@@ -2,7 +2,9 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
 )
 
 // User holds the schema definition for the User entity.
@@ -12,7 +14,27 @@ type User struct {
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.String("id").
+			NotEmpty().
+			Immutable().
+			Unique().
+			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
+		field.String("name").
+			NotEmpty().
+			MaxLen(256),
+		field.
+			String("email").
+			NotEmpty().
+			MaxLen(256).
+			Unique(),
+		field.Bytes("salt").
+			NotEmpty().
+			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
+		field.Bytes("pwhash").
+			NotEmpty().
+			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
+	}
 }
 
 // Edges of the User.
