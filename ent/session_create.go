@@ -55,6 +55,14 @@ func (_c *SessionCreate) SetDeletedAt(v time.Time) *SessionCreate {
 	return _c
 }
 
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *SessionCreate) SetNillableDeletedAt(v *time.Time) *SessionCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetLoginAt sets the "login_at" field.
 func (_c *SessionCreate) SetLoginAt(v time.Time) *SessionCreate {
 	_c.mutation.SetLoginAt(v)
@@ -173,9 +181,6 @@ func (_c *SessionCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Session.updated_at"`)}
 	}
-	if _, ok := _c.mutation.DeletedAt(); !ok {
-		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Session.deleted_at"`)}
-	}
 	if v, ok := _c.mutation.IP(); ok {
 		if err := session.IPValidator(v); err != nil {
 			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Session.ip": %w`, err)}
@@ -247,7 +252,7 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(session.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = value
+		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.LoginAt(); ok {
 		_spec.SetField(session.FieldLoginAt, field.TypeTime, value)

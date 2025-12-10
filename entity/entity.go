@@ -4,6 +4,8 @@ import (
 	"errors"
 	"moknito/ent"
 	"os"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Entity struct {
@@ -26,4 +28,8 @@ func NewEntity() (*Entity, error) {
 
 func (e *Entity) Close() error {
 	return e.ent.Close()
+}
+
+func (e *Entity) Ent() *ent.Client {
+	return e.ent
 }

@@ -244,7 +244,7 @@ func (m *AuthenticationMutation) DeletedAt() (r time.Time, exists bool) {
 // OldDeletedAt returns the old "deleted_at" field's value of the Authentication entity.
 // If the Authentication object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthenticationMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
+func (m *AuthenticationMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
 	}
@@ -258,9 +258,22 @@ func (m *AuthenticationMutation) OldDeletedAt(ctx context.Context) (v time.Time,
 	return oldValue.DeletedAt, nil
 }
 
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *AuthenticationMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[authentication.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *AuthenticationMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[authentication.FieldDeletedAt]
+	return ok
+}
+
 // ResetDeletedAt resets all changes to the "deleted_at" field.
 func (m *AuthenticationMutation) ResetDeletedAt() {
 	m.deleted_at = nil
+	delete(m.clearedFields, authentication.FieldDeletedAt)
 }
 
 // SetCode sets the "code" field.
@@ -624,6 +637,9 @@ func (m *AuthenticationMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *AuthenticationMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(authentication.FieldDeletedAt) {
+		fields = append(fields, authentication.FieldDeletedAt)
+	}
 	if m.FieldCleared(authentication.FieldCode) {
 		fields = append(fields, authentication.FieldCode)
 	}
@@ -647,6 +663,9 @@ func (m *AuthenticationMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *AuthenticationMutation) ClearField(name string) error {
 	switch name {
+	case authentication.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
 	case authentication.FieldCode:
 		m.ClearCode()
 		return nil
@@ -974,7 +993,7 @@ func (m *SessionMutation) DeletedAt() (r time.Time, exists bool) {
 // OldDeletedAt returns the old "deleted_at" field's value of the Session entity.
 // If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
+func (m *SessionMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
 	}
@@ -988,9 +1007,22 @@ func (m *SessionMutation) OldDeletedAt(ctx context.Context) (v time.Time, err er
 	return oldValue.DeletedAt, nil
 }
 
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *SessionMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[session.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *SessionMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[session.FieldDeletedAt]
+	return ok
+}
+
 // ResetDeletedAt resets all changes to the "deleted_at" field.
 func (m *SessionMutation) ResetDeletedAt() {
 	m.deleted_at = nil
+	delete(m.clearedFields, session.FieldDeletedAt)
 }
 
 // SetLoginAt sets the "login_at" field.
@@ -1404,6 +1436,9 @@ func (m *SessionMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *SessionMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(session.FieldDeletedAt) {
+		fields = append(fields, session.FieldDeletedAt)
+	}
 	if m.FieldCleared(session.FieldLoginAt) {
 		fields = append(fields, session.FieldLoginAt)
 	}
@@ -1427,6 +1462,9 @@ func (m *SessionMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *SessionMutation) ClearField(name string) error {
 	switch name {
+	case session.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
 	case session.FieldLoginAt:
 		m.ClearLoginAt()
 		return nil
@@ -1762,7 +1800,7 @@ func (m *UserMutation) DeletedAt() (r time.Time, exists bool) {
 // OldDeletedAt returns the old "deleted_at" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
+func (m *UserMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
 	}
@@ -1776,9 +1814,22 @@ func (m *UserMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error
 	return oldValue.DeletedAt, nil
 }
 
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *UserMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[user.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *UserMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[user.FieldDeletedAt]
+	return ok
+}
+
 // ResetDeletedAt resets all changes to the "deleted_at" field.
 func (m *UserMutation) ResetDeletedAt() {
 	m.deleted_at = nil
+	delete(m.clearedFields, user.FieldDeletedAt)
 }
 
 // SetName sets the "name" field.
@@ -2256,7 +2307,11 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(user.FieldDeletedAt) {
+		fields = append(fields, user.FieldDeletedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2269,6 +2324,11 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
+	switch name {
+	case user.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 

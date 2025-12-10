@@ -215,6 +215,16 @@ func DeletedAtLTE(v time.Time) predicate.Authentication {
 	return predicate.Authentication(sql.FieldLTE(FieldDeletedAt, v))
 }
 
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.Authentication {
+	return predicate.Authentication(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.Authentication {
+	return predicate.Authentication(sql.FieldNotNull(FieldDeletedAt))
+}
+
 // CodeEQ applies the EQ predicate on the "code" field.
 func CodeEQ(v []byte) predicate.Authentication {
 	return predicate.Authentication(sql.FieldEQ(FieldCode, v))

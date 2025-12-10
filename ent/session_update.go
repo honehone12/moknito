@@ -49,6 +49,12 @@ func (_u *SessionUpdate) SetNillableDeletedAt(v *time.Time) *SessionUpdate {
 	return _u
 }
 
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *SessionUpdate) ClearDeletedAt() *SessionUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetLoginAt sets the "login_at" field.
 func (_u *SessionUpdate) SetLoginAt(v time.Time) *SessionUpdate {
 	_u.mutation.SetLoginAt(v)
@@ -222,6 +228,9 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(session.FieldDeletedAt, field.TypeTime, value)
 	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(session.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.LoginAt(); ok {
 		_spec.SetField(session.FieldLoginAt, field.TypeTime, value)
 	}
@@ -309,6 +318,12 @@ func (_u *SessionUpdateOne) SetNillableDeletedAt(v *time.Time) *SessionUpdateOne
 	if v != nil {
 		_u.SetDeletedAt(*v)
 	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *SessionUpdateOne) ClearDeletedAt() *SessionUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -514,6 +529,9 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(session.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(session.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.LoginAt(); ok {
 		_spec.SetField(session.FieldLoginAt, field.TypeTime, value)

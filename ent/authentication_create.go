@@ -55,6 +55,14 @@ func (_c *AuthenticationCreate) SetDeletedAt(v time.Time) *AuthenticationCreate 
 	return _c
 }
 
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (_c *AuthenticationCreate) SetNillableDeletedAt(v *time.Time) *AuthenticationCreate {
+	if v != nil {
+		_c.SetDeletedAt(*v)
+	}
+	return _c
+}
+
 // SetCode sets the "code" field.
 func (_c *AuthenticationCreate) SetCode(v []byte) *AuthenticationCreate {
 	_c.mutation.SetCode(v)
@@ -151,9 +159,6 @@ func (_c *AuthenticationCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Authentication.updated_at"`)}
 	}
-	if _, ok := _c.mutation.DeletedAt(); !ok {
-		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Authentication.deleted_at"`)}
-	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := authentication.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Authentication.id": %w`, err)}
@@ -207,7 +212,7 @@ func (_c *AuthenticationCreate) createSpec() (*Authentication, *sqlgraph.CreateS
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
 		_spec.SetField(authentication.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = value
+		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(authentication.FieldCode, field.TypeBytes, value)

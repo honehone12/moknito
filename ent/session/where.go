@@ -220,6 +220,16 @@ func DeletedAtLTE(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldLTE(FieldDeletedAt, v))
 }
 
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.Session {
+	return predicate.Session(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.Session {
+	return predicate.Session(sql.FieldNotNull(FieldDeletedAt))
+}
+
 // LoginAtEQ applies the EQ predicate on the "login_at" field.
 func LoginAtEQ(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldLoginAt, v))

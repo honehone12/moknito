@@ -49,6 +49,12 @@ func (_u *AuthenticationUpdate) SetNillableDeletedAt(v *time.Time) *Authenticati
 	return _u
 }
 
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *AuthenticationUpdate) ClearDeletedAt() *AuthenticationUpdate {
+	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
 // SetCode sets the "code" field.
 func (_u *AuthenticationUpdate) SetCode(v []byte) *AuthenticationUpdate {
 	_u.mutation.SetCode(v)
@@ -157,6 +163,9 @@ func (_u *AuthenticationUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(authentication.FieldDeletedAt, field.TypeTime, value)
 	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(authentication.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(authentication.FieldCode, field.TypeBytes, value)
 	}
@@ -238,6 +247,12 @@ func (_u *AuthenticationUpdateOne) SetNillableDeletedAt(v *time.Time) *Authentic
 	if v != nil {
 		_u.SetDeletedAt(*v)
 	}
+	return _u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (_u *AuthenticationUpdateOne) ClearDeletedAt() *AuthenticationUpdateOne {
+	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
@@ -378,6 +393,9 @@ func (_u *AuthenticationUpdateOne) sqlSave(ctx context.Context) (_node *Authenti
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
 		_spec.SetField(authentication.FieldDeletedAt, field.TypeTime, value)
+	}
+	if _u.mutation.DeletedAtCleared() {
+		_spec.ClearField(authentication.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Code(); ok {
 		_spec.SetField(authentication.FieldCode, field.TypeBytes, value)
