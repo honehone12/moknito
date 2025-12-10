@@ -28,6 +28,8 @@ func (Session) Fields() []ent.Field {
 		field.String("user_agent").
 			Optional().
 			MaxLen(256),
+		field.String("application").
+			MaxLen(256),
 	}
 }
 

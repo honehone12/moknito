@@ -23,3 +23,7 @@ func NewSequential() (string, error) {
 func ToUUID(id string) (uuid.UUID, error) {
 	return uuid.ParseBytes([]byte(id))
 }
+
+func FromUUID(uuid uuid.UUID) string {
+	return string(uuid[:])
+}

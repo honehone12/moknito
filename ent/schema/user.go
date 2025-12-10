@@ -29,12 +29,12 @@ func (User) Fields() []ent.Field {
 			NotEmpty().
 			MaxLen(256).
 			Unique(),
-		field.Bytes("salt").
-			NotEmpty().
-			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
 		field.Bytes("pwhash").
 			NotEmpty().
 			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
+		field.Int("error").
+			NonNegative().
+			Default(0),
 	}
 }
 
