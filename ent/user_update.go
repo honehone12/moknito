@@ -78,15 +78,38 @@ func (_u *UserUpdate) SetNillableEmail(v *string) *UserUpdate {
 	return _u
 }
 
-// SetSalt sets the "salt" field.
-func (_u *UserUpdate) SetSalt(v []byte) *UserUpdate {
-	_u.mutation.SetSalt(v)
+// SetPwhash sets the "pwhash" field.
+func (_u *UserUpdate) SetPwhash(v string) *UserUpdate {
+	_u.mutation.SetPwhash(v)
 	return _u
 }
 
-// SetPwhash sets the "pwhash" field.
-func (_u *UserUpdate) SetPwhash(v []byte) *UserUpdate {
-	_u.mutation.SetPwhash(v)
+// SetNillablePwhash sets the "pwhash" field if the given value is not nil.
+func (_u *UserUpdate) SetNillablePwhash(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPwhash(*v)
+	}
+	return _u
+}
+
+// SetError sets the "error" field.
+func (_u *UserUpdate) SetError(v int) *UserUpdate {
+	_u.mutation.ResetError()
+	_u.mutation.SetError(v)
+	return _u
+}
+
+// SetNillableError sets the "error" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableError(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetError(*v)
+	}
+	return _u
+}
+
+// AddError adds value to the "error" field.
+func (_u *UserUpdate) AddError(v int) *UserUpdate {
+	_u.mutation.AddError(v)
 	return _u
 }
 
@@ -215,14 +238,14 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Salt(); ok {
-		if err := user.SaltValidator(v); err != nil {
-			return &ValidationError{Name: "salt", err: fmt.Errorf(`ent: validator failed for field "User.salt": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Pwhash(); ok {
 		if err := user.PwhashValidator(v); err != nil {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Error(); ok {
+		if err := user.ErrorValidator(v); err != nil {
+			return &ValidationError{Name: "error", err: fmt.Errorf(`ent: validator failed for field "User.error": %w`, err)}
 		}
 	}
 	return nil
@@ -252,11 +275,14 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Salt(); ok {
-		_spec.SetField(user.FieldSalt, field.TypeBytes, value)
-	}
 	if value, ok := _u.mutation.Pwhash(); ok {
-		_spec.SetField(user.FieldPwhash, field.TypeBytes, value)
+		_spec.SetField(user.FieldPwhash, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Error(); ok {
+		_spec.SetField(user.FieldError, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedError(); ok {
+		_spec.AddField(user.FieldError, field.TypeInt, value)
 	}
 	if _u.mutation.AuthenticationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -416,15 +442,38 @@ func (_u *UserUpdateOne) SetNillableEmail(v *string) *UserUpdateOne {
 	return _u
 }
 
-// SetSalt sets the "salt" field.
-func (_u *UserUpdateOne) SetSalt(v []byte) *UserUpdateOne {
-	_u.mutation.SetSalt(v)
+// SetPwhash sets the "pwhash" field.
+func (_u *UserUpdateOne) SetPwhash(v string) *UserUpdateOne {
+	_u.mutation.SetPwhash(v)
 	return _u
 }
 
-// SetPwhash sets the "pwhash" field.
-func (_u *UserUpdateOne) SetPwhash(v []byte) *UserUpdateOne {
-	_u.mutation.SetPwhash(v)
+// SetNillablePwhash sets the "pwhash" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillablePwhash(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPwhash(*v)
+	}
+	return _u
+}
+
+// SetError sets the "error" field.
+func (_u *UserUpdateOne) SetError(v int) *UserUpdateOne {
+	_u.mutation.ResetError()
+	_u.mutation.SetError(v)
+	return _u
+}
+
+// SetNillableError sets the "error" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableError(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetError(*v)
+	}
+	return _u
+}
+
+// AddError adds value to the "error" field.
+func (_u *UserUpdateOne) AddError(v int) *UserUpdateOne {
+	_u.mutation.AddError(v)
 	return _u
 }
 
@@ -566,14 +615,14 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Salt(); ok {
-		if err := user.SaltValidator(v); err != nil {
-			return &ValidationError{Name: "salt", err: fmt.Errorf(`ent: validator failed for field "User.salt": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Pwhash(); ok {
 		if err := user.PwhashValidator(v); err != nil {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Error(); ok {
+		if err := user.ErrorValidator(v); err != nil {
+			return &ValidationError{Name: "error", err: fmt.Errorf(`ent: validator failed for field "User.error": %w`, err)}
 		}
 	}
 	return nil
@@ -620,11 +669,14 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	if value, ok := _u.mutation.Email(); ok {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Salt(); ok {
-		_spec.SetField(user.FieldSalt, field.TypeBytes, value)
-	}
 	if value, ok := _u.mutation.Pwhash(); ok {
-		_spec.SetField(user.FieldPwhash, field.TypeBytes, value)
+		_spec.SetField(user.FieldPwhash, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Error(); ok {
+		_spec.SetField(user.FieldError, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedError(); ok {
+		_spec.AddField(user.FieldError, field.TypeInt, value)
 	}
 	if _u.mutation.AuthenticationsCleared() {
 		edge := &sqlgraph.EdgeSpec{

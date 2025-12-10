@@ -24,10 +24,10 @@ const (
 	FieldName = "name"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
-	// FieldSalt holds the string denoting the salt field in the database.
-	FieldSalt = "salt"
 	// FieldPwhash holds the string denoting the pwhash field in the database.
 	FieldPwhash = "pwhash"
+	// FieldError holds the string denoting the error field in the database.
+	FieldError = "error"
 	// EdgeAuthentications holds the string denoting the authentications edge name in mutations.
 	EdgeAuthentications = "authentications"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
@@ -58,8 +58,8 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldName,
 	FieldEmail,
-	FieldSalt,
 	FieldPwhash,
+	FieldError,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -83,10 +83,12 @@ var (
 	NameValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
-	// SaltValidator is a validator for the "salt" field. It is called by the builders before save.
-	SaltValidator func([]byte) error
 	// PwhashValidator is a validator for the "pwhash" field. It is called by the builders before save.
-	PwhashValidator func([]byte) error
+	PwhashValidator func(string) error
+	// DefaultError holds the default value on creation for the "error" field.
+	DefaultError int
+	// ErrorValidator is a validator for the "error" field. It is called by the builders before save.
+	ErrorValidator func(int) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -122,6 +124,16 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByEmail orders the results by the email field.
 func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmail, opts...).ToFunc()
+}
+
+// ByPwhash orders the results by the pwhash field.
+func ByPwhash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPwhash, opts...).ToFunc()
+}
+
+// ByError orders the results by the error field.
+func ByError(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldError, opts...).ToFunc()
 }
 
 // ByAuthenticationsCount orders the results by authentications count.

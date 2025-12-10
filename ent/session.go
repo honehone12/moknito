@@ -30,6 +30,8 @@ type Session struct {
 	IP string `json:"ip,omitempty"`
 	// UserAgent holds the value of the "user_agent" field.
 	UserAgent string `json:"user_agent,omitempty"`
+	// Application holds the value of the "application" field.
+	Application string `json:"application,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SessionQuery when eager-loading is set.
 	Edges         SessionEdges `json:"edges"`
@@ -62,7 +64,7 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case session.FieldID, session.FieldIP, session.FieldUserAgent:
+		case session.FieldID, session.FieldIP, session.FieldUserAgent, session.FieldApplication:
 			values[i] = new(sql.NullString)
 		case session.FieldCreatedAt, session.FieldUpdatedAt, session.FieldDeletedAt, session.FieldLoginAt:
 			values[i] = new(sql.NullTime)
@@ -124,6 +126,12 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field user_agent", values[i])
 			} else if value.Valid {
 				_m.UserAgent = value.String
+			}
+		case session.FieldApplication:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field application", values[i])
+			} else if value.Valid {
+				_m.Application = value.String
 			}
 		case session.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -190,6 +198,9 @@ func (_m *Session) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_agent=")
 	builder.WriteString(_m.UserAgent)
+	builder.WriteString(", ")
+	builder.WriteString("application=")
+	builder.WriteString(_m.Application)
 	builder.WriteByte(')')
 	return builder.String()
 }

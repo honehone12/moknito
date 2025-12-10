@@ -26,6 +26,8 @@ const (
 	FieldIP = "ip"
 	// FieldUserAgent holds the string denoting the user_agent field in the database.
 	FieldUserAgent = "user_agent"
+	// FieldApplication holds the string denoting the application field in the database.
+	FieldApplication = "application"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the session in the database.
@@ -48,6 +50,7 @@ var Columns = []string{
 	FieldLoginAt,
 	FieldIP,
 	FieldUserAgent,
+	FieldApplication,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "sessions"
@@ -82,6 +85,8 @@ var (
 	IPValidator func(string) error
 	// UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
 	UserAgentValidator func(string) error
+	// ApplicationValidator is a validator for the "application" field. It is called by the builders before save.
+	ApplicationValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -122,6 +127,11 @@ func ByIP(opts ...sql.OrderTermOption) OrderOption {
 // ByUserAgent orders the results by the user_agent field.
 func ByUserAgent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserAgent, opts...).ToFunc()
+}
+
+// ByApplication orders the results by the application field.
+func ByApplication(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldApplication, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

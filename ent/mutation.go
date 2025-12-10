@@ -772,6 +772,7 @@ type SessionMutation struct {
 	login_at      *time.Time
 	ip            *string
 	user_agent    *string
+	application   *string
 	clearedFields map[string]struct{}
 	user          *string
 	cleareduser   bool
@@ -1139,6 +1140,42 @@ func (m *SessionMutation) ResetUserAgent() {
 	delete(m.clearedFields, session.FieldUserAgent)
 }
 
+// SetApplication sets the "application" field.
+func (m *SessionMutation) SetApplication(s string) {
+	m.application = &s
+}
+
+// Application returns the value of the "application" field in the mutation.
+func (m *SessionMutation) Application() (r string, exists bool) {
+	v := m.application
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApplication returns the old "application" field's value of the Session entity.
+// If the Session object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SessionMutation) OldApplication(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApplication is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApplication requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApplication: %w", err)
+	}
+	return oldValue.Application, nil
+}
+
+// ResetApplication resets all changes to the "application" field.
+func (m *SessionMutation) ResetApplication() {
+	m.application = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *SessionMutation) SetUserID(id string) {
 	m.user = &id
@@ -1212,7 +1249,7 @@ func (m *SessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, session.FieldCreatedAt)
 	}
@@ -1230,6 +1267,9 @@ func (m *SessionMutation) Fields() []string {
 	}
 	if m.user_agent != nil {
 		fields = append(fields, session.FieldUserAgent)
+	}
+	if m.application != nil {
+		fields = append(fields, session.FieldApplication)
 	}
 	return fields
 }
@@ -1251,6 +1291,8 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 		return m.IP()
 	case session.FieldUserAgent:
 		return m.UserAgent()
+	case session.FieldApplication:
+		return m.Application()
 	}
 	return nil, false
 }
@@ -1272,6 +1314,8 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldIP(ctx)
 	case session.FieldUserAgent:
 		return m.OldUserAgent(ctx)
+	case session.FieldApplication:
+		return m.OldApplication(ctx)
 	}
 	return nil, fmt.Errorf("unknown Session field %s", name)
 }
@@ -1322,6 +1366,13 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserAgent(v)
+		return nil
+	case session.FieldApplication:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApplication(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Session field %s", name)
@@ -1410,6 +1461,9 @@ func (m *SessionMutation) ResetField(name string) error {
 		return nil
 	case session.FieldUserAgent:
 		m.ResetUserAgent()
+		return nil
+	case session.FieldApplication:
+		m.ResetApplication()
 		return nil
 	}
 	return fmt.Errorf("unknown Session field %s", name)
@@ -1500,8 +1554,9 @@ type UserMutation struct {
 	deleted_at             *time.Time
 	name                   *string
 	email                  *string
-	salt                   *[]byte
-	pwhash                 *[]byte
+	pwhash                 *string
+	error                  *int
+	adderror               *int
 	clearedFields          map[string]struct{}
 	authentications        map[string]struct{}
 	removedauthentications map[string]struct{}
@@ -1798,49 +1853,13 @@ func (m *UserMutation) ResetEmail() {
 	m.email = nil
 }
 
-// SetSalt sets the "salt" field.
-func (m *UserMutation) SetSalt(b []byte) {
-	m.salt = &b
-}
-
-// Salt returns the value of the "salt" field in the mutation.
-func (m *UserMutation) Salt() (r []byte, exists bool) {
-	v := m.salt
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSalt returns the old "salt" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldSalt(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSalt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSalt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSalt: %w", err)
-	}
-	return oldValue.Salt, nil
-}
-
-// ResetSalt resets all changes to the "salt" field.
-func (m *UserMutation) ResetSalt() {
-	m.salt = nil
-}
-
 // SetPwhash sets the "pwhash" field.
-func (m *UserMutation) SetPwhash(b []byte) {
-	m.pwhash = &b
+func (m *UserMutation) SetPwhash(s string) {
+	m.pwhash = &s
 }
 
 // Pwhash returns the value of the "pwhash" field in the mutation.
-func (m *UserMutation) Pwhash() (r []byte, exists bool) {
+func (m *UserMutation) Pwhash() (r string, exists bool) {
 	v := m.pwhash
 	if v == nil {
 		return
@@ -1851,7 +1870,7 @@ func (m *UserMutation) Pwhash() (r []byte, exists bool) {
 // OldPwhash returns the old "pwhash" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldPwhash(ctx context.Context) (v []byte, err error) {
+func (m *UserMutation) OldPwhash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPwhash is only allowed on UpdateOne operations")
 	}
@@ -1868,6 +1887,62 @@ func (m *UserMutation) OldPwhash(ctx context.Context) (v []byte, err error) {
 // ResetPwhash resets all changes to the "pwhash" field.
 func (m *UserMutation) ResetPwhash() {
 	m.pwhash = nil
+}
+
+// SetError sets the "error" field.
+func (m *UserMutation) SetError(i int) {
+	m.error = &i
+	m.adderror = nil
+}
+
+// Error returns the value of the "error" field in the mutation.
+func (m *UserMutation) Error() (r int, exists bool) {
+	v := m.error
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldError returns the old "error" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldError(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldError is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldError requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldError: %w", err)
+	}
+	return oldValue.Error, nil
+}
+
+// AddError adds i to the "error" field.
+func (m *UserMutation) AddError(i int) {
+	if m.adderror != nil {
+		*m.adderror += i
+	} else {
+		m.adderror = &i
+	}
+}
+
+// AddedError returns the value that was added to the "error" field in this mutation.
+func (m *UserMutation) AddedError() (r int, exists bool) {
+	v := m.adderror
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetError resets all changes to the "error" field.
+func (m *UserMutation) ResetError() {
+	m.error = nil
+	m.adderror = nil
 }
 
 // AddAuthenticationIDs adds the "authentications" edge to the Authentication entity by ids.
@@ -2028,11 +2103,11 @@ func (m *UserMutation) Fields() []string {
 	if m.email != nil {
 		fields = append(fields, user.FieldEmail)
 	}
-	if m.salt != nil {
-		fields = append(fields, user.FieldSalt)
-	}
 	if m.pwhash != nil {
 		fields = append(fields, user.FieldPwhash)
+	}
+	if m.error != nil {
+		fields = append(fields, user.FieldError)
 	}
 	return fields
 }
@@ -2052,10 +2127,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case user.FieldEmail:
 		return m.Email()
-	case user.FieldSalt:
-		return m.Salt()
 	case user.FieldPwhash:
 		return m.Pwhash()
+	case user.FieldError:
+		return m.Error()
 	}
 	return nil, false
 }
@@ -2075,10 +2150,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldName(ctx)
 	case user.FieldEmail:
 		return m.OldEmail(ctx)
-	case user.FieldSalt:
-		return m.OldSalt(ctx)
 	case user.FieldPwhash:
 		return m.OldPwhash(ctx)
+	case user.FieldError:
+		return m.OldError(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2123,19 +2198,19 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEmail(v)
 		return nil
-	case user.FieldSalt:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSalt(v)
-		return nil
 	case user.FieldPwhash:
-		v, ok := value.([]byte)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPwhash(v)
+		return nil
+	case user.FieldError:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetError(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -2144,13 +2219,21 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.adderror != nil {
+		fields = append(fields, user.FieldError)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldError:
+		return m.AddedError()
+	}
 	return nil, false
 }
 
@@ -2159,6 +2242,13 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldError:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddError(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -2201,11 +2291,11 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldEmail:
 		m.ResetEmail()
 		return nil
-	case user.FieldSalt:
-		m.ResetSalt()
-		return nil
 	case user.FieldPwhash:
 		m.ResetPwhash()
+		return nil
+	case user.FieldError:
+		m.ResetError()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"moknito/hash"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -16,9 +17,15 @@ func main() {
 		echo.Logger.Fatal(err)
 	}
 
-	if salt := os.Getenv("PEPPER"); len(salt) != 44 {
+	if pepper := os.Getenv("PEPPER"); len(pepper) != hash.PEPPER_ENV_LEN {
 		echo.Logger.Fatal("env for perpper is invalid")
 	}
+
+	mocknito, err := NewMocknito()
+	if err != nil {
+		echo.Logger.Fatal(err)
+	}
+	defer mocknito.Close()
 
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)

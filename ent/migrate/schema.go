@@ -42,6 +42,7 @@ var (
 		{Name: "login_at", Type: field.TypeTime, Nullable: true},
 		{Name: "ip", Type: field.TypeString, Nullable: true, Size: 256},
 		{Name: "user_agent", Type: field.TypeString, Nullable: true, Size: 256},
+		{Name: "application", Type: field.TypeString, Size: 256},
 		{Name: "user_sessions", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
@@ -52,7 +53,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "sessions_users_sessions",
-				Columns:    []*schema.Column{SessionsColumns[7]},
+				Columns:    []*schema.Column{SessionsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -66,8 +67,8 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString, Size: 256},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 256},
-		{Name: "salt", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(32)"}},
-		{Name: "pwhash", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(32)"}},
+		{Name: "pwhash", Type: field.TypeString},
+		{Name: "error", Type: field.TypeInt, Default: 0},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

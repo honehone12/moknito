@@ -95,6 +95,11 @@ func UserAgent(v string) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldUserAgent, v))
 }
 
+// Application applies equality check predicate on the "application" field. It's identical to ApplicationEQ.
+func Application(v string) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldApplication, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Session {
 	return predicate.Session(sql.FieldEQ(FieldCreatedAt, v))
@@ -413,6 +418,71 @@ func UserAgentEqualFold(v string) predicate.Session {
 // UserAgentContainsFold applies the ContainsFold predicate on the "user_agent" field.
 func UserAgentContainsFold(v string) predicate.Session {
 	return predicate.Session(sql.FieldContainsFold(FieldUserAgent, v))
+}
+
+// ApplicationEQ applies the EQ predicate on the "application" field.
+func ApplicationEQ(v string) predicate.Session {
+	return predicate.Session(sql.FieldEQ(FieldApplication, v))
+}
+
+// ApplicationNEQ applies the NEQ predicate on the "application" field.
+func ApplicationNEQ(v string) predicate.Session {
+	return predicate.Session(sql.FieldNEQ(FieldApplication, v))
+}
+
+// ApplicationIn applies the In predicate on the "application" field.
+func ApplicationIn(vs ...string) predicate.Session {
+	return predicate.Session(sql.FieldIn(FieldApplication, vs...))
+}
+
+// ApplicationNotIn applies the NotIn predicate on the "application" field.
+func ApplicationNotIn(vs ...string) predicate.Session {
+	return predicate.Session(sql.FieldNotIn(FieldApplication, vs...))
+}
+
+// ApplicationGT applies the GT predicate on the "application" field.
+func ApplicationGT(v string) predicate.Session {
+	return predicate.Session(sql.FieldGT(FieldApplication, v))
+}
+
+// ApplicationGTE applies the GTE predicate on the "application" field.
+func ApplicationGTE(v string) predicate.Session {
+	return predicate.Session(sql.FieldGTE(FieldApplication, v))
+}
+
+// ApplicationLT applies the LT predicate on the "application" field.
+func ApplicationLT(v string) predicate.Session {
+	return predicate.Session(sql.FieldLT(FieldApplication, v))
+}
+
+// ApplicationLTE applies the LTE predicate on the "application" field.
+func ApplicationLTE(v string) predicate.Session {
+	return predicate.Session(sql.FieldLTE(FieldApplication, v))
+}
+
+// ApplicationContains applies the Contains predicate on the "application" field.
+func ApplicationContains(v string) predicate.Session {
+	return predicate.Session(sql.FieldContains(FieldApplication, v))
+}
+
+// ApplicationHasPrefix applies the HasPrefix predicate on the "application" field.
+func ApplicationHasPrefix(v string) predicate.Session {
+	return predicate.Session(sql.FieldHasPrefix(FieldApplication, v))
+}
+
+// ApplicationHasSuffix applies the HasSuffix predicate on the "application" field.
+func ApplicationHasSuffix(v string) predicate.Session {
+	return predicate.Session(sql.FieldHasSuffix(FieldApplication, v))
+}
+
+// ApplicationEqualFold applies the EqualFold predicate on the "application" field.
+func ApplicationEqualFold(v string) predicate.Session {
+	return predicate.Session(sql.FieldEqualFold(FieldApplication, v))
+}
+
+// ApplicationContainsFold applies the ContainsFold predicate on the "application" field.
+func ApplicationContainsFold(v string) predicate.Session {
+	return predicate.Session(sql.FieldContainsFold(FieldApplication, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

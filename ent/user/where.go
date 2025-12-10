@@ -90,14 +90,14 @@ func Email(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldEmail, v))
 }
 
-// Salt applies equality check predicate on the "salt" field. It's identical to SaltEQ.
-func Salt(v []byte) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldSalt, v))
+// Pwhash applies equality check predicate on the "pwhash" field. It's identical to PwhashEQ.
+func Pwhash(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldPwhash, v))
 }
 
-// Pwhash applies equality check predicate on the "pwhash" field. It's identical to PwhashEQ.
-func Pwhash(v []byte) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPwhash, v))
+// Error applies equality check predicate on the "error" field. It's identical to ErrorEQ.
+func Error(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldError, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -350,84 +350,109 @@ func EmailContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldEmail, v))
 }
 
-// SaltEQ applies the EQ predicate on the "salt" field.
-func SaltEQ(v []byte) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldSalt, v))
-}
-
-// SaltNEQ applies the NEQ predicate on the "salt" field.
-func SaltNEQ(v []byte) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldSalt, v))
-}
-
-// SaltIn applies the In predicate on the "salt" field.
-func SaltIn(vs ...[]byte) predicate.User {
-	return predicate.User(sql.FieldIn(FieldSalt, vs...))
-}
-
-// SaltNotIn applies the NotIn predicate on the "salt" field.
-func SaltNotIn(vs ...[]byte) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldSalt, vs...))
-}
-
-// SaltGT applies the GT predicate on the "salt" field.
-func SaltGT(v []byte) predicate.User {
-	return predicate.User(sql.FieldGT(FieldSalt, v))
-}
-
-// SaltGTE applies the GTE predicate on the "salt" field.
-func SaltGTE(v []byte) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldSalt, v))
-}
-
-// SaltLT applies the LT predicate on the "salt" field.
-func SaltLT(v []byte) predicate.User {
-	return predicate.User(sql.FieldLT(FieldSalt, v))
-}
-
-// SaltLTE applies the LTE predicate on the "salt" field.
-func SaltLTE(v []byte) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldSalt, v))
-}
-
 // PwhashEQ applies the EQ predicate on the "pwhash" field.
-func PwhashEQ(v []byte) predicate.User {
+func PwhashEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldPwhash, v))
 }
 
 // PwhashNEQ applies the NEQ predicate on the "pwhash" field.
-func PwhashNEQ(v []byte) predicate.User {
+func PwhashNEQ(v string) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldPwhash, v))
 }
 
 // PwhashIn applies the In predicate on the "pwhash" field.
-func PwhashIn(vs ...[]byte) predicate.User {
+func PwhashIn(vs ...string) predicate.User {
 	return predicate.User(sql.FieldIn(FieldPwhash, vs...))
 }
 
 // PwhashNotIn applies the NotIn predicate on the "pwhash" field.
-func PwhashNotIn(vs ...[]byte) predicate.User {
+func PwhashNotIn(vs ...string) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldPwhash, vs...))
 }
 
 // PwhashGT applies the GT predicate on the "pwhash" field.
-func PwhashGT(v []byte) predicate.User {
+func PwhashGT(v string) predicate.User {
 	return predicate.User(sql.FieldGT(FieldPwhash, v))
 }
 
 // PwhashGTE applies the GTE predicate on the "pwhash" field.
-func PwhashGTE(v []byte) predicate.User {
+func PwhashGTE(v string) predicate.User {
 	return predicate.User(sql.FieldGTE(FieldPwhash, v))
 }
 
 // PwhashLT applies the LT predicate on the "pwhash" field.
-func PwhashLT(v []byte) predicate.User {
+func PwhashLT(v string) predicate.User {
 	return predicate.User(sql.FieldLT(FieldPwhash, v))
 }
 
 // PwhashLTE applies the LTE predicate on the "pwhash" field.
-func PwhashLTE(v []byte) predicate.User {
+func PwhashLTE(v string) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldPwhash, v))
+}
+
+// PwhashContains applies the Contains predicate on the "pwhash" field.
+func PwhashContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldPwhash, v))
+}
+
+// PwhashHasPrefix applies the HasPrefix predicate on the "pwhash" field.
+func PwhashHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldPwhash, v))
+}
+
+// PwhashHasSuffix applies the HasSuffix predicate on the "pwhash" field.
+func PwhashHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldPwhash, v))
+}
+
+// PwhashEqualFold applies the EqualFold predicate on the "pwhash" field.
+func PwhashEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldPwhash, v))
+}
+
+// PwhashContainsFold applies the ContainsFold predicate on the "pwhash" field.
+func PwhashContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldPwhash, v))
+}
+
+// ErrorEQ applies the EQ predicate on the "error" field.
+func ErrorEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldError, v))
+}
+
+// ErrorNEQ applies the NEQ predicate on the "error" field.
+func ErrorNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldError, v))
+}
+
+// ErrorIn applies the In predicate on the "error" field.
+func ErrorIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldError, vs...))
+}
+
+// ErrorNotIn applies the NotIn predicate on the "error" field.
+func ErrorNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldError, vs...))
+}
+
+// ErrorGT applies the GT predicate on the "error" field.
+func ErrorGT(v int) predicate.User {
+	return predicate.User(sql.FieldGT(FieldError, v))
+}
+
+// ErrorGTE applies the GTE predicate on the "error" field.
+func ErrorGTE(v int) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldError, v))
+}
+
+// ErrorLT applies the LT predicate on the "error" field.
+func ErrorLT(v int) predicate.User {
+	return predicate.User(sql.FieldLT(FieldError, v))
+}
+
+// ErrorLTE applies the LTE predicate on the "error" field.
+func ErrorLTE(v int) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldError, v))
 }
 
 // HasAuthentications applies the HasEdge predicate on the "authentications" edge.

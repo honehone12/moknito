@@ -109,6 +109,20 @@ func (_u *SessionUpdate) ClearUserAgent() *SessionUpdate {
 	return _u
 }
 
+// SetApplication sets the "application" field.
+func (_u *SessionUpdate) SetApplication(v string) *SessionUpdate {
+	_u.mutation.SetApplication(v)
+	return _u
+}
+
+// SetNillableApplication sets the "application" field if the given value is not nil.
+func (_u *SessionUpdate) SetNillableApplication(v *string) *SessionUpdate {
+	if v != nil {
+		_u.SetApplication(*v)
+	}
+	return _u
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *SessionUpdate) SetUserID(id string) *SessionUpdate {
 	_u.mutation.SetUserID(id)
@@ -179,6 +193,11 @@ func (_u *SessionUpdate) check() error {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Session.user_agent": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Application(); ok {
+		if err := session.ApplicationValidator(v); err != nil {
+			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Session.application": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Session.user"`)
 	}
@@ -220,6 +239,9 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.UserAgentCleared() {
 		_spec.ClearField(session.FieldUserAgent, field.TypeString)
+	}
+	if value, ok := _u.mutation.Application(); ok {
+		_spec.SetField(session.FieldApplication, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -350,6 +372,20 @@ func (_u *SessionUpdateOne) ClearUserAgent() *SessionUpdateOne {
 	return _u
 }
 
+// SetApplication sets the "application" field.
+func (_u *SessionUpdateOne) SetApplication(v string) *SessionUpdateOne {
+	_u.mutation.SetApplication(v)
+	return _u
+}
+
+// SetNillableApplication sets the "application" field if the given value is not nil.
+func (_u *SessionUpdateOne) SetNillableApplication(v *string) *SessionUpdateOne {
+	if v != nil {
+		_u.SetApplication(*v)
+	}
+	return _u
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *SessionUpdateOne) SetUserID(id string) *SessionUpdateOne {
 	_u.mutation.SetUserID(id)
@@ -433,6 +469,11 @@ func (_u *SessionUpdateOne) check() error {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Session.user_agent": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Application(); ok {
+		if err := session.ApplicationValidator(v); err != nil {
+			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Session.application": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Session.user"`)
 	}
@@ -491,6 +532,9 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 	}
 	if _u.mutation.UserAgentCleared() {
 		_spec.ClearField(session.FieldUserAgent, field.TypeString)
+	}
+	if value, ok := _u.mutation.Application(); ok {
+		_spec.SetField(session.FieldApplication, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

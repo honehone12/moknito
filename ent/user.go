@@ -27,10 +27,10 @@ type User struct {
 	Name string `json:"name,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
-	// Salt holds the value of the "salt" field.
-	Salt []byte `json:"salt,omitempty"`
 	// Pwhash holds the value of the "pwhash" field.
-	Pwhash []byte `json:"pwhash,omitempty"`
+	Pwhash string `json:"pwhash,omitempty"`
+	// Error holds the value of the "error" field.
+	Error int `json:"error,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -71,9 +71,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldSalt, user.FieldPwhash:
-			values[i] = new([]byte)
-		case user.FieldID, user.FieldName, user.FieldEmail:
+		case user.FieldError:
+			values[i] = new(sql.NullInt64)
+		case user.FieldID, user.FieldName, user.FieldEmail, user.FieldPwhash:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -128,17 +128,17 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Email = value.String
 			}
-		case user.FieldSalt:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field salt", values[i])
-			} else if value != nil {
-				_m.Salt = *value
-			}
 		case user.FieldPwhash:
-			if value, ok := values[i].(*[]byte); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field pwhash", values[i])
-			} else if value != nil {
-				_m.Pwhash = *value
+			} else if value.Valid {
+				_m.Pwhash = value.String
+			}
+		case user.FieldError:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field error", values[i])
+			} else if value.Valid {
+				_m.Error = int(value.Int64)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -201,11 +201,11 @@ func (_m *User) String() string {
 	builder.WriteString("email=")
 	builder.WriteString(_m.Email)
 	builder.WriteString(", ")
-	builder.WriteString("salt=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Salt))
-	builder.WriteString(", ")
 	builder.WriteString("pwhash=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Pwhash))
+	builder.WriteString(_m.Pwhash)
+	builder.WriteString(", ")
+	builder.WriteString("error=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Error))
 	builder.WriteByte(')')
 	return builder.String()
 }

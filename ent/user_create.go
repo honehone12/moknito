@@ -68,15 +68,23 @@ func (_c *UserCreate) SetEmail(v string) *UserCreate {
 	return _c
 }
 
-// SetSalt sets the "salt" field.
-func (_c *UserCreate) SetSalt(v []byte) *UserCreate {
-	_c.mutation.SetSalt(v)
+// SetPwhash sets the "pwhash" field.
+func (_c *UserCreate) SetPwhash(v string) *UserCreate {
+	_c.mutation.SetPwhash(v)
 	return _c
 }
 
-// SetPwhash sets the "pwhash" field.
-func (_c *UserCreate) SetPwhash(v []byte) *UserCreate {
-	_c.mutation.SetPwhash(v)
+// SetError sets the "error" field.
+func (_c *UserCreate) SetError(v int) *UserCreate {
+	_c.mutation.SetError(v)
+	return _c
+}
+
+// SetNillableError sets the "error" field if the given value is not nil.
+func (_c *UserCreate) SetNillableError(v *int) *UserCreate {
+	if v != nil {
+		_c.SetError(*v)
+	}
 	return _c
 }
 
@@ -159,6 +167,10 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.Error(); !ok {
+		v := user.DefaultError
+		_c.mutation.SetError(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -188,20 +200,20 @@ func (_c *UserCreate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Salt(); !ok {
-		return &ValidationError{Name: "salt", err: errors.New(`ent: missing required field "User.salt"`)}
-	}
-	if v, ok := _c.mutation.Salt(); ok {
-		if err := user.SaltValidator(v); err != nil {
-			return &ValidationError{Name: "salt", err: fmt.Errorf(`ent: validator failed for field "User.salt": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Pwhash(); !ok {
 		return &ValidationError{Name: "pwhash", err: errors.New(`ent: missing required field "User.pwhash"`)}
 	}
 	if v, ok := _c.mutation.Pwhash(); ok {
 		if err := user.PwhashValidator(v); err != nil {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Error(); !ok {
+		return &ValidationError{Name: "error", err: errors.New(`ent: missing required field "User.error"`)}
+	}
+	if v, ok := _c.mutation.Error(); ok {
+		if err := user.ErrorValidator(v); err != nil {
+			return &ValidationError{Name: "error", err: fmt.Errorf(`ent: validator failed for field "User.error": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
@@ -264,13 +276,13 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
-	if value, ok := _c.mutation.Salt(); ok {
-		_spec.SetField(user.FieldSalt, field.TypeBytes, value)
-		_node.Salt = value
-	}
 	if value, ok := _c.mutation.Pwhash(); ok {
-		_spec.SetField(user.FieldPwhash, field.TypeBytes, value)
+		_spec.SetField(user.FieldPwhash, field.TypeString, value)
 		_node.Pwhash = value
+	}
+	if value, ok := _c.mutation.Error(); ok {
+		_spec.SetField(user.FieldError, field.TypeInt, value)
+		_node.Error = value
 	}
 	if nodes := _c.mutation.AuthenticationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

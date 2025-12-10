@@ -97,6 +97,12 @@ func (_c *SessionCreate) SetNillableUserAgent(v *string) *SessionCreate {
 	return _c
 }
 
+// SetApplication sets the "application" field.
+func (_c *SessionCreate) SetApplication(v string) *SessionCreate {
+	_c.mutation.SetApplication(v)
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *SessionCreate) SetID(v string) *SessionCreate {
 	_c.mutation.SetID(v)
@@ -180,6 +186,14 @@ func (_c *SessionCreate) check() error {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Session.user_agent": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.Application(); !ok {
+		return &ValidationError{Name: "application", err: errors.New(`ent: missing required field "Session.application"`)}
+	}
+	if v, ok := _c.mutation.Application(); ok {
+		if err := session.ApplicationValidator(v); err != nil {
+			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Session.application": %w`, err)}
+		}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := session.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Session.id": %w`, err)}
@@ -246,6 +260,10 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.UserAgent(); ok {
 		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
 		_node.UserAgent = value
+	}
+	if value, ok := _c.mutation.Application(); ok {
+		_spec.SetField(session.FieldApplication, field.TypeString, value)
+		_node.Application = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

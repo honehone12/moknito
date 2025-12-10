@@ -56,6 +56,10 @@ func init() {
 	sessionDescUserAgent := sessionFields[3].Descriptor()
 	// session.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
 	session.UserAgentValidator = sessionDescUserAgent.Validators[0].(func(string) error)
+	// sessionDescApplication is the schema descriptor for application field.
+	sessionDescApplication := sessionFields[4].Descriptor()
+	// session.ApplicationValidator is a validator for the "application" field. It is called by the builders before save.
+	session.ApplicationValidator = sessionDescApplication.Validators[0].(func(string) error)
 	// sessionDescID is the schema descriptor for id field.
 	sessionDescID := sessionFields[0].Descriptor()
 	// session.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -111,14 +115,16 @@ func init() {
 			return nil
 		}
 	}()
-	// userDescSalt is the schema descriptor for salt field.
-	userDescSalt := userFields[3].Descriptor()
-	// user.SaltValidator is a validator for the "salt" field. It is called by the builders before save.
-	user.SaltValidator = userDescSalt.Validators[0].(func([]byte) error)
 	// userDescPwhash is the schema descriptor for pwhash field.
-	userDescPwhash := userFields[4].Descriptor()
+	userDescPwhash := userFields[3].Descriptor()
 	// user.PwhashValidator is a validator for the "pwhash" field. It is called by the builders before save.
-	user.PwhashValidator = userDescPwhash.Validators[0].(func([]byte) error)
+	user.PwhashValidator = userDescPwhash.Validators[0].(func(string) error)
+	// userDescError is the schema descriptor for error field.
+	userDescError := userFields[4].Descriptor()
+	// user.DefaultError holds the default value on creation for the error field.
+	user.DefaultError = userDescError.Default.(int)
+	// user.ErrorValidator is a validator for the "error" field. It is called by the builders before save.
+	user.ErrorValidator = userDescError.Validators[0].(func(int) error)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
