@@ -27,6 +27,9 @@ func main() {
 	}
 	defer mocknito.Close()
 
+	api := echo.Group("/api")
+	api.POST("/user/new", mocknito.userNew)
+
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)
 	}
