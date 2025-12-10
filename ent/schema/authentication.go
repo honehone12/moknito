@@ -35,7 +35,10 @@ func (Authentication) Fields() []ent.Field {
 // Edges of the Authentication.
 func (Authentication) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("authentications").Unique(),
+		edge.From("user", User.Type).
+			Ref("authentications").
+			Required().
+			Unique(),
 	}
 }
 

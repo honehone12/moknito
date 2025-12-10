@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // User holds the schema definition for the User entity.
@@ -42,6 +43,12 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("authentications", Authentication.Type),
 		edge.To("sessions", Session.Type),
+	}
+}
+
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("email").Unique(),
 	}
 }
 

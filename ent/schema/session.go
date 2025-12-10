@@ -34,7 +34,10 @@ func (Session) Fields() []ent.Field {
 // Edges of the Session.
 func (Session) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("sessions").Unique(),
+		edge.From("user", User.Type).
+			Ref("sessions").
+			Required().
+			Unique(),
 	}
 }
 
