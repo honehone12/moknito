@@ -3,6 +3,7 @@ package main
 import (
 	"moknito/hash"
 	"moknito/middleware"
+	"net/url"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -36,6 +37,21 @@ func main() {
 	api := echo.Group("/api")
 	api.Use(originGuard)
 	api.POST("/user/new", mocknito.userNew)
+
+	ui := echo.Group("/*")
+	uiUrl, err := url.Parse("http://localhost:3000")
+	if err != nil {
+		echo.Logger.Fatal(err)
+	}
+	uiBalancer := echo4middleware.NewRoundRobinBalancer(
+		[]*echo4middleware.ProxyTarget{
+			{
+				Name: "dev",
+				URL:  uiUrl,
+			},
+		},
+	)
+	ui.Use(echo4middleware.Proxy(uiBalancer))
 
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)

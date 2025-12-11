@@ -9,7 +9,7 @@ import (
 
 type userNewRequest struct {
 	Name     string `form:"name" validate:"min=1,max=256"`
-	Email    string `form:"email" validate:"email"`
+	Email    string `form:"email" validate:"email,max=128"`
 	Password string `form:"password" validate:"min=8,max=128"`
 }
 
