@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"moknito/sys"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 	"time"
 
@@ -18,13 +20,20 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func TestUserNew_E2E(t *testing.T) {
+func TestMain(m *testing.M) {
 	// here is dotenv ///////////////////////////////////////////////////////
 	/////////////////////////////////////////////////////////////////////////
 	if err := godotenv.Load(); err != nil {
-		t.Logf("Could not load .env file, relying on environment variables: %v", err)
+		err := errors.Join(err, errors.New("Could not load .env file, relying on environment variables"))
+		panic(err)
 	}
 
+	// Run all tests.
+	exitCode := m.Run()
+	os.Exit(exitCode)
+}
+
+func TestUserNew_E2E(t *testing.T) {
 	m, err := NewMocknito()
 	if err != nil {
 		t.Fatalf("Failed to create moknito instance: %v", err)

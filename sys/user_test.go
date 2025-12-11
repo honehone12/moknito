@@ -13,12 +13,12 @@ import (
 
 var _ UserSys = &System{}
 
-func TestEntity_CreateUser(t *testing.T) {
+func TestSystem_CreateUser(t *testing.T) {
 	// Arrange
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 
-	entEntity := new(client)
+	system := new(client)
 	ctx := context.Background()
 
 	name := "testuser"
@@ -26,7 +26,7 @@ func TestEntity_CreateUser(t *testing.T) {
 	password := "password123"
 
 	// Act
-	user, err := entEntity.CreateUser(ctx, name, email, password)
+	user, err := system.CreateUser(ctx, name, email, password)
 
 	// Assert
 	require.NoError(t, err)
