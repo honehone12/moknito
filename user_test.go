@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"moknito/ent/user"
+	"moknito/sys"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -19,6 +19,8 @@ import (
 )
 
 func TestUserNew_E2E(t *testing.T) {
+	// here is dotenv ///////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////////////
 	if err := godotenv.Load(); err != nil {
 		t.Logf("Could not load .env file, relying on environment variables: %v", err)
 	}
@@ -31,7 +33,7 @@ func TestUserNew_E2E(t *testing.T) {
 
 	// Auto-migration for test database
 	// In a real project, you might want a more sophisticated migration strategy
-	if err := m.entity.Ent().Schema.Create(
+	if err := m.system.(*sys.System).Ent().Schema.Create(
 		context.Background(),
 		migrate.WithDropColumn(true),
 		migrate.WithDropIndex(true),
@@ -55,15 +57,17 @@ func TestUserNew_E2E(t *testing.T) {
 		testUserEmail := uniqueEmail("success@example.com")
 		testUserPassword := "password123"
 
-		defer func() {
-			_, err := m.entity.Ent().User.
-				Delete().
-				Where(user.EmailEQ(testUserEmail)).
-				Exec(context.Background())
-			if err != nil {
-				t.Logf("cleanup failed for user %s: %v", testUserEmail, err)
-			}
-		}()
+		// clean up codes //////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////
+		// defer func() {
+		// 	_, err := m.system.(*sys.System).Ent().User.
+		// 		Delete().
+		// 		Where(user.EmailEQ(testUserEmail)).
+		// 		Exec(context.Background())
+		// 	if err != nil {
+		// 		t.Logf("cleanup failed for user %s: %v", testUserEmail, err)
+		// 	}
+		// }()
 
 		form := url.Values{}
 		form.Add("name", testUserName)
@@ -116,15 +120,17 @@ func TestUserNew_E2E(t *testing.T) {
 		testUserEmail := uniqueEmail("duplicate@example.com")
 		testUserPassword := "password123"
 
-		defer func() {
-			_, err := m.entity.Ent().User.
-				Delete().
-				Where(user.EmailEQ(testUserEmail)).
-				Exec(context.Background())
-			if err != nil {
-				t.Logf("cleanup failed for user %s: %v", testUserEmail, err)
-			}
-		}()
+		// clean up codes //////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////
+		// defer func() {
+		// 	_, err := m.system.(*sys.System).Ent().User.
+		// 		Delete().
+		// 		Where(user.EmailEQ(testUserEmail)).
+		// 		Exec(context.Background())
+		// 	if err != nil {
+		// 		t.Logf("cleanup failed for user %s: %v", testUserEmail, err)
+		// 	}
+		// }()
 
 		// First request - should succeed
 		form1 := url.Values{}
