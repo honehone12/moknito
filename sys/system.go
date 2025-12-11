@@ -2,6 +2,7 @@ package sys
 
 import (
 	"errors"
+	"io"
 	"moknito/ent"
 	"os"
 
@@ -10,8 +11,7 @@ import (
 
 type Sys interface {
 	UserSys
-
-	Close() error
+	io.Closer
 }
 
 type System struct {
