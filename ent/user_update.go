@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"moknito/ent/authentication"
+	"moknito/ent/authorization"
 	"moknito/ent/predicate"
 	"moknito/ent/session"
 	"moknito/ent/user"
@@ -134,6 +135,21 @@ func (_u *UserUpdate) AddAuthentications(v ...*Authentication) *UserUpdate {
 	return _u.AddAuthenticationIDs(ids...)
 }
 
+// AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by IDs.
+func (_u *UserUpdate) AddAuthorizationIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddAuthorizationIDs(ids...)
+	return _u
+}
+
+// AddAuthorizations adds the "authorizations" edges to the Authorization entity.
+func (_u *UserUpdate) AddAuthorizations(v ...*Authorization) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAuthorizationIDs(ids...)
+}
+
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
 func (_u *UserUpdate) AddSessionIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddSessionIDs(ids...)
@@ -173,6 +189,27 @@ func (_u *UserUpdate) RemoveAuthentications(v ...*Authentication) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAuthenticationIDs(ids...)
+}
+
+// ClearAuthorizations clears all "authorizations" edges to the Authorization entity.
+func (_u *UserUpdate) ClearAuthorizations() *UserUpdate {
+	_u.mutation.ClearAuthorizations()
+	return _u
+}
+
+// RemoveAuthorizationIDs removes the "authorizations" edge to Authorization entities by IDs.
+func (_u *UserUpdate) RemoveAuthorizationIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveAuthorizationIDs(ids...)
+	return _u
+}
+
+// RemoveAuthorizations removes "authorizations" edges to Authorization entities.
+func (_u *UserUpdate) RemoveAuthorizations(v ...*Authorization) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAuthorizationIDs(ids...)
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
@@ -331,6 +368,51 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.AuthorizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AuthorizationsTable,
+			Columns: []string{user.AuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAuthorizationsIDs(); len(nodes) > 0 && !_u.mutation.AuthorizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AuthorizationsTable,
+			Columns: []string{user.AuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AuthorizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AuthorizationsTable,
+			Columns: []string{user.AuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -507,6 +589,21 @@ func (_u *UserUpdateOne) AddAuthentications(v ...*Authentication) *UserUpdateOne
 	return _u.AddAuthenticationIDs(ids...)
 }
 
+// AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by IDs.
+func (_u *UserUpdateOne) AddAuthorizationIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddAuthorizationIDs(ids...)
+	return _u
+}
+
+// AddAuthorizations adds the "authorizations" edges to the Authorization entity.
+func (_u *UserUpdateOne) AddAuthorizations(v ...*Authorization) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddAuthorizationIDs(ids...)
+}
+
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
 func (_u *UserUpdateOne) AddSessionIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddSessionIDs(ids...)
@@ -546,6 +643,27 @@ func (_u *UserUpdateOne) RemoveAuthentications(v ...*Authentication) *UserUpdate
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveAuthenticationIDs(ids...)
+}
+
+// ClearAuthorizations clears all "authorizations" edges to the Authorization entity.
+func (_u *UserUpdateOne) ClearAuthorizations() *UserUpdateOne {
+	_u.mutation.ClearAuthorizations()
+	return _u
+}
+
+// RemoveAuthorizationIDs removes the "authorizations" edge to Authorization entities by IDs.
+func (_u *UserUpdateOne) RemoveAuthorizationIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveAuthorizationIDs(ids...)
+	return _u
+}
+
+// RemoveAuthorizations removes "authorizations" edges to Authorization entities.
+func (_u *UserUpdateOne) RemoveAuthorizations(v ...*Authorization) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveAuthorizationIDs(ids...)
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
@@ -734,6 +852,51 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.AuthorizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AuthorizationsTable,
+			Columns: []string{user.AuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedAuthorizationsIDs(); len(nodes) > 0 && !_u.mutation.AuthorizationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AuthorizationsTable,
+			Columns: []string{user.AuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.AuthorizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AuthorizationsTable,
+			Columns: []string{user.AuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

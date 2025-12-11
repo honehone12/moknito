@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"moknito/ent/authentication"
+	"moknito/ent/authorization"
 	"moknito/ent/predicate"
 	"moknito/ent/session"
 	"moknito/ent/user"
@@ -26,6 +27,7 @@ type UserQuery struct {
 	inters              []Interceptor
 	predicates          []predicate.User
 	withAuthentications *AuthenticationQuery
+	withAuthorizations  *AuthorizationQuery
 	withSessions        *SessionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -78,6 +80,28 @@ func (_q *UserQuery) QueryAuthentications() *AuthenticationQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(authentication.Table, authentication.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthenticationsTable, user.AuthenticationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAuthorizations chains the current query on the "authorizations" edge.
+func (_q *UserQuery) QueryAuthorizations() *AuthorizationQuery {
+	query := (&AuthorizationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(authorization.Table, authorization.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthorizationsTable, user.AuthorizationsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -300,6 +324,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		inters:              append([]Interceptor{}, _q.inters...),
 		predicates:          append([]predicate.User{}, _q.predicates...),
 		withAuthentications: _q.withAuthentications.Clone(),
+		withAuthorizations:  _q.withAuthorizations.Clone(),
 		withSessions:        _q.withSessions.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
@@ -315,6 +340,17 @@ func (_q *UserQuery) WithAuthentications(opts ...func(*AuthenticationQuery)) *Us
 		opt(query)
 	}
 	_q.withAuthentications = query
+	return _q
+}
+
+// WithAuthorizations tells the query-builder to eager-load the nodes that are connected to
+// the "authorizations" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithAuthorizations(opts ...func(*AuthorizationQuery)) *UserQuery {
+	query := (&AuthorizationClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withAuthorizations = query
 	return _q
 }
 
@@ -407,8 +443,9 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = _q.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			_q.withAuthentications != nil,
+			_q.withAuthorizations != nil,
 			_q.withSessions != nil,
 		}
 	)
@@ -434,6 +471,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadAuthentications(ctx, query, nodes,
 			func(n *User) { n.Edges.Authentications = []*Authentication{} },
 			func(n *User, e *Authentication) { n.Edges.Authentications = append(n.Edges.Authentications, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withAuthorizations; query != nil {
+		if err := _q.loadAuthorizations(ctx, query, nodes,
+			func(n *User) { n.Edges.Authorizations = []*Authorization{} },
+			func(n *User, e *Authorization) { n.Edges.Authorizations = append(n.Edges.Authorizations, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -473,6 +517,37 @@ func (_q *UserQuery) loadAuthentications(ctx context.Context, query *Authenticat
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_authentications" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *AuthorizationQuery, nodes []*User, init func(*User), assign func(*User, *Authorization)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Authorization(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.AuthorizationsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_authorizations
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_authorizations" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_authorizations" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

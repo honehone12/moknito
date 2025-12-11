@@ -1,6 +1,7 @@
 package main
 
 import (
+	"moknito/res"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -22,12 +23,12 @@ func (m *Moknito) userNew(ctx echo.Context) error {
 
 	if err := ctx.Bind(&form); err != nil {
 		ctx.Logger().Warn(err)
-		return BadRequest(ctx)
+		return res.BadRequest(ctx)
 	}
 
 	if err := m.validator.Struct(&form); err != nil {
 		ctx.Logger().Warn(err)
-		return BadRequest(ctx)
+		return res.BadRequest(ctx)
 	}
 
 	u, err := m.system.CreateUser(
@@ -38,7 +39,7 @@ func (m *Moknito) userNew(ctx echo.Context) error {
 	)
 	if err != nil {
 		ctx.Logger().Error(err)
-		return InternalError(ctx)
+		return res.InternalError(ctx)
 	}
 
 	res := userNewResponse{

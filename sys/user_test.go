@@ -18,7 +18,7 @@ func TestSystem_CreateUser(t *testing.T) {
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 
-	system := new(client)
+	system := &System{ent: client}
 	ctx := context.Background()
 
 	name := "testuser"

@@ -12,6 +12,7 @@ import (
 	"moknito/ent/migrate"
 
 	"moknito/ent/authentication"
+	"moknito/ent/authorization"
 	"moknito/ent/session"
 	"moknito/ent/user"
 
@@ -28,6 +29,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Authentication is the client for interacting with the Authentication builders.
 	Authentication *AuthenticationClient
+	// Authorization is the client for interacting with the Authorization builders.
+	Authorization *AuthorizationClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// User is the client for interacting with the User builders.
@@ -44,6 +47,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Authentication = NewAuthenticationClient(c.config)
+	c.Authorization = NewAuthorizationClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -139,6 +143,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:            ctx,
 		config:         cfg,
 		Authentication: NewAuthenticationClient(cfg),
+		Authorization:  NewAuthorizationClient(cfg),
 		Session:        NewSessionClient(cfg),
 		User:           NewUserClient(cfg),
 	}, nil
@@ -161,6 +166,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:            ctx,
 		config:         cfg,
 		Authentication: NewAuthenticationClient(cfg),
+		Authorization:  NewAuthorizationClient(cfg),
 		Session:        NewSessionClient(cfg),
 		User:           NewUserClient(cfg),
 	}, nil
@@ -192,6 +198,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Authentication.Use(hooks...)
+	c.Authorization.Use(hooks...)
 	c.Session.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -200,6 +207,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Authentication.Intercept(interceptors...)
+	c.Authorization.Intercept(interceptors...)
 	c.Session.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
@@ -209,6 +217,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *AuthenticationMutation:
 		return c.Authentication.mutate(ctx, m)
+	case *AuthorizationMutation:
+		return c.Authorization.mutate(ctx, m)
 	case *SessionMutation:
 		return c.Session.mutate(ctx, m)
 	case *UserMutation:
@@ -364,6 +374,155 @@ func (c *AuthenticationClient) mutate(ctx context.Context, m *AuthenticationMuta
 		return (&AuthenticationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Authentication mutation op: %q", m.Op())
+	}
+}
+
+// AuthorizationClient is a client for the Authorization schema.
+type AuthorizationClient struct {
+	config
+}
+
+// NewAuthorizationClient returns a client for the Authorization from the given config.
+func NewAuthorizationClient(c config) *AuthorizationClient {
+	return &AuthorizationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `authorization.Hooks(f(g(h())))`.
+func (c *AuthorizationClient) Use(hooks ...Hook) {
+	c.hooks.Authorization = append(c.hooks.Authorization, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `authorization.Intercept(f(g(h())))`.
+func (c *AuthorizationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Authorization = append(c.inters.Authorization, interceptors...)
+}
+
+// Create returns a builder for creating a Authorization entity.
+func (c *AuthorizationClient) Create() *AuthorizationCreate {
+	mutation := newAuthorizationMutation(c.config, OpCreate)
+	return &AuthorizationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Authorization entities.
+func (c *AuthorizationClient) CreateBulk(builders ...*AuthorizationCreate) *AuthorizationCreateBulk {
+	return &AuthorizationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AuthorizationClient) MapCreateBulk(slice any, setFunc func(*AuthorizationCreate, int)) *AuthorizationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AuthorizationCreateBulk{err: fmt.Errorf("calling to AuthorizationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AuthorizationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AuthorizationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Authorization.
+func (c *AuthorizationClient) Update() *AuthorizationUpdate {
+	mutation := newAuthorizationMutation(c.config, OpUpdate)
+	return &AuthorizationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AuthorizationClient) UpdateOne(_m *Authorization) *AuthorizationUpdateOne {
+	mutation := newAuthorizationMutation(c.config, OpUpdateOne, withAuthorization(_m))
+	return &AuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AuthorizationClient) UpdateOneID(id string) *AuthorizationUpdateOne {
+	mutation := newAuthorizationMutation(c.config, OpUpdateOne, withAuthorizationID(id))
+	return &AuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Authorization.
+func (c *AuthorizationClient) Delete() *AuthorizationDelete {
+	mutation := newAuthorizationMutation(c.config, OpDelete)
+	return &AuthorizationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AuthorizationClient) DeleteOne(_m *Authorization) *AuthorizationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AuthorizationClient) DeleteOneID(id string) *AuthorizationDeleteOne {
+	builder := c.Delete().Where(authorization.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AuthorizationDeleteOne{builder}
+}
+
+// Query returns a query builder for Authorization.
+func (c *AuthorizationClient) Query() *AuthorizationQuery {
+	return &AuthorizationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAuthorization},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Authorization entity by its id.
+func (c *AuthorizationClient) Get(ctx context.Context, id string) (*Authorization, error) {
+	return c.Query().Where(authorization.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AuthorizationClient) GetX(ctx context.Context, id string) *Authorization {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Authorization.
+func (c *AuthorizationClient) QueryUser(_m *Authorization) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(authorization.Table, authorization.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, authorization.UserTable, authorization.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AuthorizationClient) Hooks() []Hook {
+	return c.hooks.Authorization
+}
+
+// Interceptors returns the client interceptors.
+func (c *AuthorizationClient) Interceptors() []Interceptor {
+	return c.inters.Authorization
+}
+
+func (c *AuthorizationClient) mutate(ctx context.Context, m *AuthorizationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AuthorizationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AuthorizationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AuthorizationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AuthorizationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Authorization mutation op: %q", m.Op())
 	}
 }
 
@@ -640,6 +799,22 @@ func (c *UserClient) QueryAuthentications(_m *User) *AuthenticationQuery {
 	return query
 }
 
+// QueryAuthorizations queries the authorizations edge of a User.
+func (c *UserClient) QueryAuthorizations(_m *User) *AuthorizationQuery {
+	query := (&AuthorizationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(authorization.Table, authorization.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthorizationsTable, user.AuthorizationsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QuerySessions queries the sessions edge of a User.
 func (c *UserClient) QuerySessions(_m *User) *SessionQuery {
 	query := (&SessionClient{config: c.config}).Query()
@@ -684,9 +859,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Authentication, Session, User []ent.Hook
+		Authentication, Authorization, Session, User []ent.Hook
 	}
 	inters struct {
-		Authentication, Session, User []ent.Interceptor
+		Authentication, Authorization, Session, User []ent.Interceptor
 	}
 )

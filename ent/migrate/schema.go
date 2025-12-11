@@ -33,6 +33,31 @@ var (
 			},
 		},
 	}
+	// AuthorizationsColumns holds the columns for the "authorizations" table.
+	AuthorizationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "application", Type: field.TypeString},
+		{Name: "domain", Type: field.TypeString},
+		{Name: "client_id", Type: field.TypeString},
+		{Name: "user_authorizations", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+	}
+	// AuthorizationsTable holds the schema information for the "authorizations" table.
+	AuthorizationsTable = &schema.Table{
+		Name:       "authorizations",
+		Columns:    AuthorizationsColumns,
+		PrimaryKey: []*schema.Column{AuthorizationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "authorizations_users_authorizations",
+				Columns:    []*schema.Column{AuthorizationsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
@@ -86,6 +111,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AuthenticationsTable,
+		AuthorizationsTable,
 		SessionsTable,
 		UsersTable,
 	}
@@ -93,5 +119,6 @@ var (
 
 func init() {
 	AuthenticationsTable.ForeignKeys[0].RefTable = UsersTable
+	AuthorizationsTable.ForeignKeys[0].RefTable = UsersTable
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 }

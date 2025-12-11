@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"moknito/ent/authentication"
+	"moknito/ent/authorization"
 	"moknito/ent/session"
 	"moknito/ent/user"
 	"time"
@@ -115,6 +116,21 @@ func (_c *UserCreate) AddAuthentications(v ...*Authentication) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddAuthenticationIDs(ids...)
+}
+
+// AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by IDs.
+func (_c *UserCreate) AddAuthorizationIDs(ids ...string) *UserCreate {
+	_c.mutation.AddAuthorizationIDs(ids...)
+	return _c
+}
+
+// AddAuthorizations adds the "authorizations" edges to the Authorization entity.
+func (_c *UserCreate) AddAuthorizations(v ...*Authorization) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddAuthorizationIDs(ids...)
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
@@ -298,6 +314,22 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.AuthorizationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.AuthorizationsTable,
+			Columns: []string{user.AuthorizationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

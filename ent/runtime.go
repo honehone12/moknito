@@ -4,6 +4,7 @@ package ent
 
 import (
 	"moknito/ent/authentication"
+	"moknito/ent/authorization"
 	"moknito/ent/schema"
 	"moknito/ent/session"
 	"moknito/ent/user"
@@ -33,6 +34,37 @@ func init() {
 	authenticationDescID := authenticationFields[0].Descriptor()
 	// authentication.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	authentication.IDValidator = authenticationDescID.Validators[0].(func(string) error)
+	authorizationMixin := schema.Authorization{}.Mixin()
+	authorizationMixinFields0 := authorizationMixin[0].Fields()
+	_ = authorizationMixinFields0
+	authorizationFields := schema.Authorization{}.Fields()
+	_ = authorizationFields
+	// authorizationDescCreatedAt is the schema descriptor for created_at field.
+	authorizationDescCreatedAt := authorizationMixinFields0[0].Descriptor()
+	// authorization.DefaultCreatedAt holds the default value on creation for the created_at field.
+	authorization.DefaultCreatedAt = authorizationDescCreatedAt.Default.(func() time.Time)
+	// authorizationDescUpdatedAt is the schema descriptor for updated_at field.
+	authorizationDescUpdatedAt := authorizationMixinFields0[1].Descriptor()
+	// authorization.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	authorization.DefaultUpdatedAt = authorizationDescUpdatedAt.Default.(func() time.Time)
+	// authorization.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	authorization.UpdateDefaultUpdatedAt = authorizationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// authorizationDescApplication is the schema descriptor for application field.
+	authorizationDescApplication := authorizationFields[1].Descriptor()
+	// authorization.ApplicationValidator is a validator for the "application" field. It is called by the builders before save.
+	authorization.ApplicationValidator = authorizationDescApplication.Validators[0].(func(string) error)
+	// authorizationDescDomain is the schema descriptor for domain field.
+	authorizationDescDomain := authorizationFields[2].Descriptor()
+	// authorization.DomainValidator is a validator for the "domain" field. It is called by the builders before save.
+	authorization.DomainValidator = authorizationDescDomain.Validators[0].(func(string) error)
+	// authorizationDescClientID is the schema descriptor for client_id field.
+	authorizationDescClientID := authorizationFields[3].Descriptor()
+	// authorization.ClientIDValidator is a validator for the "client_id" field. It is called by the builders before save.
+	authorization.ClientIDValidator = authorizationDescClientID.Validators[0].(func(string) error)
+	// authorizationDescID is the schema descriptor for id field.
+	authorizationDescID := authorizationFields[0].Descriptor()
+	// authorization.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	authorization.IDValidator = authorizationDescID.Validators[0].(func(string) error)
 	sessionMixin := schema.Session{}.Mixin()
 	sessionMixinFields0 := sessionMixin[0].Fields()
 	_ = sessionMixinFields0

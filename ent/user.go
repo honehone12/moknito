@@ -41,11 +41,13 @@ type User struct {
 type UserEdges struct {
 	// Authentications holds the value of the authentications edge.
 	Authentications []*Authentication `json:"authentications,omitempty"`
+	// Authorizations holds the value of the authorizations edge.
+	Authorizations []*Authorization `json:"authorizations,omitempty"`
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // AuthenticationsOrErr returns the Authentications value or an error if the edge
@@ -57,10 +59,19 @@ func (e UserEdges) AuthenticationsOrErr() ([]*Authentication, error) {
 	return nil, &NotLoadedError{edge: "authentications"}
 }
 
+// AuthorizationsOrErr returns the Authorizations value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) AuthorizationsOrErr() ([]*Authorization, error) {
+	if e.loadedTypes[1] {
+		return e.Authorizations, nil
+	}
+	return nil, &NotLoadedError{edge: "authorizations"}
+}
+
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SessionsOrErr() ([]*Session, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Sessions, nil
 	}
 	return nil, &NotLoadedError{edge: "sessions"}
@@ -157,6 +168,11 @@ func (_m *User) Value(name string) (ent.Value, error) {
 // QueryAuthentications queries the "authentications" edge of the User entity.
 func (_m *User) QueryAuthentications() *AuthenticationQuery {
 	return NewUserClient(_m.config).QueryAuthentications(_m)
+}
+
+// QueryAuthorizations queries the "authorizations" edge of the User entity.
+func (_m *User) QueryAuthorizations() *AuthorizationQuery {
+	return NewUserClient(_m.config).QueryAuthorizations(_m)
 }
 
 // QuerySessions queries the "sessions" edge of the User entity.

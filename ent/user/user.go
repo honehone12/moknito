@@ -30,6 +30,8 @@ const (
 	FieldError = "error"
 	// EdgeAuthentications holds the string denoting the authentications edge name in mutations.
 	EdgeAuthentications = "authentications"
+	// EdgeAuthorizations holds the string denoting the authorizations edge name in mutations.
+	EdgeAuthorizations = "authorizations"
 	// EdgeSessions holds the string denoting the sessions edge name in mutations.
 	EdgeSessions = "sessions"
 	// Table holds the table name of the user in the database.
@@ -41,6 +43,13 @@ const (
 	AuthenticationsInverseTable = "authentications"
 	// AuthenticationsColumn is the table column denoting the authentications relation/edge.
 	AuthenticationsColumn = "user_authentications"
+	// AuthorizationsTable is the table that holds the authorizations relation/edge.
+	AuthorizationsTable = "authorizations"
+	// AuthorizationsInverseTable is the table name for the Authorization entity.
+	// It exists in this package in order to avoid circular dependency with the "authorization" package.
+	AuthorizationsInverseTable = "authorizations"
+	// AuthorizationsColumn is the table column denoting the authorizations relation/edge.
+	AuthorizationsColumn = "user_authorizations"
 	// SessionsTable is the table that holds the sessions relation/edge.
 	SessionsTable = "sessions"
 	// SessionsInverseTable is the table name for the Session entity.
@@ -150,6 +159,20 @@ func ByAuthentications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByAuthorizationsCount orders the results by authorizations count.
+func ByAuthorizationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAuthorizationsStep(), opts...)
+	}
+}
+
+// ByAuthorizations orders the results by authorizations terms.
+func ByAuthorizations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAuthorizationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // BySessionsCount orders the results by sessions count.
 func BySessionsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -168,6 +191,13 @@ func newAuthenticationsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AuthenticationsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AuthenticationsTable, AuthenticationsColumn),
+	)
+}
+func newAuthorizationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AuthorizationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AuthorizationsTable, AuthorizationsColumn),
 	)
 }
 func newSessionsStep() *sqlgraph.Step {
