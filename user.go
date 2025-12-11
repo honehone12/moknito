@@ -30,7 +30,7 @@ func (m *Moknito) userNew(ctx echo.Context) error {
 		return BadRequest(ctx)
 	}
 
-	u, err := m.entity.CreateUser(
+	u, err := m.system.CreateUser(
 		ctx.Request().Context(),
 		form.Name,
 		form.Email,

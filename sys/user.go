@@ -1,4 +1,4 @@
-package entity
+package sys
 
 import (
 	"context"
@@ -7,11 +7,16 @@ import (
 	"moknito/id"
 )
 
-func (e *Entity) CreateUser(
+type UserSys interface {
+	CreateUser(
+		ctx context.Context,
+		name, email, password string,
+	) (*ent.User, error)
+}
+
+func (s *System) CreateUser(
 	ctx context.Context,
-	name string,
-	email string,
-	password string,
+	name, email, password string,
 ) (*ent.User, error) {
 	pwHash, err := hash.Hash(password)
 	if err != nil {
@@ -23,7 +28,7 @@ func (e *Entity) CreateUser(
 		return nil, err
 	}
 
-	return e.ent.User.Create().
+	return s.ent.User.Create().
 		SetID(id).
 		SetName(name).
 		SetEmail(email).

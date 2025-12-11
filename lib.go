@@ -1,18 +1,18 @@
 package main
 
 import (
-	"moknito/entity"
+	"moknito/sys"
 
 	"github.com/go-playground/validator/v10"
 )
 
 type Moknito struct {
-	entity    *entity.Entity
+	system    sys.Sys
 	validator *validator.Validate
 }
 
 func NewMocknito() (*Moknito, error) {
-	entity, err := entity.NewEntity()
+	system, err := sys.NewSystem()
 	if err != nil {
 		return nil, err
 	}
@@ -20,11 +20,11 @@ func NewMocknito() (*Moknito, error) {
 	validator := validator.New()
 
 	return &Moknito{
-		entity,
+		system,
 		validator,
 	}, nil
 }
 
 func (m *Moknito) Close() error {
-	return m.entity.Close()
+	return m.system.Close()
 }
