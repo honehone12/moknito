@@ -26,7 +26,7 @@ func main() {
 		echo.Logger.Fatal("env for perpper is invalid")
 	}
 
-	mocknito, err := NewMocknito(echo.Logger)
+	mocknito, err := NewMocknito()
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}

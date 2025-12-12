@@ -14,7 +14,7 @@ type UserSys interface {
 	) (*ent.User, error)
 }
 
-func (s *System) CreateUser(
+func (s *EntSys) CreateUser(
 	ctx context.Context,
 	name, email, password string,
 ) (*ent.User, error) {

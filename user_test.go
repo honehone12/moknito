@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestUserNew_E2E(t *testing.T) {
-	m, err := NewMocknito(nil)
+	m, err := NewMocknito()
 	if err != nil {
 		t.Fatalf("Failed to create moknito instance: %v", err)
 	}
@@ -42,7 +42,7 @@ func TestUserNew_E2E(t *testing.T) {
 
 	// Auto-migration for test database
 	// In a real project, you might want a more sophisticated migration strategy
-	if err := m.system.(*sys.System).Ent().Schema.Create(
+	if err := m.system.(*sys.EntSys).Ent().Schema.Create(
 		context.Background(),
 		migrate.WithDropColumn(true),
 		migrate.WithDropIndex(true),
