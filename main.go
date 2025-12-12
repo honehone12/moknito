@@ -45,6 +45,7 @@ func main() {
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
+	// this should be static route after build
 	ui.Use(echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(
 		[]*echo4middleware.ProxyTarget{
 			{
