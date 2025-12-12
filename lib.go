@@ -4,6 +4,7 @@ import (
 	"moknito/sys"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
 )
 
 type Moknito struct {
@@ -11,8 +12,8 @@ type Moknito struct {
 	validator *validator.Validate
 }
 
-func NewMocknito() (*Moknito, error) {
-	system, err := sys.NewSystem()
+func NewMocknito(logger echo.Logger) (*Moknito, error) {
+	system, err := sys.NewSystem(logger)
 	if err != nil {
 		return nil, err
 	}

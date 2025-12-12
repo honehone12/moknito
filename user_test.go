@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestUserNew_E2E(t *testing.T) {
-	m, err := NewMocknito()
+	m, err := NewMocknito(nil)
 	if err != nil {
 		t.Fatalf("Failed to create moknito instance: %v", err)
 	}

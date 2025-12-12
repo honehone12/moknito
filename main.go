@@ -9,11 +9,14 @@ import (
 	"github.com/joho/godotenv"
 	echo4 "github.com/labstack/echo/v4"
 	echo4middleware "github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 )
 
 func main() {
 	echo := echo4.New()
 	echo.Use(echo4middleware.Logger())
+	echo.Logger.SetLevel(log.INFO)
+	echo.Logger.SetPrefix("MOKNITO")
 
 	if err := godotenv.Load(); err != nil {
 		echo.Logger.Fatal(err)
@@ -23,18 +26,17 @@ func main() {
 		echo.Logger.Fatal("env for perpper is invalid")
 	}
 
-	mocknito, err := NewMocknito()
+	mocknito, err := NewMocknito(echo.Logger)
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
 	defer mocknito.Close()
 
+	api := echo.Group("/api")
 	originGuard, err := middleware.OriginGuard()
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
-
-	api := echo.Group("/api")
 	api.Use(originGuard)
 	api.POST("/user/new", mocknito.userNew)
 
@@ -43,15 +45,14 @@ func main() {
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
-	uiBalancer := echo4middleware.NewRoundRobinBalancer(
+	ui.Use(echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(
 		[]*echo4middleware.ProxyTarget{
 			{
-				Name: "dev",
+				Name: "ui",
 				URL:  uiUrl,
 			},
 		},
-	)
-	ui.Use(echo4middleware.Proxy(uiBalancer))
+	)))
 
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)

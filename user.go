@@ -42,9 +42,11 @@ func (m *Moknito) userNew(ctx echo.Context) error {
 		return res.InternalError(ctx)
 	}
 
-	res := userNewResponse{
+	resBody := userNewResponse{
 		Name:  u.Name,
 		Email: u.Email,
 	}
-	return ctx.JSON(http.StatusOK, res)
+
+	ctx.Response().Header().Set("Location", "/authentication/login")
+	return ctx.JSON(http.StatusSeeOther, resBody)
 }
