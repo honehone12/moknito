@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"moknito/ent/session"
+	"moknito/ent/login"
 	"moknito/ent/user"
 	"time"
 
@@ -14,21 +14,21 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// SessionCreate is the builder for creating a Session entity.
-type SessionCreate struct {
+// LoginCreate is the builder for creating a Login entity.
+type LoginCreate struct {
 	config
-	mutation *SessionMutation
+	mutation *LoginMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *SessionCreate) SetCreatedAt(v time.Time) *SessionCreate {
+func (_c *LoginCreate) SetCreatedAt(v time.Time) *LoginCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableCreatedAt(v *time.Time) *SessionCreate {
+func (_c *LoginCreate) SetNillableCreatedAt(v *time.Time) *LoginCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -36,13 +36,13 @@ func (_c *SessionCreate) SetNillableCreatedAt(v *time.Time) *SessionCreate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *SessionCreate) SetUpdatedAt(v time.Time) *SessionCreate {
+func (_c *LoginCreate) SetUpdatedAt(v time.Time) *LoginCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableUpdatedAt(v *time.Time) *SessionCreate {
+func (_c *LoginCreate) SetNillableUpdatedAt(v *time.Time) *LoginCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -50,13 +50,13 @@ func (_c *SessionCreate) SetNillableUpdatedAt(v *time.Time) *SessionCreate {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_c *SessionCreate) SetDeletedAt(v time.Time) *SessionCreate {
+func (_c *LoginCreate) SetDeletedAt(v time.Time) *LoginCreate {
 	_c.mutation.SetDeletedAt(v)
 	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableDeletedAt(v *time.Time) *SessionCreate {
+func (_c *LoginCreate) SetNillableDeletedAt(v *time.Time) *LoginCreate {
 	if v != nil {
 		_c.SetDeletedAt(*v)
 	}
@@ -64,13 +64,13 @@ func (_c *SessionCreate) SetNillableDeletedAt(v *time.Time) *SessionCreate {
 }
 
 // SetLoginAt sets the "login_at" field.
-func (_c *SessionCreate) SetLoginAt(v time.Time) *SessionCreate {
+func (_c *LoginCreate) SetLoginAt(v time.Time) *LoginCreate {
 	_c.mutation.SetLoginAt(v)
 	return _c
 }
 
 // SetNillableLoginAt sets the "login_at" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableLoginAt(v *time.Time) *SessionCreate {
+func (_c *LoginCreate) SetNillableLoginAt(v *time.Time) *LoginCreate {
 	if v != nil {
 		_c.SetLoginAt(*v)
 	}
@@ -78,13 +78,13 @@ func (_c *SessionCreate) SetNillableLoginAt(v *time.Time) *SessionCreate {
 }
 
 // SetIP sets the "ip" field.
-func (_c *SessionCreate) SetIP(v string) *SessionCreate {
+func (_c *LoginCreate) SetIP(v string) *LoginCreate {
 	_c.mutation.SetIP(v)
 	return _c
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableIP(v *string) *SessionCreate {
+func (_c *LoginCreate) SetNillableIP(v *string) *LoginCreate {
 	if v != nil {
 		_c.SetIP(*v)
 	}
@@ -92,13 +92,13 @@ func (_c *SessionCreate) SetNillableIP(v *string) *SessionCreate {
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (_c *SessionCreate) SetUserAgent(v string) *SessionCreate {
+func (_c *LoginCreate) SetUserAgent(v string) *LoginCreate {
 	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
 // SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableUserAgent(v *string) *SessionCreate {
+func (_c *LoginCreate) SetNillableUserAgent(v *string) *LoginCreate {
 	if v != nil {
 		_c.SetUserAgent(*v)
 	}
@@ -106,41 +106,41 @@ func (_c *SessionCreate) SetNillableUserAgent(v *string) *SessionCreate {
 }
 
 // SetApplication sets the "application" field.
-func (_c *SessionCreate) SetApplication(v string) *SessionCreate {
+func (_c *LoginCreate) SetApplication(v string) *LoginCreate {
 	_c.mutation.SetApplication(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *SessionCreate) SetID(v string) *SessionCreate {
+func (_c *LoginCreate) SetID(v string) *LoginCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_c *SessionCreate) SetUserID(id string) *SessionCreate {
+func (_c *LoginCreate) SetUserID(id string) *LoginCreate {
 	_c.mutation.SetUserID(id)
 	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *SessionCreate) SetUser(v *User) *SessionCreate {
+func (_c *LoginCreate) SetUser(v *User) *LoginCreate {
 	return _c.SetUserID(v.ID)
 }
 
-// Mutation returns the SessionMutation object of the builder.
-func (_c *SessionCreate) Mutation() *SessionMutation {
+// Mutation returns the LoginMutation object of the builder.
+func (_c *LoginCreate) Mutation() *LoginMutation {
 	return _c.mutation
 }
 
-// Save creates the Session in the database.
-func (_c *SessionCreate) Save(ctx context.Context) (*Session, error) {
+// Save creates the Login in the database.
+func (_c *LoginCreate) Save(ctx context.Context) (*Login, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *SessionCreate) SaveX(ctx context.Context) *Session {
+func (_c *LoginCreate) SaveX(ctx context.Context) *Login {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -149,68 +149,68 @@ func (_c *SessionCreate) SaveX(ctx context.Context) *Session {
 }
 
 // Exec executes the query.
-func (_c *SessionCreate) Exec(ctx context.Context) error {
+func (_c *LoginCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *SessionCreate) ExecX(ctx context.Context) {
+func (_c *LoginCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *SessionCreate) defaults() {
+func (_c *LoginCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := session.DefaultCreatedAt()
+		v := login.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := session.DefaultUpdatedAt()
+		v := login.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *SessionCreate) check() error {
+func (_c *LoginCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Session.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Login.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Session.updated_at"`)}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Login.updated_at"`)}
 	}
 	if v, ok := _c.mutation.IP(); ok {
-		if err := session.IPValidator(v); err != nil {
-			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Session.ip": %w`, err)}
+		if err := login.IPValidator(v); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Login.ip": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.UserAgent(); ok {
-		if err := session.UserAgentValidator(v); err != nil {
-			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Session.user_agent": %w`, err)}
+		if err := login.UserAgentValidator(v); err != nil {
+			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Login.user_agent": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Application(); !ok {
-		return &ValidationError{Name: "application", err: errors.New(`ent: missing required field "Session.application"`)}
+		return &ValidationError{Name: "application", err: errors.New(`ent: missing required field "Login.application"`)}
 	}
 	if v, ok := _c.mutation.Application(); ok {
-		if err := session.ApplicationValidator(v); err != nil {
-			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Session.application": %w`, err)}
+		if err := login.ApplicationValidator(v); err != nil {
+			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Login.application": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
-		if err := session.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Session.id": %w`, err)}
+		if err := login.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Login.id": %w`, err)}
 		}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Session.user"`)}
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Login.user"`)}
 	}
 	return nil
 }
 
-func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
+func (_c *LoginCreate) sqlSave(ctx context.Context) (*Login, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 		if id, ok := _spec.ID.Value.(string); ok {
 			_node.ID = id
 		} else {
-			return nil, fmt.Errorf("unexpected Session.ID type: %T", _spec.ID.Value)
+			return nil, fmt.Errorf("unexpected Login.ID type: %T", _spec.ID.Value)
 		}
 	}
 	_c.mutation.id = &_node.ID
@@ -233,49 +233,49 @@ func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 	return _node, nil
 }
 
-func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
+func (_c *LoginCreate) createSpec() (*Login, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Session{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeString))
+		_node = &Login{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(login.Table, sqlgraph.NewFieldSpec(login.FieldID, field.TypeString))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(session.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(login.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(session.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(login.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(session.FieldDeletedAt, field.TypeTime, value)
+		_spec.SetField(login.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
 	if value, ok := _c.mutation.LoginAt(); ok {
-		_spec.SetField(session.FieldLoginAt, field.TypeTime, value)
+		_spec.SetField(login.FieldLoginAt, field.TypeTime, value)
 		_node.LoginAt = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeString, value)
+		_spec.SetField(login.FieldIP, field.TypeString, value)
 		_node.IP = value
 	}
 	if value, ok := _c.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(login.FieldUserAgent, field.TypeString, value)
 		_node.UserAgent = value
 	}
 	if value, ok := _c.mutation.Application(); ok {
-		_spec.SetField(session.FieldApplication, field.TypeString, value)
+		_spec.SetField(login.FieldApplication, field.TypeString, value)
 		_node.Application = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   login.UserTable,
+			Columns: []string{login.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
@@ -290,27 +290,27 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// SessionCreateBulk is the builder for creating many Session entities in bulk.
-type SessionCreateBulk struct {
+// LoginCreateBulk is the builder for creating many Login entities in bulk.
+type LoginCreateBulk struct {
 	config
 	err      error
-	builders []*SessionCreate
+	builders []*LoginCreate
 }
 
-// Save creates the Session entities in the database.
-func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
+// Save creates the Login entities in the database.
+func (_c *LoginCreateBulk) Save(ctx context.Context) ([]*Login, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*Session, len(_c.builders))
+	nodes := make([]*Login, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*SessionMutation)
+				mutation, ok := m.(*LoginMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -353,7 +353,7 @@ func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *SessionCreateBulk) SaveX(ctx context.Context) []*Session {
+func (_c *LoginCreateBulk) SaveX(ctx context.Context) []*Login {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -362,13 +362,13 @@ func (_c *SessionCreateBulk) SaveX(ctx context.Context) []*Session {
 }
 
 // Exec executes the query.
-func (_c *SessionCreateBulk) Exec(ctx context.Context) error {
+func (_c *LoginCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *SessionCreateBulk) ExecX(ctx context.Context) {
+func (_c *LoginCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

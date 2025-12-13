@@ -13,7 +13,7 @@ type Moknito struct {
 }
 
 func NewMocknito() (*Moknito, error) {
-	system, err := sys.NewEntSys(ent.Debug())
+	system, err := sys.NewEntRdsSys(ent.Debug())
 	if err != nil {
 		return nil, err
 	}

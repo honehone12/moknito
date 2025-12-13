@@ -51,10 +51,10 @@ const (
 	// AuthorizationsColumn is the table column denoting the authorizations relation/edge.
 	AuthorizationsColumn = "user_authorizations"
 	// SessionsTable is the table that holds the sessions relation/edge.
-	SessionsTable = "sessions"
-	// SessionsInverseTable is the table name for the Session entity.
-	// It exists in this package in order to avoid circular dependency with the "session" package.
-	SessionsInverseTable = "sessions"
+	SessionsTable = "logins"
+	// SessionsInverseTable is the table name for the Login entity.
+	// It exists in this package in order to avoid circular dependency with the "login" package.
+	SessionsInverseTable = "logins"
 	// SessionsColumn is the table column denoting the sessions relation/edge.
 	SessionsColumn = "user_sessions"
 )

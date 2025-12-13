@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
-	"moknito/ent/session"
+	"moknito/ent/login"
 	"moknito/ent/user"
 	"time"
 
@@ -133,14 +133,14 @@ func (_c *UserCreate) AddAuthorizations(v ...*Authorization) *UserCreate {
 	return _c.AddAuthorizationIDs(ids...)
 }
 
-// AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
+// AddSessionIDs adds the "sessions" edge to the Login entity by IDs.
 func (_c *UserCreate) AddSessionIDs(ids ...string) *UserCreate {
 	_c.mutation.AddSessionIDs(ids...)
 	return _c
 }
 
-// AddSessions adds the "sessions" edges to the Session entity.
-func (_c *UserCreate) AddSessions(v ...*Session) *UserCreate {
+// AddSessions adds the "sessions" edges to the Login entity.
+func (_c *UserCreate) AddSessions(v ...*Login) *UserCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -345,7 +345,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(login.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

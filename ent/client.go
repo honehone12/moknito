@@ -13,7 +13,7 @@ import (
 
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
-	"moknito/ent/session"
+	"moknito/ent/login"
 	"moknito/ent/user"
 
 	"entgo.io/ent"
@@ -31,8 +31,8 @@ type Client struct {
 	Authentication *AuthenticationClient
 	// Authorization is the client for interacting with the Authorization builders.
 	Authorization *AuthorizationClient
-	// Session is the client for interacting with the Session builders.
-	Session *SessionClient
+	// Login is the client for interacting with the Login builders.
+	Login *LoginClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -48,7 +48,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Authentication = NewAuthenticationClient(c.config)
 	c.Authorization = NewAuthorizationClient(c.config)
-	c.Session = NewSessionClient(c.config)
+	c.Login = NewLoginClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -144,7 +144,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:         cfg,
 		Authentication: NewAuthenticationClient(cfg),
 		Authorization:  NewAuthorizationClient(cfg),
-		Session:        NewSessionClient(cfg),
+		Login:          NewLoginClient(cfg),
 		User:           NewUserClient(cfg),
 	}, nil
 }
@@ -167,7 +167,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:         cfg,
 		Authentication: NewAuthenticationClient(cfg),
 		Authorization:  NewAuthorizationClient(cfg),
-		Session:        NewSessionClient(cfg),
+		Login:          NewLoginClient(cfg),
 		User:           NewUserClient(cfg),
 	}, nil
 }
@@ -199,7 +199,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Authentication.Use(hooks...)
 	c.Authorization.Use(hooks...)
-	c.Session.Use(hooks...)
+	c.Login.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -208,7 +208,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Authentication.Intercept(interceptors...)
 	c.Authorization.Intercept(interceptors...)
-	c.Session.Intercept(interceptors...)
+	c.Login.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
 
@@ -219,8 +219,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Authentication.mutate(ctx, m)
 	case *AuthorizationMutation:
 		return c.Authorization.mutate(ctx, m)
-	case *SessionMutation:
-		return c.Session.mutate(ctx, m)
+	case *LoginMutation:
+		return c.Login.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -526,107 +526,107 @@ func (c *AuthorizationClient) mutate(ctx context.Context, m *AuthorizationMutati
 	}
 }
 
-// SessionClient is a client for the Session schema.
-type SessionClient struct {
+// LoginClient is a client for the Login schema.
+type LoginClient struct {
 	config
 }
 
-// NewSessionClient returns a client for the Session from the given config.
-func NewSessionClient(c config) *SessionClient {
-	return &SessionClient{config: c}
+// NewLoginClient returns a client for the Login from the given config.
+func NewLoginClient(c config) *LoginClient {
+	return &LoginClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `session.Hooks(f(g(h())))`.
-func (c *SessionClient) Use(hooks ...Hook) {
-	c.hooks.Session = append(c.hooks.Session, hooks...)
+// A call to `Use(f, g, h)` equals to `login.Hooks(f(g(h())))`.
+func (c *LoginClient) Use(hooks ...Hook) {
+	c.hooks.Login = append(c.hooks.Login, hooks...)
 }
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `session.Intercept(f(g(h())))`.
-func (c *SessionClient) Intercept(interceptors ...Interceptor) {
-	c.inters.Session = append(c.inters.Session, interceptors...)
+// A call to `Intercept(f, g, h)` equals to `login.Intercept(f(g(h())))`.
+func (c *LoginClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Login = append(c.inters.Login, interceptors...)
 }
 
-// Create returns a builder for creating a Session entity.
-func (c *SessionClient) Create() *SessionCreate {
-	mutation := newSessionMutation(c.config, OpCreate)
-	return &SessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Login entity.
+func (c *LoginClient) Create() *LoginCreate {
+	mutation := newLoginMutation(c.config, OpCreate)
+	return &LoginCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Session entities.
-func (c *SessionClient) CreateBulk(builders ...*SessionCreate) *SessionCreateBulk {
-	return &SessionCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Login entities.
+func (c *LoginClient) CreateBulk(builders ...*LoginCreate) *LoginCreateBulk {
+	return &LoginCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *SessionClient) MapCreateBulk(slice any, setFunc func(*SessionCreate, int)) *SessionCreateBulk {
+func (c *LoginClient) MapCreateBulk(slice any, setFunc func(*LoginCreate, int)) *LoginCreateBulk {
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &SessionCreateBulk{err: fmt.Errorf("calling to SessionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &LoginCreateBulk{err: fmt.Errorf("calling to LoginClient.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*SessionCreate, rv.Len())
+	builders := make([]*LoginCreate, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &SessionCreateBulk{config: c.config, builders: builders}
+	return &LoginCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Session.
-func (c *SessionClient) Update() *SessionUpdate {
-	mutation := newSessionMutation(c.config, OpUpdate)
-	return &SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Login.
+func (c *LoginClient) Update() *LoginUpdate {
+	mutation := newLoginMutation(c.config, OpUpdate)
+	return &LoginUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *SessionClient) UpdateOne(_m *Session) *SessionUpdateOne {
-	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(_m))
-	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *LoginClient) UpdateOne(_m *Login) *LoginUpdateOne {
+	mutation := newLoginMutation(c.config, OpUpdateOne, withLogin(_m))
+	return &LoginUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SessionClient) UpdateOneID(id string) *SessionUpdateOne {
-	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
-	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *LoginClient) UpdateOneID(id string) *LoginUpdateOne {
+	mutation := newLoginMutation(c.config, OpUpdateOne, withLoginID(id))
+	return &LoginUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Session.
-func (c *SessionClient) Delete() *SessionDelete {
-	mutation := newSessionMutation(c.config, OpDelete)
-	return &SessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Login.
+func (c *LoginClient) Delete() *LoginDelete {
+	mutation := newLoginMutation(c.config, OpDelete)
+	return &LoginDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *SessionClient) DeleteOne(_m *Session) *SessionDeleteOne {
+func (c *LoginClient) DeleteOne(_m *Login) *LoginDeleteOne {
 	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SessionClient) DeleteOneID(id string) *SessionDeleteOne {
-	builder := c.Delete().Where(session.ID(id))
+func (c *LoginClient) DeleteOneID(id string) *LoginDeleteOne {
+	builder := c.Delete().Where(login.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &SessionDeleteOne{builder}
+	return &LoginDeleteOne{builder}
 }
 
-// Query returns a query builder for Session.
-func (c *SessionClient) Query() *SessionQuery {
-	return &SessionQuery{
+// Query returns a query builder for Login.
+func (c *LoginClient) Query() *LoginQuery {
+	return &LoginQuery{
 		config: c.config,
-		ctx:    &QueryContext{Type: TypeSession},
+		ctx:    &QueryContext{Type: TypeLogin},
 		inters: c.Interceptors(),
 	}
 }
 
-// Get returns a Session entity by its id.
-func (c *SessionClient) Get(ctx context.Context, id string) (*Session, error) {
-	return c.Query().Where(session.ID(id)).Only(ctx)
+// Get returns a Login entity by its id.
+func (c *LoginClient) Get(ctx context.Context, id string) (*Login, error) {
+	return c.Query().Where(login.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SessionClient) GetX(ctx context.Context, id string) *Session {
+func (c *LoginClient) GetX(ctx context.Context, id string) *Login {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -634,15 +634,15 @@ func (c *SessionClient) GetX(ctx context.Context, id string) *Session {
 	return obj
 }
 
-// QueryUser queries the user edge of a Session.
-func (c *SessionClient) QueryUser(_m *Session) *UserQuery {
+// QueryUser queries the user edge of a Login.
+func (c *LoginClient) QueryUser(_m *Login) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.From(login.Table, login.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, login.UserTable, login.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -651,27 +651,27 @@ func (c *SessionClient) QueryUser(_m *Session) *UserQuery {
 }
 
 // Hooks returns the client hooks.
-func (c *SessionClient) Hooks() []Hook {
-	return c.hooks.Session
+func (c *LoginClient) Hooks() []Hook {
+	return c.hooks.Login
 }
 
 // Interceptors returns the client interceptors.
-func (c *SessionClient) Interceptors() []Interceptor {
-	return c.inters.Session
+func (c *LoginClient) Interceptors() []Interceptor {
+	return c.inters.Login
 }
 
-func (c *SessionClient) mutate(ctx context.Context, m *SessionMutation) (Value, error) {
+func (c *LoginClient) mutate(ctx context.Context, m *LoginMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&SessionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&LoginCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&LoginUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&LoginUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&SessionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&LoginDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown Session mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown Login mutation op: %q", m.Op())
 	}
 }
 
@@ -816,13 +816,13 @@ func (c *UserClient) QueryAuthorizations(_m *User) *AuthorizationQuery {
 }
 
 // QuerySessions queries the sessions edge of a User.
-func (c *UserClient) QuerySessions(_m *User) *SessionQuery {
-	query := (&SessionClient{config: c.config}).Query()
+func (c *UserClient) QuerySessions(_m *User) *LoginQuery {
+	query := (&LoginClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.To(login.Table, login.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -859,9 +859,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Authentication, Authorization, Session, User []ent.Hook
+		Authentication, Authorization, Login, User []ent.Hook
 	}
 	inters struct {
-		Authentication, Authorization, Session, User []ent.Interceptor
+		Authentication, Authorization, Login, User []ent.Interceptor
 	}
 )

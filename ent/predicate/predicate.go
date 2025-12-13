@@ -12,8 +12,8 @@ type Authentication func(*sql.Selector)
 // Authorization is the predicate function for authorization builders.
 type Authorization func(*sql.Selector)
 
-// Session is the predicate function for session builders.
-type Session func(*sql.Selector)
+// Login is the predicate function for login builders.
+type Login func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

@@ -58,8 +58,8 @@ var (
 			},
 		},
 	}
-	// SessionsColumns holds the columns for the "sessions" table.
-	SessionsColumns = []*schema.Column{
+	// LoginsColumns holds the columns for the "logins" table.
+	LoginsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
@@ -70,15 +70,15 @@ var (
 		{Name: "application", Type: field.TypeString, Size: 256},
 		{Name: "user_sessions", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
-	// SessionsTable holds the schema information for the "sessions" table.
-	SessionsTable = &schema.Table{
-		Name:       "sessions",
-		Columns:    SessionsColumns,
-		PrimaryKey: []*schema.Column{SessionsColumns[0]},
+	// LoginsTable holds the schema information for the "logins" table.
+	LoginsTable = &schema.Table{
+		Name:       "logins",
+		Columns:    LoginsColumns,
+		PrimaryKey: []*schema.Column{LoginsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "sessions_users_sessions",
-				Columns:    []*schema.Column{SessionsColumns[8]},
+				Symbol:     "logins_users_sessions",
+				Columns:    []*schema.Column{LoginsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -112,7 +112,7 @@ var (
 	Tables = []*schema.Table{
 		AuthenticationsTable,
 		AuthorizationsTable,
-		SessionsTable,
+		LoginsTable,
 		UsersTable,
 	}
 )
@@ -120,5 +120,5 @@ var (
 func init() {
 	AuthenticationsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthorizationsTable.ForeignKeys[0].RefTable = UsersTable
-	SessionsTable.ForeignKeys[0].RefTable = UsersTable
+	LoginsTable.ForeignKeys[0].RefTable = UsersTable
 }

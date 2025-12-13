@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
-	"moknito/ent/session"
+	"moknito/ent/login"
 	"moknito/ent/user"
 	"reflect"
 	"sync"
@@ -78,7 +78,7 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			authentication.Table: authentication.ValidColumn,
 			authorization.Table:  authorization.ValidColumn,
-			session.Table:        session.ValidColumn,
+			login.Table:          login.ValidColumn,
 			user.Table:           user.ValidColumn,
 		})
 	})

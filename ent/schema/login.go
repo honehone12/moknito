@@ -7,13 +7,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Session holds the schema definition for the Session entity.
-type Session struct {
+// Login holds the schema definition for the Login entity.
+type Login struct {
 	ent.Schema
 }
 
 // Fields of the Session.
-func (Session) Fields() []ent.Field {
+func (Login) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
 			NotEmpty().
@@ -34,7 +34,7 @@ func (Session) Fields() []ent.Field {
 }
 
 // Edges of the Session.
-func (Session) Edges() []ent.Edge {
+func (Login) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
 			Ref("sessions").
@@ -43,7 +43,7 @@ func (Session) Edges() []ent.Edge {
 	}
 }
 
-func (Session) Mixin() []ent.Mixin {
+func (Login) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		Time{},
 	}

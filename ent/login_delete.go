@@ -4,34 +4,34 @@ package ent
 
 import (
 	"context"
+	"moknito/ent/login"
 	"moknito/ent/predicate"
-	"moknito/ent/session"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
 
-// SessionDelete is the builder for deleting a Session entity.
-type SessionDelete struct {
+// LoginDelete is the builder for deleting a Login entity.
+type LoginDelete struct {
 	config
 	hooks    []Hook
-	mutation *SessionMutation
+	mutation *LoginMutation
 }
 
-// Where appends a list predicates to the SessionDelete builder.
-func (_d *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
+// Where appends a list predicates to the LoginDelete builder.
+func (_d *LoginDelete) Where(ps ...predicate.Login) *LoginDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *SessionDelete) Exec(ctx context.Context) (int, error) {
+func (_d *LoginDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SessionDelete) ExecX(ctx context.Context) int {
+func (_d *LoginDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *SessionDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *SessionDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeString))
+func (_d *LoginDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(login.Table, sqlgraph.NewFieldSpec(login.FieldID, field.TypeString))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *SessionDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// SessionDeleteOne is the builder for deleting a single Session entity.
-type SessionDeleteOne struct {
-	_d *SessionDelete
+// LoginDeleteOne is the builder for deleting a single Login entity.
+type LoginDeleteOne struct {
+	_d *LoginDelete
 }
 
-// Where appends a list predicates to the SessionDelete builder.
-func (_d *SessionDeleteOne) Where(ps ...predicate.Session) *SessionDeleteOne {
+// Where appends a list predicates to the LoginDelete builder.
+func (_d *LoginDeleteOne) Where(ps ...predicate.Login) *LoginDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *SessionDeleteOne) Exec(ctx context.Context) error {
+func (_d *LoginDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{session.Label}
+		return &NotFoundError{login.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SessionDeleteOne) ExecX(ctx context.Context) {
+func (_d *LoginDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

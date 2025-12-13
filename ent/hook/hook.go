@@ -32,16 +32,16 @@ func (f AuthorizationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuthorizationMutation", m)
 }
 
-// The SessionFunc type is an adapter to allow the use of ordinary
-// function as Session mutator.
-type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
+// The LoginFunc type is an adapter to allow the use of ordinary
+// function as Login mutator.
+type LoginFunc func(context.Context, *ent.LoginMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.SessionMutation); ok {
+func (f LoginFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LoginMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LoginMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

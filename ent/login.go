@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"moknito/ent/session"
+	"moknito/ent/login"
 	"moknito/ent/user"
 	"strings"
 	"time"
@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Session is the model entity for the Session schema.
-type Session struct {
+// Login is the model entity for the Login schema.
+type Login struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
@@ -33,14 +33,14 @@ type Session struct {
 	// Application holds the value of the "application" field.
 	Application string `json:"application,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the SessionQuery when eager-loading is set.
-	Edges         SessionEdges `json:"edges"`
+	// The values are being populated by the LoginQuery when eager-loading is set.
+	Edges         LoginEdges `json:"edges"`
 	user_sessions *string
 	selectValues  sql.SelectValues
 }
 
-// SessionEdges holds the relations/edges for other nodes in the graph.
-type SessionEdges struct {
+// LoginEdges holds the relations/edges for other nodes in the graph.
+type LoginEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -50,7 +50,7 @@ type SessionEdges struct {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e SessionEdges) UserOrErr() (*User, error) {
+func (e LoginEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
 	} else if e.loadedTypes[0] {
@@ -60,15 +60,15 @@ func (e SessionEdges) UserOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Session) scanValues(columns []string) ([]any, error) {
+func (*Login) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case session.FieldID, session.FieldIP, session.FieldUserAgent, session.FieldApplication:
+		case login.FieldID, login.FieldIP, login.FieldUserAgent, login.FieldApplication:
 			values[i] = new(sql.NullString)
-		case session.FieldCreatedAt, session.FieldUpdatedAt, session.FieldDeletedAt, session.FieldLoginAt:
+		case login.FieldCreatedAt, login.FieldUpdatedAt, login.FieldDeletedAt, login.FieldLoginAt:
 			values[i] = new(sql.NullTime)
-		case session.ForeignKeys[0]: // user_sessions
+		case login.ForeignKeys[0]: // user_sessions
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -78,63 +78,63 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Session fields.
-func (_m *Session) assignValues(columns []string, values []any) error {
+// to the Login fields.
+func (_m *Login) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case session.FieldID:
+		case login.FieldID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
 				_m.ID = value.String
 			}
-		case session.FieldCreatedAt:
+		case login.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case session.FieldUpdatedAt:
+		case login.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case session.FieldDeletedAt:
+		case login.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case session.FieldLoginAt:
+		case login.FieldLoginAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field login_at", values[i])
 			} else if value.Valid {
 				_m.LoginAt = value.Time
 			}
-		case session.FieldIP:
+		case login.FieldIP:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value.Valid {
 				_m.IP = value.String
 			}
-		case session.FieldUserAgent:
+		case login.FieldUserAgent:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_agent", values[i])
 			} else if value.Valid {
 				_m.UserAgent = value.String
 			}
-		case session.FieldApplication:
+		case login.FieldApplication:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field application", values[i])
 			} else if value.Valid {
 				_m.Application = value.String
 			}
-		case session.ForeignKeys[0]:
+		case login.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_sessions", values[i])
 			} else if value.Valid {
@@ -148,39 +148,39 @@ func (_m *Session) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Session.
+// Value returns the ent.Value that was dynamically selected and assigned to the Login.
 // This includes values selected through modifiers, order, etc.
-func (_m *Session) Value(name string) (ent.Value, error) {
+func (_m *Login) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the Session entity.
-func (_m *Session) QueryUser() *UserQuery {
-	return NewSessionClient(_m.config).QueryUser(_m)
+// QueryUser queries the "user" edge of the Login entity.
+func (_m *Login) QueryUser() *UserQuery {
+	return NewLoginClient(_m.config).QueryUser(_m)
 }
 
-// Update returns a builder for updating this Session.
-// Note that you need to call Session.Unwrap() before calling this method if this Session
+// Update returns a builder for updating this Login.
+// Note that you need to call Login.Unwrap() before calling this method if this Login
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *Session) Update() *SessionUpdateOne {
-	return NewSessionClient(_m.config).UpdateOne(_m)
+func (_m *Login) Update() *LoginUpdateOne {
+	return NewLoginClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the Session entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Login entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *Session) Unwrap() *Session {
+func (_m *Login) Unwrap() *Login {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Session is not a transactional entity")
+		panic("ent: Login is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *Session) String() string {
+func (_m *Login) String() string {
 	var builder strings.Builder
-	builder.WriteString("Session(")
+	builder.WriteString("Login(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -208,5 +208,5 @@ func (_m *Session) String() string {
 	return builder.String()
 }
 
-// Sessions is a parsable slice of Session.
-type Sessions []*Session
+// Logins is a parsable slice of Login.
+type Logins []*Login

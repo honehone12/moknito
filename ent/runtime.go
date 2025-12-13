@@ -5,8 +5,8 @@ package ent
 import (
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
+	"moknito/ent/login"
 	"moknito/ent/schema"
-	"moknito/ent/session"
 	"moknito/ent/user"
 	"time"
 )
@@ -65,37 +65,37 @@ func init() {
 	authorizationDescID := authorizationFields[0].Descriptor()
 	// authorization.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	authorization.IDValidator = authorizationDescID.Validators[0].(func(string) error)
-	sessionMixin := schema.Session{}.Mixin()
-	sessionMixinFields0 := sessionMixin[0].Fields()
-	_ = sessionMixinFields0
-	sessionFields := schema.Session{}.Fields()
-	_ = sessionFields
-	// sessionDescCreatedAt is the schema descriptor for created_at field.
-	sessionDescCreatedAt := sessionMixinFields0[0].Descriptor()
-	// session.DefaultCreatedAt holds the default value on creation for the created_at field.
-	session.DefaultCreatedAt = sessionDescCreatedAt.Default.(func() time.Time)
-	// sessionDescUpdatedAt is the schema descriptor for updated_at field.
-	sessionDescUpdatedAt := sessionMixinFields0[1].Descriptor()
-	// session.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	session.DefaultUpdatedAt = sessionDescUpdatedAt.Default.(func() time.Time)
-	// session.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	session.UpdateDefaultUpdatedAt = sessionDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// sessionDescIP is the schema descriptor for ip field.
-	sessionDescIP := sessionFields[2].Descriptor()
-	// session.IPValidator is a validator for the "ip" field. It is called by the builders before save.
-	session.IPValidator = sessionDescIP.Validators[0].(func(string) error)
-	// sessionDescUserAgent is the schema descriptor for user_agent field.
-	sessionDescUserAgent := sessionFields[3].Descriptor()
-	// session.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
-	session.UserAgentValidator = sessionDescUserAgent.Validators[0].(func(string) error)
-	// sessionDescApplication is the schema descriptor for application field.
-	sessionDescApplication := sessionFields[4].Descriptor()
-	// session.ApplicationValidator is a validator for the "application" field. It is called by the builders before save.
-	session.ApplicationValidator = sessionDescApplication.Validators[0].(func(string) error)
-	// sessionDescID is the schema descriptor for id field.
-	sessionDescID := sessionFields[0].Descriptor()
-	// session.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	session.IDValidator = sessionDescID.Validators[0].(func(string) error)
+	loginMixin := schema.Login{}.Mixin()
+	loginMixinFields0 := loginMixin[0].Fields()
+	_ = loginMixinFields0
+	loginFields := schema.Login{}.Fields()
+	_ = loginFields
+	// loginDescCreatedAt is the schema descriptor for created_at field.
+	loginDescCreatedAt := loginMixinFields0[0].Descriptor()
+	// login.DefaultCreatedAt holds the default value on creation for the created_at field.
+	login.DefaultCreatedAt = loginDescCreatedAt.Default.(func() time.Time)
+	// loginDescUpdatedAt is the schema descriptor for updated_at field.
+	loginDescUpdatedAt := loginMixinFields0[1].Descriptor()
+	// login.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	login.DefaultUpdatedAt = loginDescUpdatedAt.Default.(func() time.Time)
+	// login.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	login.UpdateDefaultUpdatedAt = loginDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// loginDescIP is the schema descriptor for ip field.
+	loginDescIP := loginFields[2].Descriptor()
+	// login.IPValidator is a validator for the "ip" field. It is called by the builders before save.
+	login.IPValidator = loginDescIP.Validators[0].(func(string) error)
+	// loginDescUserAgent is the schema descriptor for user_agent field.
+	loginDescUserAgent := loginFields[3].Descriptor()
+	// login.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
+	login.UserAgentValidator = loginDescUserAgent.Validators[0].(func(string) error)
+	// loginDescApplication is the schema descriptor for application field.
+	loginDescApplication := loginFields[4].Descriptor()
+	// login.ApplicationValidator is a validator for the "application" field. It is called by the builders before save.
+	login.ApplicationValidator = loginDescApplication.Validators[0].(func(string) error)
+	// loginDescID is the schema descriptor for id field.
+	loginDescID := loginFields[0].Descriptor()
+	// login.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	login.IDValidator = loginDescID.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

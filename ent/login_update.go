@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/ent/login"
 	"moknito/ent/predicate"
-	"moknito/ent/session"
 	"moknito/ent/user"
 	"time"
 
@@ -16,33 +16,33 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// SessionUpdate is the builder for updating Session entities.
-type SessionUpdate struct {
+// LoginUpdate is the builder for updating Login entities.
+type LoginUpdate struct {
 	config
 	hooks    []Hook
-	mutation *SessionMutation
+	mutation *LoginMutation
 }
 
-// Where appends a list predicates to the SessionUpdate builder.
-func (_u *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
+// Where appends a list predicates to the LoginUpdate builder.
+func (_u *LoginUpdate) Where(ps ...predicate.Login) *LoginUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *SessionUpdate) SetUpdatedAt(v time.Time) *SessionUpdate {
+func (_u *LoginUpdate) SetUpdatedAt(v time.Time) *LoginUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_u *SessionUpdate) SetDeletedAt(v time.Time) *SessionUpdate {
+func (_u *LoginUpdate) SetDeletedAt(v time.Time) *LoginUpdate {
 	_u.mutation.SetDeletedAt(v)
 	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableDeletedAt(v *time.Time) *SessionUpdate {
+func (_u *LoginUpdate) SetNillableDeletedAt(v *time.Time) *LoginUpdate {
 	if v != nil {
 		_u.SetDeletedAt(*v)
 	}
@@ -50,19 +50,19 @@ func (_u *SessionUpdate) SetNillableDeletedAt(v *time.Time) *SessionUpdate {
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *SessionUpdate) ClearDeletedAt() *SessionUpdate {
+func (_u *LoginUpdate) ClearDeletedAt() *LoginUpdate {
 	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
 // SetLoginAt sets the "login_at" field.
-func (_u *SessionUpdate) SetLoginAt(v time.Time) *SessionUpdate {
+func (_u *LoginUpdate) SetLoginAt(v time.Time) *LoginUpdate {
 	_u.mutation.SetLoginAt(v)
 	return _u
 }
 
 // SetNillableLoginAt sets the "login_at" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableLoginAt(v *time.Time) *SessionUpdate {
+func (_u *LoginUpdate) SetNillableLoginAt(v *time.Time) *LoginUpdate {
 	if v != nil {
 		_u.SetLoginAt(*v)
 	}
@@ -70,19 +70,19 @@ func (_u *SessionUpdate) SetNillableLoginAt(v *time.Time) *SessionUpdate {
 }
 
 // ClearLoginAt clears the value of the "login_at" field.
-func (_u *SessionUpdate) ClearLoginAt() *SessionUpdate {
+func (_u *LoginUpdate) ClearLoginAt() *LoginUpdate {
 	_u.mutation.ClearLoginAt()
 	return _u
 }
 
 // SetIP sets the "ip" field.
-func (_u *SessionUpdate) SetIP(v string) *SessionUpdate {
+func (_u *LoginUpdate) SetIP(v string) *LoginUpdate {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableIP(v *string) *SessionUpdate {
+func (_u *LoginUpdate) SetNillableIP(v *string) *LoginUpdate {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -90,19 +90,19 @@ func (_u *SessionUpdate) SetNillableIP(v *string) *SessionUpdate {
 }
 
 // ClearIP clears the value of the "ip" field.
-func (_u *SessionUpdate) ClearIP() *SessionUpdate {
+func (_u *LoginUpdate) ClearIP() *LoginUpdate {
 	_u.mutation.ClearIP()
 	return _u
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (_u *SessionUpdate) SetUserAgent(v string) *SessionUpdate {
+func (_u *LoginUpdate) SetUserAgent(v string) *LoginUpdate {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableUserAgent(v *string) *SessionUpdate {
+func (_u *LoginUpdate) SetNillableUserAgent(v *string) *LoginUpdate {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -110,19 +110,19 @@ func (_u *SessionUpdate) SetNillableUserAgent(v *string) *SessionUpdate {
 }
 
 // ClearUserAgent clears the value of the "user_agent" field.
-func (_u *SessionUpdate) ClearUserAgent() *SessionUpdate {
+func (_u *LoginUpdate) ClearUserAgent() *LoginUpdate {
 	_u.mutation.ClearUserAgent()
 	return _u
 }
 
 // SetApplication sets the "application" field.
-func (_u *SessionUpdate) SetApplication(v string) *SessionUpdate {
+func (_u *LoginUpdate) SetApplication(v string) *LoginUpdate {
 	_u.mutation.SetApplication(v)
 	return _u
 }
 
 // SetNillableApplication sets the "application" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableApplication(v *string) *SessionUpdate {
+func (_u *LoginUpdate) SetNillableApplication(v *string) *LoginUpdate {
 	if v != nil {
 		_u.SetApplication(*v)
 	}
@@ -130,35 +130,35 @@ func (_u *SessionUpdate) SetNillableApplication(v *string) *SessionUpdate {
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *SessionUpdate) SetUserID(id string) *SessionUpdate {
+func (_u *LoginUpdate) SetUserID(id string) *LoginUpdate {
 	_u.mutation.SetUserID(id)
 	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *SessionUpdate) SetUser(v *User) *SessionUpdate {
+func (_u *LoginUpdate) SetUser(v *User) *LoginUpdate {
 	return _u.SetUserID(v.ID)
 }
 
-// Mutation returns the SessionMutation object of the builder.
-func (_u *SessionUpdate) Mutation() *SessionMutation {
+// Mutation returns the LoginMutation object of the builder.
+func (_u *LoginUpdate) Mutation() *LoginMutation {
 	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (_u *SessionUpdate) ClearUser() *SessionUpdate {
+func (_u *LoginUpdate) ClearUser() *LoginUpdate {
 	_u.mutation.ClearUser()
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *SessionUpdate) Save(ctx context.Context) (int, error) {
+func (_u *LoginUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SessionUpdate) SaveX(ctx context.Context) int {
+func (_u *LoginUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -167,54 +167,54 @@ func (_u *SessionUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *SessionUpdate) Exec(ctx context.Context) error {
+func (_u *LoginUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *SessionUpdate) ExecX(ctx context.Context) {
+func (_u *LoginUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *SessionUpdate) defaults() {
+func (_u *LoginUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := session.UpdateDefaultUpdatedAt()
+		v := login.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *SessionUpdate) check() error {
+func (_u *LoginUpdate) check() error {
 	if v, ok := _u.mutation.IP(); ok {
-		if err := session.IPValidator(v); err != nil {
-			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Session.ip": %w`, err)}
+		if err := login.IPValidator(v); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Login.ip": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.UserAgent(); ok {
-		if err := session.UserAgentValidator(v); err != nil {
-			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Session.user_agent": %w`, err)}
+		if err := login.UserAgentValidator(v); err != nil {
+			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Login.user_agent": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Application(); ok {
-		if err := session.ApplicationValidator(v); err != nil {
-			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Session.application": %w`, err)}
+		if err := login.ApplicationValidator(v); err != nil {
+			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Login.application": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Session.user"`)
+		return errors.New(`ent: clearing a required unique edge "Login.user"`)
 	}
 	return nil
 }
 
-func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *LoginUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(login.Table, login.Columns, sqlgraph.NewFieldSpec(login.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -223,41 +223,41 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(session.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(login.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(session.FieldDeletedAt, field.TypeTime, value)
+		_spec.SetField(login.FieldDeletedAt, field.TypeTime, value)
 	}
 	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(session.FieldDeletedAt, field.TypeTime)
+		_spec.ClearField(login.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.LoginAt(); ok {
-		_spec.SetField(session.FieldLoginAt, field.TypeTime, value)
+		_spec.SetField(login.FieldLoginAt, field.TypeTime, value)
 	}
 	if _u.mutation.LoginAtCleared() {
-		_spec.ClearField(session.FieldLoginAt, field.TypeTime)
+		_spec.ClearField(login.FieldLoginAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeString, value)
+		_spec.SetField(login.FieldIP, field.TypeString, value)
 	}
 	if _u.mutation.IPCleared() {
-		_spec.ClearField(session.FieldIP, field.TypeString)
+		_spec.ClearField(login.FieldIP, field.TypeString)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(login.FieldUserAgent, field.TypeString, value)
 	}
 	if _u.mutation.UserAgentCleared() {
-		_spec.ClearField(session.FieldUserAgent, field.TypeString)
+		_spec.ClearField(login.FieldUserAgent, field.TypeString)
 	}
 	if value, ok := _u.mutation.Application(); ok {
-		_spec.SetField(session.FieldApplication, field.TypeString, value)
+		_spec.SetField(login.FieldApplication, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   login.UserTable,
+			Columns: []string{login.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
@@ -269,8 +269,8 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   login.UserTable,
+			Columns: []string{login.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
@@ -283,7 +283,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{session.Label}
+			err = &NotFoundError{login.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -293,28 +293,28 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	return _node, nil
 }
 
-// SessionUpdateOne is the builder for updating a single Session entity.
-type SessionUpdateOne struct {
+// LoginUpdateOne is the builder for updating a single Login entity.
+type LoginUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *SessionMutation
+	mutation *LoginMutation
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *SessionUpdateOne) SetUpdatedAt(v time.Time) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetUpdatedAt(v time.Time) *LoginUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_u *SessionUpdateOne) SetDeletedAt(v time.Time) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetDeletedAt(v time.Time) *LoginUpdateOne {
 	_u.mutation.SetDeletedAt(v)
 	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableDeletedAt(v *time.Time) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetNillableDeletedAt(v *time.Time) *LoginUpdateOne {
 	if v != nil {
 		_u.SetDeletedAt(*v)
 	}
@@ -322,19 +322,19 @@ func (_u *SessionUpdateOne) SetNillableDeletedAt(v *time.Time) *SessionUpdateOne
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *SessionUpdateOne) ClearDeletedAt() *SessionUpdateOne {
+func (_u *LoginUpdateOne) ClearDeletedAt() *LoginUpdateOne {
 	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
 // SetLoginAt sets the "login_at" field.
-func (_u *SessionUpdateOne) SetLoginAt(v time.Time) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetLoginAt(v time.Time) *LoginUpdateOne {
 	_u.mutation.SetLoginAt(v)
 	return _u
 }
 
 // SetNillableLoginAt sets the "login_at" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableLoginAt(v *time.Time) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetNillableLoginAt(v *time.Time) *LoginUpdateOne {
 	if v != nil {
 		_u.SetLoginAt(*v)
 	}
@@ -342,19 +342,19 @@ func (_u *SessionUpdateOne) SetNillableLoginAt(v *time.Time) *SessionUpdateOne {
 }
 
 // ClearLoginAt clears the value of the "login_at" field.
-func (_u *SessionUpdateOne) ClearLoginAt() *SessionUpdateOne {
+func (_u *LoginUpdateOne) ClearLoginAt() *LoginUpdateOne {
 	_u.mutation.ClearLoginAt()
 	return _u
 }
 
 // SetIP sets the "ip" field.
-func (_u *SessionUpdateOne) SetIP(v string) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetIP(v string) *LoginUpdateOne {
 	_u.mutation.SetIP(v)
 	return _u
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableIP(v *string) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetNillableIP(v *string) *LoginUpdateOne {
 	if v != nil {
 		_u.SetIP(*v)
 	}
@@ -362,19 +362,19 @@ func (_u *SessionUpdateOne) SetNillableIP(v *string) *SessionUpdateOne {
 }
 
 // ClearIP clears the value of the "ip" field.
-func (_u *SessionUpdateOne) ClearIP() *SessionUpdateOne {
+func (_u *LoginUpdateOne) ClearIP() *LoginUpdateOne {
 	_u.mutation.ClearIP()
 	return _u
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (_u *SessionUpdateOne) SetUserAgent(v string) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetUserAgent(v string) *LoginUpdateOne {
 	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableUserAgent(v *string) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetNillableUserAgent(v *string) *LoginUpdateOne {
 	if v != nil {
 		_u.SetUserAgent(*v)
 	}
@@ -382,19 +382,19 @@ func (_u *SessionUpdateOne) SetNillableUserAgent(v *string) *SessionUpdateOne {
 }
 
 // ClearUserAgent clears the value of the "user_agent" field.
-func (_u *SessionUpdateOne) ClearUserAgent() *SessionUpdateOne {
+func (_u *LoginUpdateOne) ClearUserAgent() *LoginUpdateOne {
 	_u.mutation.ClearUserAgent()
 	return _u
 }
 
 // SetApplication sets the "application" field.
-func (_u *SessionUpdateOne) SetApplication(v string) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetApplication(v string) *LoginUpdateOne {
 	_u.mutation.SetApplication(v)
 	return _u
 }
 
 // SetNillableApplication sets the "application" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableApplication(v *string) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetNillableApplication(v *string) *LoginUpdateOne {
 	if v != nil {
 		_u.SetApplication(*v)
 	}
@@ -402,48 +402,48 @@ func (_u *SessionUpdateOne) SetNillableApplication(v *string) *SessionUpdateOne 
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (_u *SessionUpdateOne) SetUserID(id string) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetUserID(id string) *LoginUpdateOne {
 	_u.mutation.SetUserID(id)
 	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *SessionUpdateOne) SetUser(v *User) *SessionUpdateOne {
+func (_u *LoginUpdateOne) SetUser(v *User) *LoginUpdateOne {
 	return _u.SetUserID(v.ID)
 }
 
-// Mutation returns the SessionMutation object of the builder.
-func (_u *SessionUpdateOne) Mutation() *SessionMutation {
+// Mutation returns the LoginMutation object of the builder.
+func (_u *LoginUpdateOne) Mutation() *LoginMutation {
 	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (_u *SessionUpdateOne) ClearUser() *SessionUpdateOne {
+func (_u *LoginUpdateOne) ClearUser() *LoginUpdateOne {
 	_u.mutation.ClearUser()
 	return _u
 }
 
-// Where appends a list predicates to the SessionUpdate builder.
-func (_u *SessionUpdateOne) Where(ps ...predicate.Session) *SessionUpdateOne {
+// Where appends a list predicates to the LoginUpdate builder.
+func (_u *LoginUpdateOne) Where(ps ...predicate.Login) *LoginUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdateOne {
+func (_u *LoginUpdateOne) Select(field string, fields ...string) *LoginUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated Session entity.
-func (_u *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
+// Save executes the query and returns the updated Login entity.
+func (_u *LoginUpdateOne) Save(ctx context.Context) (*Login, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SessionUpdateOne) SaveX(ctx context.Context) *Session {
+func (_u *LoginUpdateOne) SaveX(ctx context.Context) *Login {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -452,67 +452,67 @@ func (_u *SessionUpdateOne) SaveX(ctx context.Context) *Session {
 }
 
 // Exec executes the query on the entity.
-func (_u *SessionUpdateOne) Exec(ctx context.Context) error {
+func (_u *LoginUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *SessionUpdateOne) ExecX(ctx context.Context) {
+func (_u *LoginUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *SessionUpdateOne) defaults() {
+func (_u *LoginUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := session.UpdateDefaultUpdatedAt()
+		v := login.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *SessionUpdateOne) check() error {
+func (_u *LoginUpdateOne) check() error {
 	if v, ok := _u.mutation.IP(); ok {
-		if err := session.IPValidator(v); err != nil {
-			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Session.ip": %w`, err)}
+		if err := login.IPValidator(v); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Login.ip": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.UserAgent(); ok {
-		if err := session.UserAgentValidator(v); err != nil {
-			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Session.user_agent": %w`, err)}
+		if err := login.UserAgentValidator(v); err != nil {
+			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Login.user_agent": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Application(); ok {
-		if err := session.ApplicationValidator(v); err != nil {
-			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Session.application": %w`, err)}
+		if err := login.ApplicationValidator(v); err != nil {
+			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Login.application": %w`, err)}
 		}
 	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Session.user"`)
+		return errors.New(`ent: clearing a required unique edge "Login.user"`)
 	}
 	return nil
 }
 
-func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err error) {
+func (_u *LoginUpdateOne) sqlSave(ctx context.Context) (_node *Login, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(login.Table, login.Columns, sqlgraph.NewFieldSpec(login.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Session.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Login.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, session.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, login.FieldID)
 		for _, f := range fields {
-			if !session.ValidColumn(f) {
+			if !login.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != session.FieldID {
+			if f != login.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -525,41 +525,41 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(session.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(login.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(session.FieldDeletedAt, field.TypeTime, value)
+		_spec.SetField(login.FieldDeletedAt, field.TypeTime, value)
 	}
 	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(session.FieldDeletedAt, field.TypeTime)
+		_spec.ClearField(login.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.LoginAt(); ok {
-		_spec.SetField(session.FieldLoginAt, field.TypeTime, value)
+		_spec.SetField(login.FieldLoginAt, field.TypeTime, value)
 	}
 	if _u.mutation.LoginAtCleared() {
-		_spec.ClearField(session.FieldLoginAt, field.TypeTime)
+		_spec.ClearField(login.FieldLoginAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(session.FieldIP, field.TypeString, value)
+		_spec.SetField(login.FieldIP, field.TypeString, value)
 	}
 	if _u.mutation.IPCleared() {
-		_spec.ClearField(session.FieldIP, field.TypeString)
+		_spec.ClearField(login.FieldIP, field.TypeString)
 	}
 	if value, ok := _u.mutation.UserAgent(); ok {
-		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
+		_spec.SetField(login.FieldUserAgent, field.TypeString, value)
 	}
 	if _u.mutation.UserAgentCleared() {
-		_spec.ClearField(session.FieldUserAgent, field.TypeString)
+		_spec.ClearField(login.FieldUserAgent, field.TypeString)
 	}
 	if value, ok := _u.mutation.Application(); ok {
-		_spec.SetField(session.FieldApplication, field.TypeString, value)
+		_spec.SetField(login.FieldApplication, field.TypeString, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   login.UserTable,
+			Columns: []string{login.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
@@ -571,8 +571,8 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
+			Table:   login.UserTable,
+			Columns: []string{login.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
@@ -583,12 +583,12 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Session{config: _u.config}
+	_node = &Login{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{session.Label}
+			err = &NotFoundError{login.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

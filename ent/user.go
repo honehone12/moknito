@@ -44,7 +44,7 @@ type UserEdges struct {
 	// Authorizations holds the value of the authorizations edge.
 	Authorizations []*Authorization `json:"authorizations,omitempty"`
 	// Sessions holds the value of the sessions edge.
-	Sessions []*Session `json:"sessions,omitempty"`
+	Sessions []*Login `json:"sessions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -70,7 +70,7 @@ func (e UserEdges) AuthorizationsOrErr() ([]*Authorization, error) {
 
 // SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) SessionsOrErr() ([]*Session, error) {
+func (e UserEdges) SessionsOrErr() ([]*Login, error) {
 	if e.loadedTypes[2] {
 		return e.Sessions, nil
 	}
@@ -176,7 +176,7 @@ func (_m *User) QueryAuthorizations() *AuthorizationQuery {
 }
 
 // QuerySessions queries the "sessions" edge of the User entity.
-func (_m *User) QuerySessions() *SessionQuery {
+func (_m *User) QuerySessions() *LoginQuery {
 	return NewUserClient(_m.config).QuerySessions(_m)
 }
 

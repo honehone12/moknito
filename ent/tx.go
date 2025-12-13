@@ -16,8 +16,8 @@ type Tx struct {
 	Authentication *AuthenticationClient
 	// Authorization is the client for interacting with the Authorization builders.
 	Authorization *AuthorizationClient
-	// Session is the client for interacting with the Session builders.
-	Session *SessionClient
+	// Login is the client for interacting with the Login builders.
+	Login *LoginClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -153,7 +153,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Authentication = NewAuthenticationClient(tx.config)
 	tx.Authorization = NewAuthorizationClient(tx.config)
-	tx.Session = NewSessionClient(tx.config)
+	tx.Login = NewLoginClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 
