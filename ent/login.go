@@ -24,8 +24,8 @@ type Login struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// LoginAt holds the value of the "login_at" field.
-	LoginAt time.Time `json:"login_at,omitempty"`
+	// LogoutAt holds the value of the "logout_at" field.
+	LogoutAt time.Time `json:"logout_at,omitempty"`
 	// IP holds the value of the "ip" field.
 	IP string `json:"ip,omitempty"`
 	// UserAgent holds the value of the "user_agent" field.
@@ -66,7 +66,7 @@ func (*Login) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case login.FieldID, login.FieldIP, login.FieldUserAgent, login.FieldApplication:
 			values[i] = new(sql.NullString)
-		case login.FieldCreatedAt, login.FieldUpdatedAt, login.FieldDeletedAt, login.FieldLoginAt:
+		case login.FieldCreatedAt, login.FieldUpdatedAt, login.FieldDeletedAt, login.FieldLogoutAt:
 			values[i] = new(sql.NullTime)
 		case login.ForeignKeys[0]: // user_sessions
 			values[i] = new(sql.NullString)
@@ -110,11 +110,11 @@ func (_m *Login) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case login.FieldLoginAt:
+		case login.FieldLogoutAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field login_at", values[i])
+				return fmt.Errorf("unexpected type %T for field logout_at", values[i])
 			} else if value.Valid {
-				_m.LoginAt = value.Time
+				_m.LogoutAt = value.Time
 			}
 		case login.FieldIP:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -193,8 +193,8 @@ func (_m *Login) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("login_at=")
-	builder.WriteString(_m.LoginAt.Format(time.ANSIC))
+	builder.WriteString("logout_at=")
+	builder.WriteString(_m.LogoutAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("ip=")
 	builder.WriteString(_m.IP)

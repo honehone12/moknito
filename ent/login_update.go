@@ -55,23 +55,23 @@ func (_u *LoginUpdate) ClearDeletedAt() *LoginUpdate {
 	return _u
 }
 
-// SetLoginAt sets the "login_at" field.
-func (_u *LoginUpdate) SetLoginAt(v time.Time) *LoginUpdate {
-	_u.mutation.SetLoginAt(v)
+// SetLogoutAt sets the "logout_at" field.
+func (_u *LoginUpdate) SetLogoutAt(v time.Time) *LoginUpdate {
+	_u.mutation.SetLogoutAt(v)
 	return _u
 }
 
-// SetNillableLoginAt sets the "login_at" field if the given value is not nil.
-func (_u *LoginUpdate) SetNillableLoginAt(v *time.Time) *LoginUpdate {
+// SetNillableLogoutAt sets the "logout_at" field if the given value is not nil.
+func (_u *LoginUpdate) SetNillableLogoutAt(v *time.Time) *LoginUpdate {
 	if v != nil {
-		_u.SetLoginAt(*v)
+		_u.SetLogoutAt(*v)
 	}
 	return _u
 }
 
-// ClearLoginAt clears the value of the "login_at" field.
-func (_u *LoginUpdate) ClearLoginAt() *LoginUpdate {
-	_u.mutation.ClearLoginAt()
+// ClearLogoutAt clears the value of the "logout_at" field.
+func (_u *LoginUpdate) ClearLogoutAt() *LoginUpdate {
+	_u.mutation.ClearLogoutAt()
 	return _u
 }
 
@@ -231,11 +231,11 @@ func (_u *LoginUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(login.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.LoginAt(); ok {
-		_spec.SetField(login.FieldLoginAt, field.TypeTime, value)
+	if value, ok := _u.mutation.LogoutAt(); ok {
+		_spec.SetField(login.FieldLogoutAt, field.TypeTime, value)
 	}
-	if _u.mutation.LoginAtCleared() {
-		_spec.ClearField(login.FieldLoginAt, field.TypeTime)
+	if _u.mutation.LogoutAtCleared() {
+		_spec.ClearField(login.FieldLogoutAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.IP(); ok {
 		_spec.SetField(login.FieldIP, field.TypeString, value)
@@ -327,23 +327,23 @@ func (_u *LoginUpdateOne) ClearDeletedAt() *LoginUpdateOne {
 	return _u
 }
 
-// SetLoginAt sets the "login_at" field.
-func (_u *LoginUpdateOne) SetLoginAt(v time.Time) *LoginUpdateOne {
-	_u.mutation.SetLoginAt(v)
+// SetLogoutAt sets the "logout_at" field.
+func (_u *LoginUpdateOne) SetLogoutAt(v time.Time) *LoginUpdateOne {
+	_u.mutation.SetLogoutAt(v)
 	return _u
 }
 
-// SetNillableLoginAt sets the "login_at" field if the given value is not nil.
-func (_u *LoginUpdateOne) SetNillableLoginAt(v *time.Time) *LoginUpdateOne {
+// SetNillableLogoutAt sets the "logout_at" field if the given value is not nil.
+func (_u *LoginUpdateOne) SetNillableLogoutAt(v *time.Time) *LoginUpdateOne {
 	if v != nil {
-		_u.SetLoginAt(*v)
+		_u.SetLogoutAt(*v)
 	}
 	return _u
 }
 
-// ClearLoginAt clears the value of the "login_at" field.
-func (_u *LoginUpdateOne) ClearLoginAt() *LoginUpdateOne {
-	_u.mutation.ClearLoginAt()
+// ClearLogoutAt clears the value of the "logout_at" field.
+func (_u *LoginUpdateOne) ClearLogoutAt() *LoginUpdateOne {
+	_u.mutation.ClearLogoutAt()
 	return _u
 }
 
@@ -533,11 +533,11 @@ func (_u *LoginUpdateOne) sqlSave(ctx context.Context) (_node *Login, err error)
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(login.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.LoginAt(); ok {
-		_spec.SetField(login.FieldLoginAt, field.TypeTime, value)
+	if value, ok := _u.mutation.LogoutAt(); ok {
+		_spec.SetField(login.FieldLogoutAt, field.TypeTime, value)
 	}
-	if _u.mutation.LoginAtCleared() {
-		_spec.ClearField(login.FieldLoginAt, field.TypeTime)
+	if _u.mutation.LogoutAtCleared() {
+		_spec.ClearField(login.FieldLogoutAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.IP(); ok {
 		_spec.SetField(login.FieldIP, field.TypeString, value)

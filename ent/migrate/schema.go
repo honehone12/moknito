@@ -64,7 +64,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "login_at", Type: field.TypeTime, Nullable: true},
+		{Name: "logout_at", Type: field.TypeTime, Nullable: true},
 		{Name: "ip", Type: field.TypeString, Nullable: true, Size: 256},
 		{Name: "user_agent", Type: field.TypeString, Nullable: true, Size: 256},
 		{Name: "application", Type: field.TypeString, Size: 256},

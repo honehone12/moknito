@@ -80,9 +80,9 @@ func DeletedAt(v time.Time) predicate.Login {
 	return predicate.Login(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// LoginAt applies equality check predicate on the "login_at" field. It's identical to LoginAtEQ.
-func LoginAt(v time.Time) predicate.Login {
-	return predicate.Login(sql.FieldEQ(FieldLoginAt, v))
+// LogoutAt applies equality check predicate on the "logout_at" field. It's identical to LogoutAtEQ.
+func LogoutAt(v time.Time) predicate.Login {
+	return predicate.Login(sql.FieldEQ(FieldLogoutAt, v))
 }
 
 // IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
@@ -230,54 +230,54 @@ func DeletedAtNotNil() predicate.Login {
 	return predicate.Login(sql.FieldNotNull(FieldDeletedAt))
 }
 
-// LoginAtEQ applies the EQ predicate on the "login_at" field.
-func LoginAtEQ(v time.Time) predicate.Login {
-	return predicate.Login(sql.FieldEQ(FieldLoginAt, v))
+// LogoutAtEQ applies the EQ predicate on the "logout_at" field.
+func LogoutAtEQ(v time.Time) predicate.Login {
+	return predicate.Login(sql.FieldEQ(FieldLogoutAt, v))
 }
 
-// LoginAtNEQ applies the NEQ predicate on the "login_at" field.
-func LoginAtNEQ(v time.Time) predicate.Login {
-	return predicate.Login(sql.FieldNEQ(FieldLoginAt, v))
+// LogoutAtNEQ applies the NEQ predicate on the "logout_at" field.
+func LogoutAtNEQ(v time.Time) predicate.Login {
+	return predicate.Login(sql.FieldNEQ(FieldLogoutAt, v))
 }
 
-// LoginAtIn applies the In predicate on the "login_at" field.
-func LoginAtIn(vs ...time.Time) predicate.Login {
-	return predicate.Login(sql.FieldIn(FieldLoginAt, vs...))
+// LogoutAtIn applies the In predicate on the "logout_at" field.
+func LogoutAtIn(vs ...time.Time) predicate.Login {
+	return predicate.Login(sql.FieldIn(FieldLogoutAt, vs...))
 }
 
-// LoginAtNotIn applies the NotIn predicate on the "login_at" field.
-func LoginAtNotIn(vs ...time.Time) predicate.Login {
-	return predicate.Login(sql.FieldNotIn(FieldLoginAt, vs...))
+// LogoutAtNotIn applies the NotIn predicate on the "logout_at" field.
+func LogoutAtNotIn(vs ...time.Time) predicate.Login {
+	return predicate.Login(sql.FieldNotIn(FieldLogoutAt, vs...))
 }
 
-// LoginAtGT applies the GT predicate on the "login_at" field.
-func LoginAtGT(v time.Time) predicate.Login {
-	return predicate.Login(sql.FieldGT(FieldLoginAt, v))
+// LogoutAtGT applies the GT predicate on the "logout_at" field.
+func LogoutAtGT(v time.Time) predicate.Login {
+	return predicate.Login(sql.FieldGT(FieldLogoutAt, v))
 }
 
-// LoginAtGTE applies the GTE predicate on the "login_at" field.
-func LoginAtGTE(v time.Time) predicate.Login {
-	return predicate.Login(sql.FieldGTE(FieldLoginAt, v))
+// LogoutAtGTE applies the GTE predicate on the "logout_at" field.
+func LogoutAtGTE(v time.Time) predicate.Login {
+	return predicate.Login(sql.FieldGTE(FieldLogoutAt, v))
 }
 
-// LoginAtLT applies the LT predicate on the "login_at" field.
-func LoginAtLT(v time.Time) predicate.Login {
-	return predicate.Login(sql.FieldLT(FieldLoginAt, v))
+// LogoutAtLT applies the LT predicate on the "logout_at" field.
+func LogoutAtLT(v time.Time) predicate.Login {
+	return predicate.Login(sql.FieldLT(FieldLogoutAt, v))
 }
 
-// LoginAtLTE applies the LTE predicate on the "login_at" field.
-func LoginAtLTE(v time.Time) predicate.Login {
-	return predicate.Login(sql.FieldLTE(FieldLoginAt, v))
+// LogoutAtLTE applies the LTE predicate on the "logout_at" field.
+func LogoutAtLTE(v time.Time) predicate.Login {
+	return predicate.Login(sql.FieldLTE(FieldLogoutAt, v))
 }
 
-// LoginAtIsNil applies the IsNil predicate on the "login_at" field.
-func LoginAtIsNil() predicate.Login {
-	return predicate.Login(sql.FieldIsNull(FieldLoginAt))
+// LogoutAtIsNil applies the IsNil predicate on the "logout_at" field.
+func LogoutAtIsNil() predicate.Login {
+	return predicate.Login(sql.FieldIsNull(FieldLogoutAt))
 }
 
-// LoginAtNotNil applies the NotNil predicate on the "login_at" field.
-func LoginAtNotNil() predicate.Login {
-	return predicate.Login(sql.FieldNotNull(FieldLoginAt))
+// LogoutAtNotNil applies the NotNil predicate on the "logout_at" field.
+func LogoutAtNotNil() predicate.Login {
+	return predicate.Login(sql.FieldNotNull(FieldLogoutAt))
 }
 
 // IPEQ applies the EQ predicate on the "ip" field.

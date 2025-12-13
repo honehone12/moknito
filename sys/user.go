@@ -40,7 +40,10 @@ func (s *EntRdsSys) RegisterUser(
 	}
 
 	exist, err := s.ent.User.Query().
-		Where(user.Email(email)).
+		Where(
+			user.Email(email),
+			user.DeletedAtIsNil(),
+		).
 		Exist(ctx)
 	if err != nil {
 		return false, err

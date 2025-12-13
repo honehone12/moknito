@@ -20,8 +20,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldLoginAt holds the string denoting the login_at field in the database.
-	FieldLoginAt = "login_at"
+	// FieldLogoutAt holds the string denoting the logout_at field in the database.
+	FieldLogoutAt = "logout_at"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
 	// FieldUserAgent holds the string denoting the user_agent field in the database.
@@ -47,7 +47,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
-	FieldLoginAt,
+	FieldLogoutAt,
 	FieldIP,
 	FieldUserAgent,
 	FieldApplication,
@@ -114,9 +114,9 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
-// ByLoginAt orders the results by the login_at field.
-func ByLoginAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLoginAt, opts...).ToFunc()
+// ByLogoutAt orders the results by the logout_at field.
+func ByLogoutAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogoutAt, opts...).ToFunc()
 }
 
 // ByIP orders the results by the ip field.

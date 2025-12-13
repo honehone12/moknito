@@ -1481,7 +1481,7 @@ type LoginMutation struct {
 	created_at    *time.Time
 	updated_at    *time.Time
 	deleted_at    *time.Time
-	login_at      *time.Time
+	logout_at     *time.Time
 	ip            *string
 	user_agent    *string
 	application   *string
@@ -1718,53 +1718,53 @@ func (m *LoginMutation) ResetDeletedAt() {
 	delete(m.clearedFields, login.FieldDeletedAt)
 }
 
-// SetLoginAt sets the "login_at" field.
-func (m *LoginMutation) SetLoginAt(t time.Time) {
-	m.login_at = &t
+// SetLogoutAt sets the "logout_at" field.
+func (m *LoginMutation) SetLogoutAt(t time.Time) {
+	m.logout_at = &t
 }
 
-// LoginAt returns the value of the "login_at" field in the mutation.
-func (m *LoginMutation) LoginAt() (r time.Time, exists bool) {
-	v := m.login_at
+// LogoutAt returns the value of the "logout_at" field in the mutation.
+func (m *LoginMutation) LogoutAt() (r time.Time, exists bool) {
+	v := m.logout_at
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLoginAt returns the old "login_at" field's value of the Login entity.
+// OldLogoutAt returns the old "logout_at" field's value of the Login entity.
 // If the Login object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LoginMutation) OldLoginAt(ctx context.Context) (v time.Time, err error) {
+func (m *LoginMutation) OldLogoutAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLoginAt is only allowed on UpdateOne operations")
+		return v, errors.New("OldLogoutAt is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLoginAt requires an ID field in the mutation")
+		return v, errors.New("OldLogoutAt requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLoginAt: %w", err)
+		return v, fmt.Errorf("querying old value for OldLogoutAt: %w", err)
 	}
-	return oldValue.LoginAt, nil
+	return oldValue.LogoutAt, nil
 }
 
-// ClearLoginAt clears the value of the "login_at" field.
-func (m *LoginMutation) ClearLoginAt() {
-	m.login_at = nil
-	m.clearedFields[login.FieldLoginAt] = struct{}{}
+// ClearLogoutAt clears the value of the "logout_at" field.
+func (m *LoginMutation) ClearLogoutAt() {
+	m.logout_at = nil
+	m.clearedFields[login.FieldLogoutAt] = struct{}{}
 }
 
-// LoginAtCleared returns if the "login_at" field was cleared in this mutation.
-func (m *LoginMutation) LoginAtCleared() bool {
-	_, ok := m.clearedFields[login.FieldLoginAt]
+// LogoutAtCleared returns if the "logout_at" field was cleared in this mutation.
+func (m *LoginMutation) LogoutAtCleared() bool {
+	_, ok := m.clearedFields[login.FieldLogoutAt]
 	return ok
 }
 
-// ResetLoginAt resets all changes to the "login_at" field.
-func (m *LoginMutation) ResetLoginAt() {
-	m.login_at = nil
-	delete(m.clearedFields, login.FieldLoginAt)
+// ResetLogoutAt resets all changes to the "logout_at" field.
+func (m *LoginMutation) ResetLogoutAt() {
+	m.logout_at = nil
+	delete(m.clearedFields, login.FieldLogoutAt)
 }
 
 // SetIP sets the "ip" field.
@@ -1984,8 +1984,8 @@ func (m *LoginMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, login.FieldDeletedAt)
 	}
-	if m.login_at != nil {
-		fields = append(fields, login.FieldLoginAt)
+	if m.logout_at != nil {
+		fields = append(fields, login.FieldLogoutAt)
 	}
 	if m.ip != nil {
 		fields = append(fields, login.FieldIP)
@@ -2010,8 +2010,8 @@ func (m *LoginMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case login.FieldDeletedAt:
 		return m.DeletedAt()
-	case login.FieldLoginAt:
-		return m.LoginAt()
+	case login.FieldLogoutAt:
+		return m.LogoutAt()
 	case login.FieldIP:
 		return m.IP()
 	case login.FieldUserAgent:
@@ -2033,8 +2033,8 @@ func (m *LoginMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldUpdatedAt(ctx)
 	case login.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case login.FieldLoginAt:
-		return m.OldLoginAt(ctx)
+	case login.FieldLogoutAt:
+		return m.OldLogoutAt(ctx)
 	case login.FieldIP:
 		return m.OldIP(ctx)
 	case login.FieldUserAgent:
@@ -2071,12 +2071,12 @@ func (m *LoginMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeletedAt(v)
 		return nil
-	case login.FieldLoginAt:
+	case login.FieldLogoutAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLoginAt(v)
+		m.SetLogoutAt(v)
 		return nil
 	case login.FieldIP:
 		v, ok := value.(string)
@@ -2132,8 +2132,8 @@ func (m *LoginMutation) ClearedFields() []string {
 	if m.FieldCleared(login.FieldDeletedAt) {
 		fields = append(fields, login.FieldDeletedAt)
 	}
-	if m.FieldCleared(login.FieldLoginAt) {
-		fields = append(fields, login.FieldLoginAt)
+	if m.FieldCleared(login.FieldLogoutAt) {
+		fields = append(fields, login.FieldLogoutAt)
 	}
 	if m.FieldCleared(login.FieldIP) {
 		fields = append(fields, login.FieldIP)
@@ -2158,8 +2158,8 @@ func (m *LoginMutation) ClearField(name string) error {
 	case login.FieldDeletedAt:
 		m.ClearDeletedAt()
 		return nil
-	case login.FieldLoginAt:
-		m.ClearLoginAt()
+	case login.FieldLogoutAt:
+		m.ClearLogoutAt()
 		return nil
 	case login.FieldIP:
 		m.ClearIP()
@@ -2184,8 +2184,8 @@ func (m *LoginMutation) ResetField(name string) error {
 	case login.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
-	case login.FieldLoginAt:
-		m.ResetLoginAt()
+	case login.FieldLogoutAt:
+		m.ResetLogoutAt()
 		return nil
 	case login.FieldIP:
 		m.ResetIP()

@@ -63,16 +63,16 @@ func (_c *LoginCreate) SetNillableDeletedAt(v *time.Time) *LoginCreate {
 	return _c
 }
 
-// SetLoginAt sets the "login_at" field.
-func (_c *LoginCreate) SetLoginAt(v time.Time) *LoginCreate {
-	_c.mutation.SetLoginAt(v)
+// SetLogoutAt sets the "logout_at" field.
+func (_c *LoginCreate) SetLogoutAt(v time.Time) *LoginCreate {
+	_c.mutation.SetLogoutAt(v)
 	return _c
 }
 
-// SetNillableLoginAt sets the "login_at" field if the given value is not nil.
-func (_c *LoginCreate) SetNillableLoginAt(v *time.Time) *LoginCreate {
+// SetNillableLogoutAt sets the "logout_at" field if the given value is not nil.
+func (_c *LoginCreate) SetNillableLogoutAt(v *time.Time) *LoginCreate {
 	if v != nil {
-		_c.SetLoginAt(*v)
+		_c.SetLogoutAt(*v)
 	}
 	return _c
 }
@@ -254,9 +254,9 @@ func (_c *LoginCreate) createSpec() (*Login, *sqlgraph.CreateSpec) {
 		_spec.SetField(login.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.LoginAt(); ok {
-		_spec.SetField(login.FieldLoginAt, field.TypeTime, value)
-		_node.LoginAt = value
+	if value, ok := _c.mutation.LogoutAt(); ok {
+		_spec.SetField(login.FieldLogoutAt, field.TypeTime, value)
+		_node.LogoutAt = value
 	}
 	if value, ok := _c.mutation.IP(); ok {
 		_spec.SetField(login.FieldIP, field.TypeString, value)

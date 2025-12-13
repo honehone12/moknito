@@ -20,7 +20,7 @@ func (Login) Fields() []ent.Field {
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.Time("login_at").
+		field.Time("logout_at").
 			Optional(),
 		field.String("ip").
 			Optional().
