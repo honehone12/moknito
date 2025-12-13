@@ -3,6 +3,7 @@ package main
 import (
 	"moknito/hash"
 	"moknito/middleware"
+	lib "moknito/moknito"
 	"net/url"
 	"os"
 
@@ -26,7 +27,7 @@ func main() {
 		echo.Logger.Fatal("env for perpper is invalid")
 	}
 
-	mocknito, err := NewMocknito()
+	mocknito, err := lib.NewMocknito()
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
@@ -38,7 +39,8 @@ func main() {
 		echo.Logger.Fatal(err)
 	}
 	api.Use(originGuard)
-	api.POST("/user/new", mocknito.userNew)
+	api.POST("/user/register", mocknito.UserRegister)
+	api.POST("/user/confirm", mocknito.UserConfirm)
 
 	ui := echo.Group("/*")
 	uiUrl, err := url.Parse("http://localhost:3000")

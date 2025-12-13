@@ -1,4 +1,4 @@
-package main
+package moknito
 
 import (
 	"moknito/ent"
