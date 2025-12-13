@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
-	"moknito/ent/login"
 	"moknito/ent/user"
 	"reflect"
 	"sync"
@@ -76,9 +76,9 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			application.Table:    application.ValidColumn,
 			authentication.Table: authentication.ValidColumn,
 			authorization.Table:  authorization.ValidColumn,
-			login.Table:          login.ValidColumn,
 			user.Table:           user.ValidColumn,
 		})
 	})

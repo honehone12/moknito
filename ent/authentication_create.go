@@ -63,28 +63,44 @@ func (_c *AuthenticationCreate) SetNillableDeletedAt(v *time.Time) *Authenticati
 	return _c
 }
 
-// SetCode sets the "code" field.
-func (_c *AuthenticationCreate) SetCode(v []byte) *AuthenticationCreate {
-	_c.mutation.SetCode(v)
+// SetIP sets the "ip" field.
+func (_c *AuthenticationCreate) SetIP(v string) *AuthenticationCreate {
+	_c.mutation.SetIP(v)
 	return _c
 }
 
-// SetChallenge sets the "challenge" field.
-func (_c *AuthenticationCreate) SetChallenge(v []byte) *AuthenticationCreate {
-	_c.mutation.SetChallenge(v)
-	return _c
-}
-
-// SetExpireAt sets the "expire_at" field.
-func (_c *AuthenticationCreate) SetExpireAt(v time.Time) *AuthenticationCreate {
-	_c.mutation.SetExpireAt(v)
-	return _c
-}
-
-// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
-func (_c *AuthenticationCreate) SetNillableExpireAt(v *time.Time) *AuthenticationCreate {
+// SetNillableIP sets the "ip" field if the given value is not nil.
+func (_c *AuthenticationCreate) SetNillableIP(v *string) *AuthenticationCreate {
 	if v != nil {
-		_c.SetExpireAt(*v)
+		_c.SetIP(*v)
+	}
+	return _c
+}
+
+// SetUserAgent sets the "user_agent" field.
+func (_c *AuthenticationCreate) SetUserAgent(v string) *AuthenticationCreate {
+	_c.mutation.SetUserAgent(v)
+	return _c
+}
+
+// SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
+func (_c *AuthenticationCreate) SetNillableUserAgent(v *string) *AuthenticationCreate {
+	if v != nil {
+		_c.SetUserAgent(*v)
+	}
+	return _c
+}
+
+// SetLogoutAt sets the "logout_at" field.
+func (_c *AuthenticationCreate) SetLogoutAt(v time.Time) *AuthenticationCreate {
+	_c.mutation.SetLogoutAt(v)
+	return _c
+}
+
+// SetNillableLogoutAt sets the "logout_at" field if the given value is not nil.
+func (_c *AuthenticationCreate) SetNillableLogoutAt(v *time.Time) *AuthenticationCreate {
+	if v != nil {
+		_c.SetLogoutAt(*v)
 	}
 	return _c
 }
@@ -159,6 +175,16 @@ func (_c *AuthenticationCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Authentication.updated_at"`)}
 	}
+	if v, ok := _c.mutation.IP(); ok {
+		if err := authentication.IPValidator(v); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Authentication.ip": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.UserAgent(); ok {
+		if err := authentication.UserAgentValidator(v); err != nil {
+			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Authentication.user_agent": %w`, err)}
+		}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := authentication.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Authentication.id": %w`, err)}
@@ -214,17 +240,17 @@ func (_c *AuthenticationCreate) createSpec() (*Authentication, *sqlgraph.CreateS
 		_spec.SetField(authentication.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.Code(); ok {
-		_spec.SetField(authentication.FieldCode, field.TypeBytes, value)
-		_node.Code = value
+	if value, ok := _c.mutation.IP(); ok {
+		_spec.SetField(authentication.FieldIP, field.TypeString, value)
+		_node.IP = value
 	}
-	if value, ok := _c.mutation.Challenge(); ok {
-		_spec.SetField(authentication.FieldChallenge, field.TypeBytes, value)
-		_node.Challenge = value
+	if value, ok := _c.mutation.UserAgent(); ok {
+		_spec.SetField(authentication.FieldUserAgent, field.TypeString, value)
+		_node.UserAgent = value
 	}
-	if value, ok := _c.mutation.ExpireAt(); ok {
-		_spec.SetField(authentication.FieldExpireAt, field.TypeTime, value)
-		_node.ExpireAt = value
+	if value, ok := _c.mutation.LogoutAt(); ok {
+		_spec.SetField(authentication.FieldLogoutAt, field.TypeTime, value)
+		_node.LogoutAt = &value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -240,7 +266,7 @@ func (_c *AuthenticationCreate) createSpec() (*Authentication, *sqlgraph.CreateS
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_authentications = &nodes[0]
+		_node.user_sessions = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

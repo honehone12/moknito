@@ -23,11 +23,13 @@ type UserSys interface {
 }
 
 type userRegistration struct {
-	Name   string
-	Email  string
-	PwHash string
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	PwHash string `json:"pwhash"`
+	Error  int    `json:"error"`
 }
 
+const MAX_AUTHENTICATION_ERROR = 10
 const USER_REGISTRATION_KEY = "USERREG"
 
 func (s *EntRdsSys) RegisterUser(
@@ -56,6 +58,7 @@ func (s *EntRdsSys) RegisterUser(
 		Name:   name,
 		Email:  email,
 		PwHash: pwHash,
+		Error:  0,
 	}
 	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_KEY, email)
 	if err := s.redis.JSONSet(ctx, key, "$", register).Err(); err != nil {
@@ -84,11 +87,20 @@ func (s *EntRdsSys) ConfirmUser(
 		return nil, false, err
 	}
 
+	if register.Error > MAX_AUTHENTICATION_ERROR {
+		// freeze until purge
+		return nil, false, nil
+	}
+
 	ok, err := hash.Check(password, register.PwHash)
 	if err != nil {
 		return nil, false, err
 	}
 	if !ok {
+		if err := s.redis.JSONNumIncrBy(ctx, key, "$.error", 1).Err(); err != nil {
+			return nil, false, err
+		}
+
 		return nil, false, nil
 	}
 
@@ -97,6 +109,8 @@ func (s *EntRdsSys) ConfirmUser(
 		return nil, false, err
 	}
 
+	// this should be tx
+	// as we create login after
 	user, err := s.ent.User.Create().
 		SetID(id).
 		SetName(register.Name).

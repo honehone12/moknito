@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"moknito/ent/login"
+	"moknito/ent/application"
 	"moknito/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
@@ -12,26 +12,26 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// LoginDelete is the builder for deleting a Login entity.
-type LoginDelete struct {
+// ApplicationDelete is the builder for deleting a Application entity.
+type ApplicationDelete struct {
 	config
 	hooks    []Hook
-	mutation *LoginMutation
+	mutation *ApplicationMutation
 }
 
-// Where appends a list predicates to the LoginDelete builder.
-func (_d *LoginDelete) Where(ps ...predicate.Login) *LoginDelete {
+// Where appends a list predicates to the ApplicationDelete builder.
+func (_d *ApplicationDelete) Where(ps ...predicate.Application) *ApplicationDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *LoginDelete) Exec(ctx context.Context) (int, error) {
+func (_d *ApplicationDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *LoginDelete) ExecX(ctx context.Context) int {
+func (_d *ApplicationDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *LoginDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *LoginDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(login.Table, sqlgraph.NewFieldSpec(login.FieldID, field.TypeString))
+func (_d *ApplicationDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(application.Table, sqlgraph.NewFieldSpec(application.FieldID, field.TypeString))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *LoginDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// LoginDeleteOne is the builder for deleting a single Login entity.
-type LoginDeleteOne struct {
-	_d *LoginDelete
+// ApplicationDeleteOne is the builder for deleting a single Application entity.
+type ApplicationDeleteOne struct {
+	_d *ApplicationDelete
 }
 
-// Where appends a list predicates to the LoginDelete builder.
-func (_d *LoginDeleteOne) Where(ps ...predicate.Login) *LoginDeleteOne {
+// Where appends a list predicates to the ApplicationDelete builder.
+func (_d *ApplicationDeleteOne) Where(ps ...predicate.Application) *ApplicationDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *LoginDeleteOne) Exec(ctx context.Context) error {
+func (_d *ApplicationDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{login.Label}
+		return &NotFoundError{application.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *LoginDeleteOne) ExecX(ctx context.Context) {
+func (_d *ApplicationDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

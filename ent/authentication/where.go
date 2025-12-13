@@ -80,19 +80,19 @@ func DeletedAt(v time.Time) predicate.Authentication {
 	return predicate.Authentication(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
-func Code(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldEQ(FieldCode, v))
+// IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
+func IP(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEQ(FieldIP, v))
 }
 
-// Challenge applies equality check predicate on the "challenge" field. It's identical to ChallengeEQ.
-func Challenge(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldEQ(FieldChallenge, v))
+// UserAgent applies equality check predicate on the "user_agent" field. It's identical to UserAgentEQ.
+func UserAgent(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEQ(FieldUserAgent, v))
 }
 
-// ExpireAt applies equality check predicate on the "expire_at" field. It's identical to ExpireAtEQ.
-func ExpireAt(v time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldEQ(FieldExpireAt, v))
+// LogoutAt applies equality check predicate on the "logout_at" field. It's identical to LogoutAtEQ.
+func LogoutAt(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEQ(FieldLogoutAt, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -225,154 +225,204 @@ func DeletedAtNotNil() predicate.Authentication {
 	return predicate.Authentication(sql.FieldNotNull(FieldDeletedAt))
 }
 
-// CodeEQ applies the EQ predicate on the "code" field.
-func CodeEQ(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldEQ(FieldCode, v))
+// IPEQ applies the EQ predicate on the "ip" field.
+func IPEQ(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEQ(FieldIP, v))
 }
 
-// CodeNEQ applies the NEQ predicate on the "code" field.
-func CodeNEQ(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldNEQ(FieldCode, v))
+// IPNEQ applies the NEQ predicate on the "ip" field.
+func IPNEQ(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldNEQ(FieldIP, v))
 }
 
-// CodeIn applies the In predicate on the "code" field.
-func CodeIn(vs ...[]byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldIn(FieldCode, vs...))
+// IPIn applies the In predicate on the "ip" field.
+func IPIn(vs ...string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldIn(FieldIP, vs...))
 }
 
-// CodeNotIn applies the NotIn predicate on the "code" field.
-func CodeNotIn(vs ...[]byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldNotIn(FieldCode, vs...))
+// IPNotIn applies the NotIn predicate on the "ip" field.
+func IPNotIn(vs ...string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldNotIn(FieldIP, vs...))
 }
 
-// CodeGT applies the GT predicate on the "code" field.
-func CodeGT(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldGT(FieldCode, v))
+// IPGT applies the GT predicate on the "ip" field.
+func IPGT(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldGT(FieldIP, v))
 }
 
-// CodeGTE applies the GTE predicate on the "code" field.
-func CodeGTE(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldGTE(FieldCode, v))
+// IPGTE applies the GTE predicate on the "ip" field.
+func IPGTE(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldGTE(FieldIP, v))
 }
 
-// CodeLT applies the LT predicate on the "code" field.
-func CodeLT(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldLT(FieldCode, v))
+// IPLT applies the LT predicate on the "ip" field.
+func IPLT(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldLT(FieldIP, v))
 }
 
-// CodeLTE applies the LTE predicate on the "code" field.
-func CodeLTE(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldLTE(FieldCode, v))
+// IPLTE applies the LTE predicate on the "ip" field.
+func IPLTE(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldLTE(FieldIP, v))
 }
 
-// CodeIsNil applies the IsNil predicate on the "code" field.
-func CodeIsNil() predicate.Authentication {
-	return predicate.Authentication(sql.FieldIsNull(FieldCode))
+// IPContains applies the Contains predicate on the "ip" field.
+func IPContains(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldContains(FieldIP, v))
 }
 
-// CodeNotNil applies the NotNil predicate on the "code" field.
-func CodeNotNil() predicate.Authentication {
-	return predicate.Authentication(sql.FieldNotNull(FieldCode))
+// IPHasPrefix applies the HasPrefix predicate on the "ip" field.
+func IPHasPrefix(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldHasPrefix(FieldIP, v))
 }
 
-// ChallengeEQ applies the EQ predicate on the "challenge" field.
-func ChallengeEQ(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldEQ(FieldChallenge, v))
+// IPHasSuffix applies the HasSuffix predicate on the "ip" field.
+func IPHasSuffix(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldHasSuffix(FieldIP, v))
 }
 
-// ChallengeNEQ applies the NEQ predicate on the "challenge" field.
-func ChallengeNEQ(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldNEQ(FieldChallenge, v))
+// IPIsNil applies the IsNil predicate on the "ip" field.
+func IPIsNil() predicate.Authentication {
+	return predicate.Authentication(sql.FieldIsNull(FieldIP))
 }
 
-// ChallengeIn applies the In predicate on the "challenge" field.
-func ChallengeIn(vs ...[]byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldIn(FieldChallenge, vs...))
+// IPNotNil applies the NotNil predicate on the "ip" field.
+func IPNotNil() predicate.Authentication {
+	return predicate.Authentication(sql.FieldNotNull(FieldIP))
 }
 
-// ChallengeNotIn applies the NotIn predicate on the "challenge" field.
-func ChallengeNotIn(vs ...[]byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldNotIn(FieldChallenge, vs...))
+// IPEqualFold applies the EqualFold predicate on the "ip" field.
+func IPEqualFold(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEqualFold(FieldIP, v))
 }
 
-// ChallengeGT applies the GT predicate on the "challenge" field.
-func ChallengeGT(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldGT(FieldChallenge, v))
+// IPContainsFold applies the ContainsFold predicate on the "ip" field.
+func IPContainsFold(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldContainsFold(FieldIP, v))
 }
 
-// ChallengeGTE applies the GTE predicate on the "challenge" field.
-func ChallengeGTE(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldGTE(FieldChallenge, v))
+// UserAgentEQ applies the EQ predicate on the "user_agent" field.
+func UserAgentEQ(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEQ(FieldUserAgent, v))
 }
 
-// ChallengeLT applies the LT predicate on the "challenge" field.
-func ChallengeLT(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldLT(FieldChallenge, v))
+// UserAgentNEQ applies the NEQ predicate on the "user_agent" field.
+func UserAgentNEQ(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldNEQ(FieldUserAgent, v))
 }
 
-// ChallengeLTE applies the LTE predicate on the "challenge" field.
-func ChallengeLTE(v []byte) predicate.Authentication {
-	return predicate.Authentication(sql.FieldLTE(FieldChallenge, v))
+// UserAgentIn applies the In predicate on the "user_agent" field.
+func UserAgentIn(vs ...string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldIn(FieldUserAgent, vs...))
 }
 
-// ChallengeIsNil applies the IsNil predicate on the "challenge" field.
-func ChallengeIsNil() predicate.Authentication {
-	return predicate.Authentication(sql.FieldIsNull(FieldChallenge))
+// UserAgentNotIn applies the NotIn predicate on the "user_agent" field.
+func UserAgentNotIn(vs ...string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldNotIn(FieldUserAgent, vs...))
 }
 
-// ChallengeNotNil applies the NotNil predicate on the "challenge" field.
-func ChallengeNotNil() predicate.Authentication {
-	return predicate.Authentication(sql.FieldNotNull(FieldChallenge))
+// UserAgentGT applies the GT predicate on the "user_agent" field.
+func UserAgentGT(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldGT(FieldUserAgent, v))
 }
 
-// ExpireAtEQ applies the EQ predicate on the "expire_at" field.
-func ExpireAtEQ(v time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldEQ(FieldExpireAt, v))
+// UserAgentGTE applies the GTE predicate on the "user_agent" field.
+func UserAgentGTE(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldGTE(FieldUserAgent, v))
 }
 
-// ExpireAtNEQ applies the NEQ predicate on the "expire_at" field.
-func ExpireAtNEQ(v time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldNEQ(FieldExpireAt, v))
+// UserAgentLT applies the LT predicate on the "user_agent" field.
+func UserAgentLT(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldLT(FieldUserAgent, v))
 }
 
-// ExpireAtIn applies the In predicate on the "expire_at" field.
-func ExpireAtIn(vs ...time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldIn(FieldExpireAt, vs...))
+// UserAgentLTE applies the LTE predicate on the "user_agent" field.
+func UserAgentLTE(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldLTE(FieldUserAgent, v))
 }
 
-// ExpireAtNotIn applies the NotIn predicate on the "expire_at" field.
-func ExpireAtNotIn(vs ...time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldNotIn(FieldExpireAt, vs...))
+// UserAgentContains applies the Contains predicate on the "user_agent" field.
+func UserAgentContains(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldContains(FieldUserAgent, v))
 }
 
-// ExpireAtGT applies the GT predicate on the "expire_at" field.
-func ExpireAtGT(v time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldGT(FieldExpireAt, v))
+// UserAgentHasPrefix applies the HasPrefix predicate on the "user_agent" field.
+func UserAgentHasPrefix(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldHasPrefix(FieldUserAgent, v))
 }
 
-// ExpireAtGTE applies the GTE predicate on the "expire_at" field.
-func ExpireAtGTE(v time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldGTE(FieldExpireAt, v))
+// UserAgentHasSuffix applies the HasSuffix predicate on the "user_agent" field.
+func UserAgentHasSuffix(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldHasSuffix(FieldUserAgent, v))
 }
 
-// ExpireAtLT applies the LT predicate on the "expire_at" field.
-func ExpireAtLT(v time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldLT(FieldExpireAt, v))
+// UserAgentIsNil applies the IsNil predicate on the "user_agent" field.
+func UserAgentIsNil() predicate.Authentication {
+	return predicate.Authentication(sql.FieldIsNull(FieldUserAgent))
 }
 
-// ExpireAtLTE applies the LTE predicate on the "expire_at" field.
-func ExpireAtLTE(v time.Time) predicate.Authentication {
-	return predicate.Authentication(sql.FieldLTE(FieldExpireAt, v))
+// UserAgentNotNil applies the NotNil predicate on the "user_agent" field.
+func UserAgentNotNil() predicate.Authentication {
+	return predicate.Authentication(sql.FieldNotNull(FieldUserAgent))
 }
 
-// ExpireAtIsNil applies the IsNil predicate on the "expire_at" field.
-func ExpireAtIsNil() predicate.Authentication {
-	return predicate.Authentication(sql.FieldIsNull(FieldExpireAt))
+// UserAgentEqualFold applies the EqualFold predicate on the "user_agent" field.
+func UserAgentEqualFold(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEqualFold(FieldUserAgent, v))
 }
 
-// ExpireAtNotNil applies the NotNil predicate on the "expire_at" field.
-func ExpireAtNotNil() predicate.Authentication {
-	return predicate.Authentication(sql.FieldNotNull(FieldExpireAt))
+// UserAgentContainsFold applies the ContainsFold predicate on the "user_agent" field.
+func UserAgentContainsFold(v string) predicate.Authentication {
+	return predicate.Authentication(sql.FieldContainsFold(FieldUserAgent, v))
+}
+
+// LogoutAtEQ applies the EQ predicate on the "logout_at" field.
+func LogoutAtEQ(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEQ(FieldLogoutAt, v))
+}
+
+// LogoutAtNEQ applies the NEQ predicate on the "logout_at" field.
+func LogoutAtNEQ(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldNEQ(FieldLogoutAt, v))
+}
+
+// LogoutAtIn applies the In predicate on the "logout_at" field.
+func LogoutAtIn(vs ...time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldIn(FieldLogoutAt, vs...))
+}
+
+// LogoutAtNotIn applies the NotIn predicate on the "logout_at" field.
+func LogoutAtNotIn(vs ...time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldNotIn(FieldLogoutAt, vs...))
+}
+
+// LogoutAtGT applies the GT predicate on the "logout_at" field.
+func LogoutAtGT(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldGT(FieldLogoutAt, v))
+}
+
+// LogoutAtGTE applies the GTE predicate on the "logout_at" field.
+func LogoutAtGTE(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldGTE(FieldLogoutAt, v))
+}
+
+// LogoutAtLT applies the LT predicate on the "logout_at" field.
+func LogoutAtLT(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldLT(FieldLogoutAt, v))
+}
+
+// LogoutAtLTE applies the LTE predicate on the "logout_at" field.
+func LogoutAtLTE(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldLTE(FieldLogoutAt, v))
+}
+
+// LogoutAtIsNil applies the IsNil predicate on the "logout_at" field.
+func LogoutAtIsNil() predicate.Authentication {
+	return predicate.Authentication(sql.FieldIsNull(FieldLogoutAt))
+}
+
+// LogoutAtNotNil applies the NotNil predicate on the "logout_at" field.
+func LogoutAtNotNil() predicate.Authentication {
+	return predicate.Authentication(sql.FieldNotNull(FieldLogoutAt))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

@@ -13,6 +13,11 @@ type userRegisterRequest struct {
 	Password string `form:"password" validate:"min=8,max=128"`
 }
 
+type userAuthenticationRequest struct {
+	Email    string `form:"email" validate:"email,max=128"`
+	Password string `form:"password" validate:"min=8,max=128"`
+}
+
 type userConfirmResponse struct {
 	Name string `json:"name"`
 }
@@ -50,7 +55,7 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 }
 
 func (m *Moknito) UserConfirm(ctx echo.Context) error {
-	form := authenticationLoginRequest{}
+	form := userAuthenticationRequest{}
 
 	if err := ctx.Bind(&form); err != nil {
 		ctx.Logger().Warn(err)

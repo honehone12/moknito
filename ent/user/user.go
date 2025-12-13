@@ -28,6 +28,8 @@ const (
 	FieldPwhash = "pwhash"
 	// FieldError holds the string denoting the error field in the database.
 	FieldError = "error"
+	// FieldLockedUntil holds the string denoting the locked_until field in the database.
+	FieldLockedUntil = "locked_until"
 	// EdgeAuthentications holds the string denoting the authentications edge name in mutations.
 	EdgeAuthentications = "authentications"
 	// EdgeAuthorizations holds the string denoting the authorizations edge name in mutations.
@@ -37,24 +39,24 @@ const (
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// AuthenticationsTable is the table that holds the authentications relation/edge.
-	AuthenticationsTable = "authentications"
-	// AuthenticationsInverseTable is the table name for the Authentication entity.
-	// It exists in this package in order to avoid circular dependency with the "authentication" package.
-	AuthenticationsInverseTable = "authentications"
+	AuthenticationsTable = "authorizations"
+	// AuthenticationsInverseTable is the table name for the Authorization entity.
+	// It exists in this package in order to avoid circular dependency with the "authorization" package.
+	AuthenticationsInverseTable = "authorizations"
 	// AuthenticationsColumn is the table column denoting the authentications relation/edge.
 	AuthenticationsColumn = "user_authentications"
 	// AuthorizationsTable is the table that holds the authorizations relation/edge.
-	AuthorizationsTable = "authorizations"
-	// AuthorizationsInverseTable is the table name for the Authorization entity.
-	// It exists in this package in order to avoid circular dependency with the "authorization" package.
-	AuthorizationsInverseTable = "authorizations"
+	AuthorizationsTable = "applications"
+	// AuthorizationsInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	AuthorizationsInverseTable = "applications"
 	// AuthorizationsColumn is the table column denoting the authorizations relation/edge.
 	AuthorizationsColumn = "user_authorizations"
 	// SessionsTable is the table that holds the sessions relation/edge.
-	SessionsTable = "logins"
-	// SessionsInverseTable is the table name for the Login entity.
-	// It exists in this package in order to avoid circular dependency with the "login" package.
-	SessionsInverseTable = "logins"
+	SessionsTable = "authentications"
+	// SessionsInverseTable is the table name for the Authentication entity.
+	// It exists in this package in order to avoid circular dependency with the "authentication" package.
+	SessionsInverseTable = "authentications"
 	// SessionsColumn is the table column denoting the sessions relation/edge.
 	SessionsColumn = "user_sessions"
 )
@@ -69,6 +71,7 @@ var Columns = []string{
 	FieldEmail,
 	FieldPwhash,
 	FieldError,
+	FieldLockedUntil,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -143,6 +146,11 @@ func ByPwhash(opts ...sql.OrderTermOption) OrderOption {
 // ByError orders the results by the error field.
 func ByError(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldError, opts...).ToFunc()
+}
+
+// ByLockedUntil orders the results by the locked_until field.
+func ByLockedUntil(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLockedUntil, opts...).ToFunc()
 }
 
 // ByAuthenticationsCount orders the results by authentications count.

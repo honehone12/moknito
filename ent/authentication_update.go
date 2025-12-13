@@ -55,27 +55,63 @@ func (_u *AuthenticationUpdate) ClearDeletedAt() *AuthenticationUpdate {
 	return _u
 }
 
-// SetCode sets the "code" field.
-func (_u *AuthenticationUpdate) SetCode(v []byte) *AuthenticationUpdate {
-	_u.mutation.SetCode(v)
+// SetIP sets the "ip" field.
+func (_u *AuthenticationUpdate) SetIP(v string) *AuthenticationUpdate {
+	_u.mutation.SetIP(v)
 	return _u
 }
 
-// ClearCode clears the value of the "code" field.
-func (_u *AuthenticationUpdate) ClearCode() *AuthenticationUpdate {
-	_u.mutation.ClearCode()
+// SetNillableIP sets the "ip" field if the given value is not nil.
+func (_u *AuthenticationUpdate) SetNillableIP(v *string) *AuthenticationUpdate {
+	if v != nil {
+		_u.SetIP(*v)
+	}
 	return _u
 }
 
-// SetChallenge sets the "challenge" field.
-func (_u *AuthenticationUpdate) SetChallenge(v []byte) *AuthenticationUpdate {
-	_u.mutation.SetChallenge(v)
+// ClearIP clears the value of the "ip" field.
+func (_u *AuthenticationUpdate) ClearIP() *AuthenticationUpdate {
+	_u.mutation.ClearIP()
 	return _u
 }
 
-// ClearChallenge clears the value of the "challenge" field.
-func (_u *AuthenticationUpdate) ClearChallenge() *AuthenticationUpdate {
-	_u.mutation.ClearChallenge()
+// SetUserAgent sets the "user_agent" field.
+func (_u *AuthenticationUpdate) SetUserAgent(v string) *AuthenticationUpdate {
+	_u.mutation.SetUserAgent(v)
+	return _u
+}
+
+// SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
+func (_u *AuthenticationUpdate) SetNillableUserAgent(v *string) *AuthenticationUpdate {
+	if v != nil {
+		_u.SetUserAgent(*v)
+	}
+	return _u
+}
+
+// ClearUserAgent clears the value of the "user_agent" field.
+func (_u *AuthenticationUpdate) ClearUserAgent() *AuthenticationUpdate {
+	_u.mutation.ClearUserAgent()
+	return _u
+}
+
+// SetLogoutAt sets the "logout_at" field.
+func (_u *AuthenticationUpdate) SetLogoutAt(v time.Time) *AuthenticationUpdate {
+	_u.mutation.SetLogoutAt(v)
+	return _u
+}
+
+// SetNillableLogoutAt sets the "logout_at" field if the given value is not nil.
+func (_u *AuthenticationUpdate) SetNillableLogoutAt(v *time.Time) *AuthenticationUpdate {
+	if v != nil {
+		_u.SetLogoutAt(*v)
+	}
+	return _u
+}
+
+// ClearLogoutAt clears the value of the "logout_at" field.
+func (_u *AuthenticationUpdate) ClearLogoutAt() *AuthenticationUpdate {
+	_u.mutation.ClearLogoutAt()
 	return _u
 }
 
@@ -139,6 +175,16 @@ func (_u *AuthenticationUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *AuthenticationUpdate) check() error {
+	if v, ok := _u.mutation.IP(); ok {
+		if err := authentication.IPValidator(v); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Authentication.ip": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.UserAgent(); ok {
+		if err := authentication.UserAgentValidator(v); err != nil {
+			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Authentication.user_agent": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Authentication.user"`)
 	}
@@ -166,20 +212,23 @@ func (_u *AuthenticationUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authentication.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(authentication.FieldCode, field.TypeBytes, value)
+	if value, ok := _u.mutation.IP(); ok {
+		_spec.SetField(authentication.FieldIP, field.TypeString, value)
 	}
-	if _u.mutation.CodeCleared() {
-		_spec.ClearField(authentication.FieldCode, field.TypeBytes)
+	if _u.mutation.IPCleared() {
+		_spec.ClearField(authentication.FieldIP, field.TypeString)
 	}
-	if value, ok := _u.mutation.Challenge(); ok {
-		_spec.SetField(authentication.FieldChallenge, field.TypeBytes, value)
+	if value, ok := _u.mutation.UserAgent(); ok {
+		_spec.SetField(authentication.FieldUserAgent, field.TypeString, value)
 	}
-	if _u.mutation.ChallengeCleared() {
-		_spec.ClearField(authentication.FieldChallenge, field.TypeBytes)
+	if _u.mutation.UserAgentCleared() {
+		_spec.ClearField(authentication.FieldUserAgent, field.TypeString)
 	}
-	if _u.mutation.ExpireAtCleared() {
-		_spec.ClearField(authentication.FieldExpireAt, field.TypeTime)
+	if value, ok := _u.mutation.LogoutAt(); ok {
+		_spec.SetField(authentication.FieldLogoutAt, field.TypeTime, value)
+	}
+	if _u.mutation.LogoutAtCleared() {
+		_spec.ClearField(authentication.FieldLogoutAt, field.TypeTime)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -256,27 +305,63 @@ func (_u *AuthenticationUpdateOne) ClearDeletedAt() *AuthenticationUpdateOne {
 	return _u
 }
 
-// SetCode sets the "code" field.
-func (_u *AuthenticationUpdateOne) SetCode(v []byte) *AuthenticationUpdateOne {
-	_u.mutation.SetCode(v)
+// SetIP sets the "ip" field.
+func (_u *AuthenticationUpdateOne) SetIP(v string) *AuthenticationUpdateOne {
+	_u.mutation.SetIP(v)
 	return _u
 }
 
-// ClearCode clears the value of the "code" field.
-func (_u *AuthenticationUpdateOne) ClearCode() *AuthenticationUpdateOne {
-	_u.mutation.ClearCode()
+// SetNillableIP sets the "ip" field if the given value is not nil.
+func (_u *AuthenticationUpdateOne) SetNillableIP(v *string) *AuthenticationUpdateOne {
+	if v != nil {
+		_u.SetIP(*v)
+	}
 	return _u
 }
 
-// SetChallenge sets the "challenge" field.
-func (_u *AuthenticationUpdateOne) SetChallenge(v []byte) *AuthenticationUpdateOne {
-	_u.mutation.SetChallenge(v)
+// ClearIP clears the value of the "ip" field.
+func (_u *AuthenticationUpdateOne) ClearIP() *AuthenticationUpdateOne {
+	_u.mutation.ClearIP()
 	return _u
 }
 
-// ClearChallenge clears the value of the "challenge" field.
-func (_u *AuthenticationUpdateOne) ClearChallenge() *AuthenticationUpdateOne {
-	_u.mutation.ClearChallenge()
+// SetUserAgent sets the "user_agent" field.
+func (_u *AuthenticationUpdateOne) SetUserAgent(v string) *AuthenticationUpdateOne {
+	_u.mutation.SetUserAgent(v)
+	return _u
+}
+
+// SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
+func (_u *AuthenticationUpdateOne) SetNillableUserAgent(v *string) *AuthenticationUpdateOne {
+	if v != nil {
+		_u.SetUserAgent(*v)
+	}
+	return _u
+}
+
+// ClearUserAgent clears the value of the "user_agent" field.
+func (_u *AuthenticationUpdateOne) ClearUserAgent() *AuthenticationUpdateOne {
+	_u.mutation.ClearUserAgent()
+	return _u
+}
+
+// SetLogoutAt sets the "logout_at" field.
+func (_u *AuthenticationUpdateOne) SetLogoutAt(v time.Time) *AuthenticationUpdateOne {
+	_u.mutation.SetLogoutAt(v)
+	return _u
+}
+
+// SetNillableLogoutAt sets the "logout_at" field if the given value is not nil.
+func (_u *AuthenticationUpdateOne) SetNillableLogoutAt(v *time.Time) *AuthenticationUpdateOne {
+	if v != nil {
+		_u.SetLogoutAt(*v)
+	}
+	return _u
+}
+
+// ClearLogoutAt clears the value of the "logout_at" field.
+func (_u *AuthenticationUpdateOne) ClearLogoutAt() *AuthenticationUpdateOne {
+	_u.mutation.ClearLogoutAt()
 	return _u
 }
 
@@ -353,6 +438,16 @@ func (_u *AuthenticationUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *AuthenticationUpdateOne) check() error {
+	if v, ok := _u.mutation.IP(); ok {
+		if err := authentication.IPValidator(v); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "Authentication.ip": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.UserAgent(); ok {
+		if err := authentication.UserAgentValidator(v); err != nil {
+			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Authentication.user_agent": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Authentication.user"`)
 	}
@@ -397,20 +492,23 @@ func (_u *AuthenticationUpdateOne) sqlSave(ctx context.Context) (_node *Authenti
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authentication.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(authentication.FieldCode, field.TypeBytes, value)
+	if value, ok := _u.mutation.IP(); ok {
+		_spec.SetField(authentication.FieldIP, field.TypeString, value)
 	}
-	if _u.mutation.CodeCleared() {
-		_spec.ClearField(authentication.FieldCode, field.TypeBytes)
+	if _u.mutation.IPCleared() {
+		_spec.ClearField(authentication.FieldIP, field.TypeString)
 	}
-	if value, ok := _u.mutation.Challenge(); ok {
-		_spec.SetField(authentication.FieldChallenge, field.TypeBytes, value)
+	if value, ok := _u.mutation.UserAgent(); ok {
+		_spec.SetField(authentication.FieldUserAgent, field.TypeString, value)
 	}
-	if _u.mutation.ChallengeCleared() {
-		_spec.ClearField(authentication.FieldChallenge, field.TypeBytes)
+	if _u.mutation.UserAgentCleared() {
+		_spec.ClearField(authentication.FieldUserAgent, field.TypeString)
 	}
-	if _u.mutation.ExpireAtCleared() {
-		_spec.ClearField(authentication.FieldExpireAt, field.TypeTime)
+	if value, ok := _u.mutation.LogoutAt(); ok {
+		_spec.SetField(authentication.FieldLogoutAt, field.TypeTime, value)
+	}
+	if _u.mutation.LogoutAtCleared() {
+		_spec.ClearField(authentication.FieldLogoutAt, field.TypeTime)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

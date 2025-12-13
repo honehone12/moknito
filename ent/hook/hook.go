@@ -8,6 +8,18 @@ import (
 	"moknito/ent"
 )
 
+// The ApplicationFunc type is an adapter to allow the use of ordinary
+// function as Application mutator.
+type ApplicationFunc func(context.Context, *ent.ApplicationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ApplicationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ApplicationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ApplicationMutation", m)
+}
+
 // The AuthenticationFunc type is an adapter to allow the use of ordinary
 // function as Authentication mutator.
 type AuthenticationFunc func(context.Context, *ent.AuthenticationMutation) (ent.Value, error)
@@ -30,18 +42,6 @@ func (f AuthorizationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuthorizationMutation", m)
-}
-
-// The LoginFunc type is an adapter to allow the use of ordinary
-// function as Login mutator.
-type LoginFunc func(context.Context, *ent.LoginMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f LoginFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.LoginMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LoginMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

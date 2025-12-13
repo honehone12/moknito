@@ -55,6 +55,30 @@ func (_u *AuthorizationUpdate) ClearDeletedAt() *AuthorizationUpdate {
 	return _u
 }
 
+// SetCode sets the "code" field.
+func (_u *AuthorizationUpdate) SetCode(v []byte) *AuthorizationUpdate {
+	_u.mutation.SetCode(v)
+	return _u
+}
+
+// ClearCode clears the value of the "code" field.
+func (_u *AuthorizationUpdate) ClearCode() *AuthorizationUpdate {
+	_u.mutation.ClearCode()
+	return _u
+}
+
+// SetChallenge sets the "challenge" field.
+func (_u *AuthorizationUpdate) SetChallenge(v []byte) *AuthorizationUpdate {
+	_u.mutation.SetChallenge(v)
+	return _u
+}
+
+// ClearChallenge clears the value of the "challenge" field.
+func (_u *AuthorizationUpdate) ClearChallenge() *AuthorizationUpdate {
+	_u.mutation.ClearChallenge()
+	return _u
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *AuthorizationUpdate) SetUserID(id string) *AuthorizationUpdate {
 	_u.mutation.SetUserID(id)
@@ -142,6 +166,21 @@ func (_u *AuthorizationUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authorization.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(authorization.FieldCode, field.TypeBytes, value)
+	}
+	if _u.mutation.CodeCleared() {
+		_spec.ClearField(authorization.FieldCode, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.Challenge(); ok {
+		_spec.SetField(authorization.FieldChallenge, field.TypeBytes, value)
+	}
+	if _u.mutation.ChallengeCleared() {
+		_spec.ClearField(authorization.FieldChallenge, field.TypeBytes)
+	}
+	if _u.mutation.ExpireAtCleared() {
+		_spec.ClearField(authorization.FieldExpireAt, field.TypeTime)
+	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -214,6 +253,30 @@ func (_u *AuthorizationUpdateOne) SetNillableDeletedAt(v *time.Time) *Authorizat
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (_u *AuthorizationUpdateOne) ClearDeletedAt() *AuthorizationUpdateOne {
 	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetCode sets the "code" field.
+func (_u *AuthorizationUpdateOne) SetCode(v []byte) *AuthorizationUpdateOne {
+	_u.mutation.SetCode(v)
+	return _u
+}
+
+// ClearCode clears the value of the "code" field.
+func (_u *AuthorizationUpdateOne) ClearCode() *AuthorizationUpdateOne {
+	_u.mutation.ClearCode()
+	return _u
+}
+
+// SetChallenge sets the "challenge" field.
+func (_u *AuthorizationUpdateOne) SetChallenge(v []byte) *AuthorizationUpdateOne {
+	_u.mutation.SetChallenge(v)
+	return _u
+}
+
+// ClearChallenge clears the value of the "challenge" field.
+func (_u *AuthorizationUpdateOne) ClearChallenge() *AuthorizationUpdateOne {
+	_u.mutation.ClearChallenge()
 	return _u
 }
 
@@ -333,6 +396,21 @@ func (_u *AuthorizationUpdateOne) sqlSave(ctx context.Context) (_node *Authoriza
 	}
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authorization.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.Code(); ok {
+		_spec.SetField(authorization.FieldCode, field.TypeBytes, value)
+	}
+	if _u.mutation.CodeCleared() {
+		_spec.ClearField(authorization.FieldCode, field.TypeBytes)
+	}
+	if value, ok := _u.mutation.Challenge(); ok {
+		_spec.SetField(authorization.FieldChallenge, field.TypeBytes, value)
+	}
+	if _u.mutation.ChallengeCleared() {
+		_spec.ClearField(authorization.FieldChallenge, field.TypeBytes)
+	}
+	if _u.mutation.ExpireAtCleared() {
+		_spec.ClearField(authorization.FieldExpireAt, field.TypeTime)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -12,7 +12,7 @@ type Authorization struct {
 	ent.Schema
 }
 
-// Fields of the Authorization.
+// Fields of the Authentication.
 func (Authorization) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
@@ -20,23 +20,23 @@ func (Authorization) Fields() []ent.Field {
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.String("application").
-			NotEmpty().
-			Immutable(),
-		field.String("domain").
-			NotEmpty().
-			Immutable(),
-		field.String("client_id").
-			NotEmpty().
+		field.Bytes("code").
+			Optional().
+			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
+		field.Bytes("challenge").
+			Optional().
+			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
+		field.Time("expire_at").
+			Optional().
 			Immutable(),
 	}
 }
 
-// Edges of the Authorization.
+// Edges of the Authentication.
 func (Authorization) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
-			Ref("authorizations").
+			Ref("authentications").
 			Required().
 			Unique(),
 	}

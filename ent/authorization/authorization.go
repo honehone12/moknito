@@ -20,12 +20,12 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldApplication holds the string denoting the application field in the database.
-	FieldApplication = "application"
-	// FieldDomain holds the string denoting the domain field in the database.
-	FieldDomain = "domain"
-	// FieldClientID holds the string denoting the client_id field in the database.
-	FieldClientID = "client_id"
+	// FieldCode holds the string denoting the code field in the database.
+	FieldCode = "code"
+	// FieldChallenge holds the string denoting the challenge field in the database.
+	FieldChallenge = "challenge"
+	// FieldExpireAt holds the string denoting the expire_at field in the database.
+	FieldExpireAt = "expire_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the authorization in the database.
@@ -36,7 +36,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_authorizations"
+	UserColumn = "user_authentications"
 )
 
 // Columns holds all SQL columns for authorization fields.
@@ -45,15 +45,15 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
-	FieldApplication,
-	FieldDomain,
-	FieldClientID,
+	FieldCode,
+	FieldChallenge,
+	FieldExpireAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "authorizations"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"user_authorizations",
+	"user_authentications",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -78,12 +78,6 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// ApplicationValidator is a validator for the "application" field. It is called by the builders before save.
-	ApplicationValidator func(string) error
-	// DomainValidator is a validator for the "domain" field. It is called by the builders before save.
-	DomainValidator func(string) error
-	// ClientIDValidator is a validator for the "client_id" field. It is called by the builders before save.
-	ClientIDValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -111,19 +105,9 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
-// ByApplication orders the results by the application field.
-func ByApplication(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldApplication, opts...).ToFunc()
-}
-
-// ByDomain orders the results by the domain field.
-func ByDomain(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDomain, opts...).ToFunc()
-}
-
-// ByClientID orders the results by the client_id field.
-func ByClientID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldClientID, opts...).ToFunc()
+// ByExpireAt orders the results by the expire_at field.
+func ByExpireAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpireAt, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

@@ -63,21 +63,29 @@ func (_c *AuthorizationCreate) SetNillableDeletedAt(v *time.Time) *Authorization
 	return _c
 }
 
-// SetApplication sets the "application" field.
-func (_c *AuthorizationCreate) SetApplication(v string) *AuthorizationCreate {
-	_c.mutation.SetApplication(v)
+// SetCode sets the "code" field.
+func (_c *AuthorizationCreate) SetCode(v []byte) *AuthorizationCreate {
+	_c.mutation.SetCode(v)
 	return _c
 }
 
-// SetDomain sets the "domain" field.
-func (_c *AuthorizationCreate) SetDomain(v string) *AuthorizationCreate {
-	_c.mutation.SetDomain(v)
+// SetChallenge sets the "challenge" field.
+func (_c *AuthorizationCreate) SetChallenge(v []byte) *AuthorizationCreate {
+	_c.mutation.SetChallenge(v)
 	return _c
 }
 
-// SetClientID sets the "client_id" field.
-func (_c *AuthorizationCreate) SetClientID(v string) *AuthorizationCreate {
-	_c.mutation.SetClientID(v)
+// SetExpireAt sets the "expire_at" field.
+func (_c *AuthorizationCreate) SetExpireAt(v time.Time) *AuthorizationCreate {
+	_c.mutation.SetExpireAt(v)
+	return _c
+}
+
+// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
+func (_c *AuthorizationCreate) SetNillableExpireAt(v *time.Time) *AuthorizationCreate {
+	if v != nil {
+		_c.SetExpireAt(*v)
+	}
 	return _c
 }
 
@@ -151,30 +159,6 @@ func (_c *AuthorizationCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Authorization.updated_at"`)}
 	}
-	if _, ok := _c.mutation.Application(); !ok {
-		return &ValidationError{Name: "application", err: errors.New(`ent: missing required field "Authorization.application"`)}
-	}
-	if v, ok := _c.mutation.Application(); ok {
-		if err := authorization.ApplicationValidator(v); err != nil {
-			return &ValidationError{Name: "application", err: fmt.Errorf(`ent: validator failed for field "Authorization.application": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Domain(); !ok {
-		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "Authorization.domain"`)}
-	}
-	if v, ok := _c.mutation.Domain(); ok {
-		if err := authorization.DomainValidator(v); err != nil {
-			return &ValidationError{Name: "domain", err: fmt.Errorf(`ent: validator failed for field "Authorization.domain": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.ClientID(); !ok {
-		return &ValidationError{Name: "client_id", err: errors.New(`ent: missing required field "Authorization.client_id"`)}
-	}
-	if v, ok := _c.mutation.ClientID(); ok {
-		if err := authorization.ClientIDValidator(v); err != nil {
-			return &ValidationError{Name: "client_id", err: fmt.Errorf(`ent: validator failed for field "Authorization.client_id": %w`, err)}
-		}
-	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := authorization.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Authorization.id": %w`, err)}
@@ -230,17 +214,17 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 		_spec.SetField(authorization.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.Application(); ok {
-		_spec.SetField(authorization.FieldApplication, field.TypeString, value)
-		_node.Application = value
+	if value, ok := _c.mutation.Code(); ok {
+		_spec.SetField(authorization.FieldCode, field.TypeBytes, value)
+		_node.Code = value
 	}
-	if value, ok := _c.mutation.Domain(); ok {
-		_spec.SetField(authorization.FieldDomain, field.TypeString, value)
-		_node.Domain = value
+	if value, ok := _c.mutation.Challenge(); ok {
+		_spec.SetField(authorization.FieldChallenge, field.TypeBytes, value)
+		_node.Challenge = value
 	}
-	if value, ok := _c.mutation.ClientID(); ok {
-		_spec.SetField(authorization.FieldClientID, field.TypeString, value)
-		_node.ClientID = value
+	if value, ok := _c.mutation.ExpireAt(); ok {
+		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
+		_node.ExpireAt = value
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -256,7 +240,7 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_authorizations = &nodes[0]
+		_node.user_authentications = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -24,17 +24,17 @@ type Authorization struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// Application holds the value of the "application" field.
-	Application string `json:"application,omitempty"`
-	// Domain holds the value of the "domain" field.
-	Domain string `json:"domain,omitempty"`
-	// ClientID holds the value of the "client_id" field.
-	ClientID string `json:"client_id,omitempty"`
+	// Code holds the value of the "code" field.
+	Code []byte `json:"code,omitempty"`
+	// Challenge holds the value of the "challenge" field.
+	Challenge []byte `json:"challenge,omitempty"`
+	// ExpireAt holds the value of the "expire_at" field.
+	ExpireAt time.Time `json:"expire_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthorizationQuery when eager-loading is set.
-	Edges               AuthorizationEdges `json:"edges"`
-	user_authorizations *string
-	selectValues        sql.SelectValues
+	Edges                AuthorizationEdges `json:"edges"`
+	user_authentications *string
+	selectValues         sql.SelectValues
 }
 
 // AuthorizationEdges holds the relations/edges for other nodes in the graph.
@@ -62,11 +62,13 @@ func (*Authorization) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case authorization.FieldID, authorization.FieldApplication, authorization.FieldDomain, authorization.FieldClientID:
+		case authorization.FieldCode, authorization.FieldChallenge:
+			values[i] = new([]byte)
+		case authorization.FieldID:
 			values[i] = new(sql.NullString)
-		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt:
+		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldExpireAt:
 			values[i] = new(sql.NullTime)
-		case authorization.ForeignKeys[0]: // user_authorizations
+		case authorization.ForeignKeys[0]: // user_authentications
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -108,30 +110,30 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case authorization.FieldApplication:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field application", values[i])
-			} else if value.Valid {
-				_m.Application = value.String
+		case authorization.FieldCode:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field code", values[i])
+			} else if value != nil {
+				_m.Code = *value
 			}
-		case authorization.FieldDomain:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field domain", values[i])
-			} else if value.Valid {
-				_m.Domain = value.String
+		case authorization.FieldChallenge:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field challenge", values[i])
+			} else if value != nil {
+				_m.Challenge = *value
 			}
-		case authorization.FieldClientID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field client_id", values[i])
+		case authorization.FieldExpireAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expire_at", values[i])
 			} else if value.Valid {
-				_m.ClientID = value.String
+				_m.ExpireAt = value.Time
 			}
 		case authorization.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_authorizations", values[i])
+				return fmt.Errorf("unexpected type %T for field user_authentications", values[i])
 			} else if value.Valid {
-				_m.user_authorizations = new(string)
-				*_m.user_authorizations = value.String
+				_m.user_authentications = new(string)
+				*_m.user_authentications = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -185,14 +187,14 @@ func (_m *Authorization) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("application=")
-	builder.WriteString(_m.Application)
+	builder.WriteString("code=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Code))
 	builder.WriteString(", ")
-	builder.WriteString("domain=")
-	builder.WriteString(_m.Domain)
+	builder.WriteString("challenge=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Challenge))
 	builder.WriteString(", ")
-	builder.WriteString("client_id=")
-	builder.WriteString(_m.ClientID)
+	builder.WriteString("expire_at=")
+	builder.WriteString(_m.ExpireAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
-	"moknito/ent/login"
 	"moknito/ent/user"
 	"time"
 
@@ -97,20 +97,34 @@ func (_c *UserCreate) SetNillableError(v *int) *UserCreate {
 	return _c
 }
 
+// SetLockedUntil sets the "locked_until" field.
+func (_c *UserCreate) SetLockedUntil(v time.Time) *UserCreate {
+	_c.mutation.SetLockedUntil(v)
+	return _c
+}
+
+// SetNillableLockedUntil sets the "locked_until" field if the given value is not nil.
+func (_c *UserCreate) SetNillableLockedUntil(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetLockedUntil(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *UserCreate) SetID(v string) *UserCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
-// AddAuthenticationIDs adds the "authentications" edge to the Authentication entity by IDs.
+// AddAuthenticationIDs adds the "authentications" edge to the Authorization entity by IDs.
 func (_c *UserCreate) AddAuthenticationIDs(ids ...string) *UserCreate {
 	_c.mutation.AddAuthenticationIDs(ids...)
 	return _c
 }
 
-// AddAuthentications adds the "authentications" edges to the Authentication entity.
-func (_c *UserCreate) AddAuthentications(v ...*Authentication) *UserCreate {
+// AddAuthentications adds the "authentications" edges to the Authorization entity.
+func (_c *UserCreate) AddAuthentications(v ...*Authorization) *UserCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -118,14 +132,14 @@ func (_c *UserCreate) AddAuthentications(v ...*Authentication) *UserCreate {
 	return _c.AddAuthenticationIDs(ids...)
 }
 
-// AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by IDs.
+// AddAuthorizationIDs adds the "authorizations" edge to the Application entity by IDs.
 func (_c *UserCreate) AddAuthorizationIDs(ids ...string) *UserCreate {
 	_c.mutation.AddAuthorizationIDs(ids...)
 	return _c
 }
 
-// AddAuthorizations adds the "authorizations" edges to the Authorization entity.
-func (_c *UserCreate) AddAuthorizations(v ...*Authorization) *UserCreate {
+// AddAuthorizations adds the "authorizations" edges to the Application entity.
+func (_c *UserCreate) AddAuthorizations(v ...*Application) *UserCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -133,14 +147,14 @@ func (_c *UserCreate) AddAuthorizations(v ...*Authorization) *UserCreate {
 	return _c.AddAuthorizationIDs(ids...)
 }
 
-// AddSessionIDs adds the "sessions" edge to the Login entity by IDs.
+// AddSessionIDs adds the "sessions" edge to the Authentication entity by IDs.
 func (_c *UserCreate) AddSessionIDs(ids ...string) *UserCreate {
 	_c.mutation.AddSessionIDs(ids...)
 	return _c
 }
 
-// AddSessions adds the "sessions" edges to the Login entity.
-func (_c *UserCreate) AddSessions(v ...*Login) *UserCreate {
+// AddSessions adds the "sessions" edges to the Authentication entity.
+func (_c *UserCreate) AddSessions(v ...*Authentication) *UserCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -305,6 +319,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldError, field.TypeInt, value)
 		_node.Error = value
 	}
+	if value, ok := _c.mutation.LockedUntil(); ok {
+		_spec.SetField(user.FieldLockedUntil, field.TypeTime, value)
+		_node.LockedUntil = &value
+	}
 	if nodes := _c.mutation.AuthenticationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -313,7 +331,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -329,7 +347,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -345,7 +363,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(login.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

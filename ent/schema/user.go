@@ -34,15 +34,18 @@ func (User) Fields() []ent.Field {
 		field.Int("error").
 			NonNegative().
 			Default(0),
+		field.Time("locked_until").
+			Nillable().
+			Optional(),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("authentications", Authentication.Type),
-		edge.To("authorizations", Authorization.Type),
-		edge.To("sessions", Login.Type),
+		edge.To("authentications", Authorization.Type),
+		edge.To("authorizations", Application.Type),
+		edge.To("sessions", Authentication.Type),
 	}
 }
 

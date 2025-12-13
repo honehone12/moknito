@@ -24,17 +24,17 @@ type Authentication struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// Code holds the value of the "code" field.
-	Code []byte `json:"code,omitempty"`
-	// Challenge holds the value of the "challenge" field.
-	Challenge []byte `json:"challenge,omitempty"`
-	// ExpireAt holds the value of the "expire_at" field.
-	ExpireAt time.Time `json:"expire_at,omitempty"`
+	// IP holds the value of the "ip" field.
+	IP string `json:"ip,omitempty"`
+	// UserAgent holds the value of the "user_agent" field.
+	UserAgent string `json:"user_agent,omitempty"`
+	// LogoutAt holds the value of the "logout_at" field.
+	LogoutAt *time.Time `json:"logout_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthenticationQuery when eager-loading is set.
-	Edges                AuthenticationEdges `json:"edges"`
-	user_authentications *string
-	selectValues         sql.SelectValues
+	Edges         AuthenticationEdges `json:"edges"`
+	user_sessions *string
+	selectValues  sql.SelectValues
 }
 
 // AuthenticationEdges holds the relations/edges for other nodes in the graph.
@@ -62,13 +62,11 @@ func (*Authentication) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case authentication.FieldCode, authentication.FieldChallenge:
-			values[i] = new([]byte)
-		case authentication.FieldID:
+		case authentication.FieldID, authentication.FieldIP, authentication.FieldUserAgent:
 			values[i] = new(sql.NullString)
-		case authentication.FieldCreatedAt, authentication.FieldUpdatedAt, authentication.FieldDeletedAt, authentication.FieldExpireAt:
+		case authentication.FieldCreatedAt, authentication.FieldUpdatedAt, authentication.FieldDeletedAt, authentication.FieldLogoutAt:
 			values[i] = new(sql.NullTime)
-		case authentication.ForeignKeys[0]: // user_authentications
+		case authentication.ForeignKeys[0]: // user_sessions
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -110,30 +108,31 @@ func (_m *Authentication) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case authentication.FieldCode:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field code", values[i])
-			} else if value != nil {
-				_m.Code = *value
-			}
-		case authentication.FieldChallenge:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field challenge", values[i])
-			} else if value != nil {
-				_m.Challenge = *value
-			}
-		case authentication.FieldExpireAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field expire_at", values[i])
+		case authentication.FieldIP:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ip", values[i])
 			} else if value.Valid {
-				_m.ExpireAt = value.Time
+				_m.IP = value.String
+			}
+		case authentication.FieldUserAgent:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field user_agent", values[i])
+			} else if value.Valid {
+				_m.UserAgent = value.String
+			}
+		case authentication.FieldLogoutAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field logout_at", values[i])
+			} else if value.Valid {
+				_m.LogoutAt = new(time.Time)
+				*_m.LogoutAt = value.Time
 			}
 		case authentication.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_authentications", values[i])
+				return fmt.Errorf("unexpected type %T for field user_sessions", values[i])
 			} else if value.Valid {
-				_m.user_authentications = new(string)
-				*_m.user_authentications = value.String
+				_m.user_sessions = new(string)
+				*_m.user_sessions = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -187,14 +186,16 @@ func (_m *Authentication) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("code=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Code))
+	builder.WriteString("ip=")
+	builder.WriteString(_m.IP)
 	builder.WriteString(", ")
-	builder.WriteString("challenge=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Challenge))
+	builder.WriteString("user_agent=")
+	builder.WriteString(_m.UserAgent)
 	builder.WriteString(", ")
-	builder.WriteString("expire_at=")
-	builder.WriteString(_m.ExpireAt.Format(time.ANSIC))
+	if v := _m.LogoutAt; v != nil {
+		builder.WriteString("logout_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

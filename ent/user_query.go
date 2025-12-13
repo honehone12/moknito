@@ -7,9 +7,9 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
-	"moknito/ent/login"
 	"moknito/ent/predicate"
 	"moknito/ent/user"
 
@@ -26,9 +26,9 @@ type UserQuery struct {
 	order               []user.OrderOption
 	inters              []Interceptor
 	predicates          []predicate.User
-	withAuthentications *AuthenticationQuery
-	withAuthorizations  *AuthorizationQuery
-	withSessions        *LoginQuery
+	withAuthentications *AuthorizationQuery
+	withAuthorizations  *ApplicationQuery
+	withSessions        *AuthenticationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -66,29 +66,7 @@ func (_q *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 }
 
 // QueryAuthentications chains the current query on the "authentications" edge.
-func (_q *UserQuery) QueryAuthentications() *AuthenticationQuery {
-	query := (&AuthenticationClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(authentication.Table, authentication.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthenticationsTable, user.AuthenticationsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryAuthorizations chains the current query on the "authorizations" edge.
-func (_q *UserQuery) QueryAuthorizations() *AuthorizationQuery {
+func (_q *UserQuery) QueryAuthentications() *AuthorizationQuery {
 	query := (&AuthorizationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -101,7 +79,7 @@ func (_q *UserQuery) QueryAuthorizations() *AuthorizationQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(authorization.Table, authorization.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthorizationsTable, user.AuthorizationsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthenticationsTable, user.AuthenticationsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -109,9 +87,9 @@ func (_q *UserQuery) QueryAuthorizations() *AuthorizationQuery {
 	return query
 }
 
-// QuerySessions chains the current query on the "sessions" edge.
-func (_q *UserQuery) QuerySessions() *LoginQuery {
-	query := (&LoginClient{config: _q.config}).Query()
+// QueryAuthorizations chains the current query on the "authorizations" edge.
+func (_q *UserQuery) QueryAuthorizations() *ApplicationQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -122,7 +100,29 @@ func (_q *UserQuery) QuerySessions() *LoginQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(login.Table, login.FieldID),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthorizationsTable, user.AuthorizationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySessions chains the current query on the "sessions" edge.
+func (_q *UserQuery) QuerySessions() *AuthenticationQuery {
+	query := (&AuthenticationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(authentication.Table, authentication.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
@@ -334,8 +334,8 @@ func (_q *UserQuery) Clone() *UserQuery {
 
 // WithAuthentications tells the query-builder to eager-load the nodes that are connected to
 // the "authentications" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithAuthentications(opts ...func(*AuthenticationQuery)) *UserQuery {
-	query := (&AuthenticationClient{config: _q.config}).Query()
+func (_q *UserQuery) WithAuthentications(opts ...func(*AuthorizationQuery)) *UserQuery {
+	query := (&AuthorizationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -345,8 +345,8 @@ func (_q *UserQuery) WithAuthentications(opts ...func(*AuthenticationQuery)) *Us
 
 // WithAuthorizations tells the query-builder to eager-load the nodes that are connected to
 // the "authorizations" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithAuthorizations(opts ...func(*AuthorizationQuery)) *UserQuery {
-	query := (&AuthorizationClient{config: _q.config}).Query()
+func (_q *UserQuery) WithAuthorizations(opts ...func(*ApplicationQuery)) *UserQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -356,8 +356,8 @@ func (_q *UserQuery) WithAuthorizations(opts ...func(*AuthorizationQuery)) *User
 
 // WithSessions tells the query-builder to eager-load the nodes that are connected to
 // the "sessions" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithSessions(opts ...func(*LoginQuery)) *UserQuery {
-	query := (&LoginClient{config: _q.config}).Query()
+func (_q *UserQuery) WithSessions(opts ...func(*AuthenticationQuery)) *UserQuery {
+	query := (&AuthenticationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -469,29 +469,29 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	}
 	if query := _q.withAuthentications; query != nil {
 		if err := _q.loadAuthentications(ctx, query, nodes,
-			func(n *User) { n.Edges.Authentications = []*Authentication{} },
-			func(n *User, e *Authentication) { n.Edges.Authentications = append(n.Edges.Authentications, e) }); err != nil {
+			func(n *User) { n.Edges.Authentications = []*Authorization{} },
+			func(n *User, e *Authorization) { n.Edges.Authentications = append(n.Edges.Authentications, e) }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withAuthorizations; query != nil {
 		if err := _q.loadAuthorizations(ctx, query, nodes,
-			func(n *User) { n.Edges.Authorizations = []*Authorization{} },
-			func(n *User, e *Authorization) { n.Edges.Authorizations = append(n.Edges.Authorizations, e) }); err != nil {
+			func(n *User) { n.Edges.Authorizations = []*Application{} },
+			func(n *User, e *Application) { n.Edges.Authorizations = append(n.Edges.Authorizations, e) }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withSessions; query != nil {
 		if err := _q.loadSessions(ctx, query, nodes,
-			func(n *User) { n.Edges.Sessions = []*Login{} },
-			func(n *User, e *Login) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
+			func(n *User) { n.Edges.Sessions = []*Authentication{} },
+			func(n *User, e *Authentication) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *UserQuery) loadAuthentications(ctx context.Context, query *AuthenticationQuery, nodes []*User, init func(*User), assign func(*User, *Authentication)) error {
+func (_q *UserQuery) loadAuthentications(ctx context.Context, query *AuthorizationQuery, nodes []*User, init func(*User), assign func(*User, *Authorization)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*User)
 	for i := range nodes {
@@ -502,7 +502,7 @@ func (_q *UserQuery) loadAuthentications(ctx context.Context, query *Authenticat
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Authentication(func(s *sql.Selector) {
+	query.Where(predicate.Authorization(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.AuthenticationsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
@@ -522,7 +522,7 @@ func (_q *UserQuery) loadAuthentications(ctx context.Context, query *Authenticat
 	}
 	return nil
 }
-func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *AuthorizationQuery, nodes []*User, init func(*User), assign func(*User, *Authorization)) error {
+func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *ApplicationQuery, nodes []*User, init func(*User), assign func(*User, *Application)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*User)
 	for i := range nodes {
@@ -533,7 +533,7 @@ func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *Authorizatio
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Authorization(func(s *sql.Selector) {
+	query.Where(predicate.Application(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.AuthorizationsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
@@ -553,7 +553,7 @@ func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *Authorizatio
 	}
 	return nil
 }
-func (_q *UserQuery) loadSessions(ctx context.Context, query *LoginQuery, nodes []*User, init func(*User), assign func(*User, *Login)) error {
+func (_q *UserQuery) loadSessions(ctx context.Context, query *AuthenticationQuery, nodes []*User, init func(*User), assign func(*User, *Authentication)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*User)
 	for i := range nodes {
@@ -564,7 +564,7 @@ func (_q *UserQuery) loadSessions(ctx context.Context, query *LoginQuery, nodes 
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Login(func(s *sql.Selector) {
+	query.Where(predicate.Authentication(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.SessionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)

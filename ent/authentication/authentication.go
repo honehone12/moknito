@@ -20,12 +20,12 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldCode holds the string denoting the code field in the database.
-	FieldCode = "code"
-	// FieldChallenge holds the string denoting the challenge field in the database.
-	FieldChallenge = "challenge"
-	// FieldExpireAt holds the string denoting the expire_at field in the database.
-	FieldExpireAt = "expire_at"
+	// FieldIP holds the string denoting the ip field in the database.
+	FieldIP = "ip"
+	// FieldUserAgent holds the string denoting the user_agent field in the database.
+	FieldUserAgent = "user_agent"
+	// FieldLogoutAt holds the string denoting the logout_at field in the database.
+	FieldLogoutAt = "logout_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the authentication in the database.
@@ -36,7 +36,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_authentications"
+	UserColumn = "user_sessions"
 )
 
 // Columns holds all SQL columns for authentication fields.
@@ -45,15 +45,15 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
-	FieldCode,
-	FieldChallenge,
-	FieldExpireAt,
+	FieldIP,
+	FieldUserAgent,
+	FieldLogoutAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "authentications"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"user_authentications",
+	"user_sessions",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -78,6 +78,10 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// IPValidator is a validator for the "ip" field. It is called by the builders before save.
+	IPValidator func(string) error
+	// UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
+	UserAgentValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -105,9 +109,19 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
-// ByExpireAt orders the results by the expire_at field.
-func ByExpireAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExpireAt, opts...).ToFunc()
+// ByIP orders the results by the ip field.
+func ByIP(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIP, opts...).ToFunc()
+}
+
+// ByUserAgent orders the results by the user_agent field.
+func ByUserAgent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserAgent, opts...).ToFunc()
+}
+
+// ByLogoutAt orders the results by the logout_at field.
+func ByLogoutAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogoutAt, opts...).ToFunc()
 }
 
 // ByUserField orders the results by user field.

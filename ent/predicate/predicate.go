@@ -6,14 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Application is the predicate function for application builders.
+type Application func(*sql.Selector)
+
 // Authentication is the predicate function for authentication builders.
 type Authentication func(*sql.Selector)
 
 // Authorization is the predicate function for authorization builders.
 type Authorization func(*sql.Selector)
-
-// Login is the predicate function for login builders.
-type Login func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

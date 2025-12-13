@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"moknito/ent/login"
+	"moknito/ent/application"
 	"moknito/ent/user"
 	"strings"
 	"time"
@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Login is the model entity for the Login schema.
-type Login struct {
+// Application is the model entity for the Application schema.
+type Application struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
@@ -24,23 +24,21 @@ type Login struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// LogoutAt holds the value of the "logout_at" field.
-	LogoutAt time.Time `json:"logout_at,omitempty"`
-	// IP holds the value of the "ip" field.
-	IP string `json:"ip,omitempty"`
-	// UserAgent holds the value of the "user_agent" field.
-	UserAgent string `json:"user_agent,omitempty"`
-	// Application holds the value of the "application" field.
-	Application string `json:"application,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Domain holds the value of the "domain" field.
+	Domain string `json:"domain,omitempty"`
+	// ClientID holds the value of the "client_id" field.
+	ClientID string `json:"client_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the LoginQuery when eager-loading is set.
-	Edges         LoginEdges `json:"edges"`
-	user_sessions *string
-	selectValues  sql.SelectValues
+	// The values are being populated by the ApplicationQuery when eager-loading is set.
+	Edges               ApplicationEdges `json:"edges"`
+	user_authorizations *string
+	selectValues        sql.SelectValues
 }
 
-// LoginEdges holds the relations/edges for other nodes in the graph.
-type LoginEdges struct {
+// ApplicationEdges holds the relations/edges for other nodes in the graph.
+type ApplicationEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -50,7 +48,7 @@ type LoginEdges struct {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e LoginEdges) UserOrErr() (*User, error) {
+func (e ApplicationEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
 	} else if e.loadedTypes[0] {
@@ -60,15 +58,15 @@ func (e LoginEdges) UserOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Login) scanValues(columns []string) ([]any, error) {
+func (*Application) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case login.FieldID, login.FieldIP, login.FieldUserAgent, login.FieldApplication:
+		case application.FieldID, application.FieldName, application.FieldDomain, application.FieldClientID:
 			values[i] = new(sql.NullString)
-		case login.FieldCreatedAt, login.FieldUpdatedAt, login.FieldDeletedAt, login.FieldLogoutAt:
+		case application.FieldCreatedAt, application.FieldUpdatedAt, application.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case login.ForeignKeys[0]: // user_sessions
+		case application.ForeignKeys[0]: // user_authorizations
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -78,68 +76,62 @@ func (*Login) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Login fields.
-func (_m *Login) assignValues(columns []string, values []any) error {
+// to the Application fields.
+func (_m *Application) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case login.FieldID:
+		case application.FieldID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
 				_m.ID = value.String
 			}
-		case login.FieldCreatedAt:
+		case application.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case login.FieldUpdatedAt:
+		case application.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case login.FieldDeletedAt:
+		case application.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case login.FieldLogoutAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field logout_at", values[i])
-			} else if value.Valid {
-				_m.LogoutAt = value.Time
-			}
-		case login.FieldIP:
+		case application.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field ip", values[i])
+				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				_m.IP = value.String
+				_m.Name = value.String
 			}
-		case login.FieldUserAgent:
+		case application.FieldDomain:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_agent", values[i])
+				return fmt.Errorf("unexpected type %T for field domain", values[i])
 			} else if value.Valid {
-				_m.UserAgent = value.String
+				_m.Domain = value.String
 			}
-		case login.FieldApplication:
+		case application.FieldClientID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field application", values[i])
+				return fmt.Errorf("unexpected type %T for field client_id", values[i])
 			} else if value.Valid {
-				_m.Application = value.String
+				_m.ClientID = value.String
 			}
-		case login.ForeignKeys[0]:
+		case application.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_sessions", values[i])
+				return fmt.Errorf("unexpected type %T for field user_authorizations", values[i])
 			} else if value.Valid {
-				_m.user_sessions = new(string)
-				*_m.user_sessions = value.String
+				_m.user_authorizations = new(string)
+				*_m.user_authorizations = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -148,39 +140,39 @@ func (_m *Login) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the Login.
+// Value returns the ent.Value that was dynamically selected and assigned to the Application.
 // This includes values selected through modifiers, order, etc.
-func (_m *Login) Value(name string) (ent.Value, error) {
+func (_m *Application) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the Login entity.
-func (_m *Login) QueryUser() *UserQuery {
-	return NewLoginClient(_m.config).QueryUser(_m)
+// QueryUser queries the "user" edge of the Application entity.
+func (_m *Application) QueryUser() *UserQuery {
+	return NewApplicationClient(_m.config).QueryUser(_m)
 }
 
-// Update returns a builder for updating this Login.
-// Note that you need to call Login.Unwrap() before calling this method if this Login
+// Update returns a builder for updating this Application.
+// Note that you need to call Application.Unwrap() before calling this method if this Application
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *Login) Update() *LoginUpdateOne {
-	return NewLoginClient(_m.config).UpdateOne(_m)
+func (_m *Application) Update() *ApplicationUpdateOne {
+	return NewApplicationClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the Login entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Application entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *Login) Unwrap() *Login {
+func (_m *Application) Unwrap() *Application {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Login is not a transactional entity")
+		panic("ent: Application is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *Login) String() string {
+func (_m *Application) String() string {
 	var builder strings.Builder
-	builder.WriteString("Login(")
+	builder.WriteString("Application(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -193,20 +185,17 @@ func (_m *Login) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("logout_at=")
-	builder.WriteString(_m.LogoutAt.Format(time.ANSIC))
+	builder.WriteString("name=")
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("ip=")
-	builder.WriteString(_m.IP)
+	builder.WriteString("domain=")
+	builder.WriteString(_m.Domain)
 	builder.WriteString(", ")
-	builder.WriteString("user_agent=")
-	builder.WriteString(_m.UserAgent)
-	builder.WriteString(", ")
-	builder.WriteString("application=")
-	builder.WriteString(_m.Application)
+	builder.WriteString("client_id=")
+	builder.WriteString(_m.ClientID)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// Logins is a parsable slice of Login.
-type Logins []*Login
+// Applications is a parsable slice of Application.
+type Applications []*Application

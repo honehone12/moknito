@@ -12,7 +12,7 @@ type Authentication struct {
 	ent.Schema
 }
 
-// Fields of the Authentication.
+// Fields of the Session.
 func (Authentication) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
@@ -20,23 +20,23 @@ func (Authentication) Fields() []ent.Field {
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.Bytes("code").
+		field.String("ip").
 			Optional().
-			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.Bytes("challenge").
+			MaxLen(256),
+		field.String("user_agent").
 			Optional().
-			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
-		field.Time("expire_at").
+			MaxLen(256),
+		field.Time("logout_at").
 			Optional().
-			Immutable(),
+			Nillable(),
 	}
 }
 
-// Edges of the Authentication.
+// Edges of the Session.
 func (Authentication) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
-			Ref("authentications").
+			Ref("sessions").
 			Required().
 			Unique(),
 	}
