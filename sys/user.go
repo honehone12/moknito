@@ -8,6 +8,7 @@ import (
 	"moknito/ent/user"
 	"moknito/hash"
 	"moknito/id"
+	"time"
 )
 
 type UserSys interface {
@@ -55,6 +56,10 @@ func (s *EntRdsSys) RegisterUser(
 	}
 	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_KEY, email)
 	if err := s.redis.JSONSet(ctx, key, "$", register).Err(); err != nil {
+		return false, err
+	}
+
+	if err := s.redis.Expire(ctx, key, time.Minute*5).Err(); err != nil {
 		return false, err
 	}
 

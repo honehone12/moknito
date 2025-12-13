@@ -42,7 +42,7 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 	}
 	if !ok {
 		ctx.Logger().Warn("duplicated user")
-		return res.Forbidden(ctx)
+		return res.BadRequest(ctx)
 	}
 
 	ctx.Response().Header().Set("Location", "/user/confirm")
