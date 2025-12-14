@@ -95,6 +95,20 @@ func (_u *AuthenticationUpdate) ClearUserAgent() *AuthenticationUpdate {
 	return _u
 }
 
+// SetExpireAt sets the "expire_at" field.
+func (_u *AuthenticationUpdate) SetExpireAt(v time.Time) *AuthenticationUpdate {
+	_u.mutation.SetExpireAt(v)
+	return _u
+}
+
+// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
+func (_u *AuthenticationUpdate) SetNillableExpireAt(v *time.Time) *AuthenticationUpdate {
+	if v != nil {
+		_u.SetExpireAt(*v)
+	}
+	return _u
+}
+
 // SetLogoutAt sets the "logout_at" field.
 func (_u *AuthenticationUpdate) SetLogoutAt(v time.Time) *AuthenticationUpdate {
 	_u.mutation.SetLogoutAt(v)
@@ -224,6 +238,9 @@ func (_u *AuthenticationUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if _u.mutation.UserAgentCleared() {
 		_spec.ClearField(authentication.FieldUserAgent, field.TypeString)
 	}
+	if value, ok := _u.mutation.ExpireAt(); ok {
+		_spec.SetField(authentication.FieldExpireAt, field.TypeTime, value)
+	}
 	if value, ok := _u.mutation.LogoutAt(); ok {
 		_spec.SetField(authentication.FieldLogoutAt, field.TypeTime, value)
 	}
@@ -342,6 +359,20 @@ func (_u *AuthenticationUpdateOne) SetNillableUserAgent(v *string) *Authenticati
 // ClearUserAgent clears the value of the "user_agent" field.
 func (_u *AuthenticationUpdateOne) ClearUserAgent() *AuthenticationUpdateOne {
 	_u.mutation.ClearUserAgent()
+	return _u
+}
+
+// SetExpireAt sets the "expire_at" field.
+func (_u *AuthenticationUpdateOne) SetExpireAt(v time.Time) *AuthenticationUpdateOne {
+	_u.mutation.SetExpireAt(v)
+	return _u
+}
+
+// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
+func (_u *AuthenticationUpdateOne) SetNillableExpireAt(v *time.Time) *AuthenticationUpdateOne {
+	if v != nil {
+		_u.SetExpireAt(*v)
+	}
 	return _u
 }
 
@@ -503,6 +534,9 @@ func (_u *AuthenticationUpdateOne) sqlSave(ctx context.Context) (_node *Authenti
 	}
 	if _u.mutation.UserAgentCleared() {
 		_spec.ClearField(authentication.FieldUserAgent, field.TypeString)
+	}
+	if value, ok := _u.mutation.ExpireAt(); ok {
+		_spec.SetField(authentication.FieldExpireAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.LogoutAt(); ok {
 		_spec.SetField(authentication.FieldLogoutAt, field.TypeTime, value)

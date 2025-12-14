@@ -26,6 +26,7 @@ func (Authentication) Fields() []ent.Field {
 		field.String("user_agent").
 			Optional().
 			MaxLen(256),
+		field.Time("expire_at"),
 		field.Time("logout_at").
 			Optional().
 			Nillable(),

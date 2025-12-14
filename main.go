@@ -4,6 +4,7 @@ import (
 	"moknito/hash"
 	"moknito/middleware"
 	lib "moknito/moknito"
+	"moknito/token"
 	"net/url"
 	"os"
 
@@ -25,6 +26,15 @@ func main() {
 
 	if pepper := os.Getenv("PEPPER"); len(pepper) != hash.PEPPER_ENV_LEN {
 		echo.Logger.Fatal("env for perpper is invalid")
+	}
+	if atk := os.Getenv("PEPPER"); len(atk) != token.SIGNATURE_KEY_ENV_LEN {
+		echo.Logger.Fatal("env for auth token key is invalid")
+	}
+	if origin := os.Getenv("ORIGIN"); len(origin) == 0 {
+		echo.Logger.Fatal("env for origin is invalid")
+	}
+	if host := os.Getenv("ORIGIN"); len(host) == 0 {
+		echo.Logger.Fatal("env for host is invalid")
 	}
 
 	mocknito, err := lib.NewMocknito()

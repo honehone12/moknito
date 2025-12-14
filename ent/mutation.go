@@ -735,6 +735,7 @@ type AuthenticationMutation struct {
 	deleted_at    *time.Time
 	ip            *string
 	user_agent    *string
+	expire_at     *time.Time
 	logout_at     *time.Time
 	clearedFields map[string]struct{}
 	user          *string
@@ -1067,6 +1068,42 @@ func (m *AuthenticationMutation) ResetUserAgent() {
 	delete(m.clearedFields, authentication.FieldUserAgent)
 }
 
+// SetExpireAt sets the "expire_at" field.
+func (m *AuthenticationMutation) SetExpireAt(t time.Time) {
+	m.expire_at = &t
+}
+
+// ExpireAt returns the value of the "expire_at" field in the mutation.
+func (m *AuthenticationMutation) ExpireAt() (r time.Time, exists bool) {
+	v := m.expire_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExpireAt returns the old "expire_at" field's value of the Authentication entity.
+// If the Authentication object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthenticationMutation) OldExpireAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExpireAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExpireAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExpireAt: %w", err)
+	}
+	return oldValue.ExpireAt, nil
+}
+
+// ResetExpireAt resets all changes to the "expire_at" field.
+func (m *AuthenticationMutation) ResetExpireAt() {
+	m.expire_at = nil
+}
+
 // SetLogoutAt sets the "logout_at" field.
 func (m *AuthenticationMutation) SetLogoutAt(t time.Time) {
 	m.logout_at = &t
@@ -1189,7 +1226,7 @@ func (m *AuthenticationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthenticationMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, authentication.FieldCreatedAt)
 	}
@@ -1204,6 +1241,9 @@ func (m *AuthenticationMutation) Fields() []string {
 	}
 	if m.user_agent != nil {
 		fields = append(fields, authentication.FieldUserAgent)
+	}
+	if m.expire_at != nil {
+		fields = append(fields, authentication.FieldExpireAt)
 	}
 	if m.logout_at != nil {
 		fields = append(fields, authentication.FieldLogoutAt)
@@ -1226,6 +1266,8 @@ func (m *AuthenticationMutation) Field(name string) (ent.Value, bool) {
 		return m.IP()
 	case authentication.FieldUserAgent:
 		return m.UserAgent()
+	case authentication.FieldExpireAt:
+		return m.ExpireAt()
 	case authentication.FieldLogoutAt:
 		return m.LogoutAt()
 	}
@@ -1247,6 +1289,8 @@ func (m *AuthenticationMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldIP(ctx)
 	case authentication.FieldUserAgent:
 		return m.OldUserAgent(ctx)
+	case authentication.FieldExpireAt:
+		return m.OldExpireAt(ctx)
 	case authentication.FieldLogoutAt:
 		return m.OldLogoutAt(ctx)
 	}
@@ -1292,6 +1336,13 @@ func (m *AuthenticationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserAgent(v)
+		return nil
+	case authentication.FieldExpireAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExpireAt(v)
 		return nil
 	case authentication.FieldLogoutAt:
 		v, ok := value.(time.Time)
@@ -1390,6 +1441,9 @@ func (m *AuthenticationMutation) ResetField(name string) error {
 		return nil
 	case authentication.FieldUserAgent:
 		m.ResetUserAgent()
+		return nil
+	case authentication.FieldExpireAt:
+		m.ResetExpireAt()
 		return nil
 	case authentication.FieldLogoutAt:
 		m.ResetLogoutAt()
@@ -1846,22 +1900,9 @@ func (m *AuthorizationMutation) OldExpireAt(ctx context.Context) (v time.Time, e
 	return oldValue.ExpireAt, nil
 }
 
-// ClearExpireAt clears the value of the "expire_at" field.
-func (m *AuthorizationMutation) ClearExpireAt() {
-	m.expire_at = nil
-	m.clearedFields[authorization.FieldExpireAt] = struct{}{}
-}
-
-// ExpireAtCleared returns if the "expire_at" field was cleared in this mutation.
-func (m *AuthorizationMutation) ExpireAtCleared() bool {
-	_, ok := m.clearedFields[authorization.FieldExpireAt]
-	return ok
-}
-
 // ResetExpireAt resets all changes to the "expire_at" field.
 func (m *AuthorizationMutation) ResetExpireAt() {
 	m.expire_at = nil
-	delete(m.clearedFields, authorization.FieldExpireAt)
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
@@ -2087,9 +2128,6 @@ func (m *AuthorizationMutation) ClearedFields() []string {
 	if m.FieldCleared(authorization.FieldChallenge) {
 		fields = append(fields, authorization.FieldChallenge)
 	}
-	if m.FieldCleared(authorization.FieldExpireAt) {
-		fields = append(fields, authorization.FieldExpireAt)
-	}
 	return fields
 }
 
@@ -2112,9 +2150,6 @@ func (m *AuthorizationMutation) ClearField(name string) error {
 		return nil
 	case authorization.FieldChallenge:
 		m.ClearChallenge()
-		return nil
-	case authorization.FieldExpireAt:
-		m.ClearExpireAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Authorization nullable field %s", name)

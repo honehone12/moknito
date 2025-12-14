@@ -28,6 +28,8 @@ type Authentication struct {
 	IP string `json:"ip,omitempty"`
 	// UserAgent holds the value of the "user_agent" field.
 	UserAgent string `json:"user_agent,omitempty"`
+	// ExpireAt holds the value of the "expire_at" field.
+	ExpireAt time.Time `json:"expire_at,omitempty"`
 	// LogoutAt holds the value of the "logout_at" field.
 	LogoutAt *time.Time `json:"logout_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -64,7 +66,7 @@ func (*Authentication) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case authentication.FieldID, authentication.FieldIP, authentication.FieldUserAgent:
 			values[i] = new(sql.NullString)
-		case authentication.FieldCreatedAt, authentication.FieldUpdatedAt, authentication.FieldDeletedAt, authentication.FieldLogoutAt:
+		case authentication.FieldCreatedAt, authentication.FieldUpdatedAt, authentication.FieldDeletedAt, authentication.FieldExpireAt, authentication.FieldLogoutAt:
 			values[i] = new(sql.NullTime)
 		case authentication.ForeignKeys[0]: // user_authentications
 			values[i] = new(sql.NullString)
@@ -119,6 +121,12 @@ func (_m *Authentication) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field user_agent", values[i])
 			} else if value.Valid {
 				_m.UserAgent = value.String
+			}
+		case authentication.FieldExpireAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expire_at", values[i])
+			} else if value.Valid {
+				_m.ExpireAt = value.Time
 			}
 		case authentication.FieldLogoutAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -191,6 +199,9 @@ func (_m *Authentication) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("user_agent=")
 	builder.WriteString(_m.UserAgent)
+	builder.WriteString(", ")
+	builder.WriteString("expire_at=")
+	builder.WriteString(_m.ExpireAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	if v := _m.LogoutAt; v != nil {
 		builder.WriteString("logout_at=")

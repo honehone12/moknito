@@ -71,8 +71,8 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 	authId, ok, err := m.system.UserJoin(
 		req.Context(),
 		form.Email, form.Password,
-		ctx.RealIP(),
-		req.Header.Get("User-Agent"),
+		ctx.RealIP(), req.Header.Get("User-Agent"),
+		m.tokenTtl,
 	)
 	if err != nil {
 		ctx.Logger().Error(err)
@@ -103,10 +103,9 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 	req := ctx.Request()
 	authId, ok, err := m.system.UserAuthenticate(
 		req.Context(),
-		form.Email,
-		form.Password,
-		ctx.RealIP(),
-		req.Header.Get("User-Agent"),
+		form.Email, form.Password,
+		ctx.RealIP(), req.Header.Get("User-Agent"),
+		m.tokenTtl,
 	)
 	if err != nil {
 		ctx.Logger().Error(err)

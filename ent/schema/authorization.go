@@ -26,9 +26,7 @@ func (Authorization) Fields() []ent.Field {
 		field.Bytes("challenge").
 			Optional().
 			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
-		field.Time("expire_at").
-			Optional().
-			Immutable(),
+		field.Time("expire_at"),
 	}
 }
 

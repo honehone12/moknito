@@ -81,14 +81,6 @@ func (_c *AuthorizationCreate) SetExpireAt(v time.Time) *AuthorizationCreate {
 	return _c
 }
 
-// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
-func (_c *AuthorizationCreate) SetNillableExpireAt(v *time.Time) *AuthorizationCreate {
-	if v != nil {
-		_c.SetExpireAt(*v)
-	}
-	return _c
-}
-
 // SetID sets the "id" field.
 func (_c *AuthorizationCreate) SetID(v string) *AuthorizationCreate {
 	_c.mutation.SetID(v)
@@ -158,6 +150,9 @@ func (_c *AuthorizationCreate) check() error {
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Authorization.updated_at"`)}
+	}
+	if _, ok := _c.mutation.ExpireAt(); !ok {
+		return &ValidationError{Name: "expire_at", err: errors.New(`ent: missing required field "Authorization.expire_at"`)}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := authorization.IDValidator(v); err != nil {

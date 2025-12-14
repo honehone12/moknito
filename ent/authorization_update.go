@@ -79,6 +79,20 @@ func (_u *AuthorizationUpdate) ClearChallenge() *AuthorizationUpdate {
 	return _u
 }
 
+// SetExpireAt sets the "expire_at" field.
+func (_u *AuthorizationUpdate) SetExpireAt(v time.Time) *AuthorizationUpdate {
+	_u.mutation.SetExpireAt(v)
+	return _u
+}
+
+// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
+func (_u *AuthorizationUpdate) SetNillableExpireAt(v *time.Time) *AuthorizationUpdate {
+	if v != nil {
+		_u.SetExpireAt(*v)
+	}
+	return _u
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *AuthorizationUpdate) SetUserID(id string) *AuthorizationUpdate {
 	_u.mutation.SetUserID(id)
@@ -178,8 +192,8 @@ func (_u *AuthorizationUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if _u.mutation.ChallengeCleared() {
 		_spec.ClearField(authorization.FieldChallenge, field.TypeBytes)
 	}
-	if _u.mutation.ExpireAtCleared() {
-		_spec.ClearField(authorization.FieldExpireAt, field.TypeTime)
+	if value, ok := _u.mutation.ExpireAt(); ok {
+		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -277,6 +291,20 @@ func (_u *AuthorizationUpdateOne) SetChallenge(v []byte) *AuthorizationUpdateOne
 // ClearChallenge clears the value of the "challenge" field.
 func (_u *AuthorizationUpdateOne) ClearChallenge() *AuthorizationUpdateOne {
 	_u.mutation.ClearChallenge()
+	return _u
+}
+
+// SetExpireAt sets the "expire_at" field.
+func (_u *AuthorizationUpdateOne) SetExpireAt(v time.Time) *AuthorizationUpdateOne {
+	_u.mutation.SetExpireAt(v)
+	return _u
+}
+
+// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
+func (_u *AuthorizationUpdateOne) SetNillableExpireAt(v *time.Time) *AuthorizationUpdateOne {
+	if v != nil {
+		_u.SetExpireAt(*v)
+	}
 	return _u
 }
 
@@ -409,8 +437,8 @@ func (_u *AuthorizationUpdateOne) sqlSave(ctx context.Context) (_node *Authoriza
 	if _u.mutation.ChallengeCleared() {
 		_spec.ClearField(authorization.FieldChallenge, field.TypeBytes)
 	}
-	if _u.mutation.ExpireAtCleared() {
-		_spec.ClearField(authorization.FieldExpireAt, field.TypeTime)
+	if value, ok := _u.mutation.ExpireAt(); ok {
+		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
 	}
 	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

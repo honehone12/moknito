@@ -90,6 +90,11 @@ func UserAgent(v string) predicate.Authentication {
 	return predicate.Authentication(sql.FieldEQ(FieldUserAgent, v))
 }
 
+// ExpireAt applies equality check predicate on the "expire_at" field. It's identical to ExpireAtEQ.
+func ExpireAt(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEQ(FieldExpireAt, v))
+}
+
 // LogoutAt applies equality check predicate on the "logout_at" field. It's identical to LogoutAtEQ.
 func LogoutAt(v time.Time) predicate.Authentication {
 	return predicate.Authentication(sql.FieldEQ(FieldLogoutAt, v))
@@ -373,6 +378,46 @@ func UserAgentEqualFold(v string) predicate.Authentication {
 // UserAgentContainsFold applies the ContainsFold predicate on the "user_agent" field.
 func UserAgentContainsFold(v string) predicate.Authentication {
 	return predicate.Authentication(sql.FieldContainsFold(FieldUserAgent, v))
+}
+
+// ExpireAtEQ applies the EQ predicate on the "expire_at" field.
+func ExpireAtEQ(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldEQ(FieldExpireAt, v))
+}
+
+// ExpireAtNEQ applies the NEQ predicate on the "expire_at" field.
+func ExpireAtNEQ(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldNEQ(FieldExpireAt, v))
+}
+
+// ExpireAtIn applies the In predicate on the "expire_at" field.
+func ExpireAtIn(vs ...time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldIn(FieldExpireAt, vs...))
+}
+
+// ExpireAtNotIn applies the NotIn predicate on the "expire_at" field.
+func ExpireAtNotIn(vs ...time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldNotIn(FieldExpireAt, vs...))
+}
+
+// ExpireAtGT applies the GT predicate on the "expire_at" field.
+func ExpireAtGT(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldGT(FieldExpireAt, v))
+}
+
+// ExpireAtGTE applies the GTE predicate on the "expire_at" field.
+func ExpireAtGTE(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldGTE(FieldExpireAt, v))
+}
+
+// ExpireAtLT applies the LT predicate on the "expire_at" field.
+func ExpireAtLT(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldLT(FieldExpireAt, v))
+}
+
+// ExpireAtLTE applies the LTE predicate on the "expire_at" field.
+func ExpireAtLTE(v time.Time) predicate.Authentication {
+	return predicate.Authentication(sql.FieldLTE(FieldExpireAt, v))
 }
 
 // LogoutAtEQ applies the EQ predicate on the "logout_at" field.

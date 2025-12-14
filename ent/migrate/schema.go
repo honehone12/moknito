@@ -41,6 +41,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "ip", Type: field.TypeString, Nullable: true, Size: 256},
 		{Name: "user_agent", Type: field.TypeString, Nullable: true, Size: 256},
+		{Name: "expire_at", Type: field.TypeTime},
 		{Name: "logout_at", Type: field.TypeTime, Nullable: true},
 		{Name: "user_authentications", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
@@ -52,7 +53,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "authentications_users_authentications",
-				Columns:    []*schema.Column{AuthenticationsColumns[7]},
+				Columns:    []*schema.Column{AuthenticationsColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -66,7 +67,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "code", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "challenge", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"mysql": "binary(32)"}},
-		{Name: "expire_at", Type: field.TypeTime, Nullable: true},
+		{Name: "expire_at", Type: field.TypeTime},
 		{Name: "user_authorizations", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthorizationsTable holds the schema information for the "authorizations" table.

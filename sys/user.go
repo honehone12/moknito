@@ -20,11 +20,13 @@ type UserSys interface {
 		ctx context.Context,
 		email, password,
 		ip, userAgent string,
+		ttl time.Duration,
 	) (id.Id, bool, error)
 	UserAuthenticate(
 		ctx context.Context,
 		email, password,
 		ip, userAgent string,
+		ttl time.Duration,
 	) (id.Id, bool, error)
 }
 
@@ -117,6 +119,7 @@ func (s *EntRdsSys) UserJoin(
 	ctx context.Context,
 	email, password,
 	ip, userAgent string,
+	ttl time.Duration,
 ) (id.Id, bool, error) {
 	ok, err := s.checkErrorCount(ctx, email)
 	if err != nil {
@@ -170,6 +173,7 @@ func (s *EntRdsSys) UserJoin(
 		SetID(string(authId)).
 		SetIP(ip).
 		SetUserAgent(userAgent).
+		SetExpireAt(time.Now().Add(ttl)).
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
@@ -184,6 +188,7 @@ func (s *EntRdsSys) UserAuthenticate(
 	ctx context.Context,
 	email, password,
 	ip, userAgent string,
+	ttl time.Duration,
 ) (id.Id, bool, error) {
 	ok, err := s.checkErrorCount(ctx, email)
 	if err != nil {
@@ -221,6 +226,7 @@ func (s *EntRdsSys) UserAuthenticate(
 		SetID(string(authId)).
 		SetIP(ip).
 		SetUserAgent(userAgent).
+		SetExpireAt(time.Now().Add(ttl)).
 		SetUser(user).
 		Save(ctx)
 	if err != nil {

@@ -24,6 +24,8 @@ const (
 	FieldIP = "ip"
 	// FieldUserAgent holds the string denoting the user_agent field in the database.
 	FieldUserAgent = "user_agent"
+	// FieldExpireAt holds the string denoting the expire_at field in the database.
+	FieldExpireAt = "expire_at"
 	// FieldLogoutAt holds the string denoting the logout_at field in the database.
 	FieldLogoutAt = "logout_at"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -47,6 +49,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldIP,
 	FieldUserAgent,
+	FieldExpireAt,
 	FieldLogoutAt,
 }
 
@@ -117,6 +120,11 @@ func ByIP(opts ...sql.OrderTermOption) OrderOption {
 // ByUserAgent orders the results by the user_agent field.
 func ByUserAgent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserAgent, opts...).ToFunc()
+}
+
+// ByExpireAt orders the results by the expire_at field.
+func ByExpireAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldExpireAt, opts...).ToFunc()
 }
 
 // ByLogoutAt orders the results by the logout_at field.

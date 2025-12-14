@@ -91,6 +91,12 @@ func (_c *AuthenticationCreate) SetNillableUserAgent(v *string) *AuthenticationC
 	return _c
 }
 
+// SetExpireAt sets the "expire_at" field.
+func (_c *AuthenticationCreate) SetExpireAt(v time.Time) *AuthenticationCreate {
+	_c.mutation.SetExpireAt(v)
+	return _c
+}
+
 // SetLogoutAt sets the "logout_at" field.
 func (_c *AuthenticationCreate) SetLogoutAt(v time.Time) *AuthenticationCreate {
 	_c.mutation.SetLogoutAt(v)
@@ -185,6 +191,9 @@ func (_c *AuthenticationCreate) check() error {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "Authentication.user_agent": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.ExpireAt(); !ok {
+		return &ValidationError{Name: "expire_at", err: errors.New(`ent: missing required field "Authentication.expire_at"`)}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := authentication.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Authentication.id": %w`, err)}
@@ -247,6 +256,10 @@ func (_c *AuthenticationCreate) createSpec() (*Authentication, *sqlgraph.CreateS
 	if value, ok := _c.mutation.UserAgent(); ok {
 		_spec.SetField(authentication.FieldUserAgent, field.TypeString, value)
 		_node.UserAgent = value
+	}
+	if value, ok := _c.mutation.ExpireAt(); ok {
+		_spec.SetField(authentication.FieldExpireAt, field.TypeTime, value)
+		_node.ExpireAt = value
 	}
 	if value, ok := _c.mutation.LogoutAt(); ok {
 		_spec.SetField(authentication.FieldLogoutAt, field.TypeTime, value)

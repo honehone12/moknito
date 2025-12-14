@@ -365,16 +365,6 @@ func ExpireAtLTE(v time.Time) predicate.Authorization {
 	return predicate.Authorization(sql.FieldLTE(FieldExpireAt, v))
 }
 
-// ExpireAtIsNil applies the IsNil predicate on the "expire_at" field.
-func ExpireAtIsNil() predicate.Authorization {
-	return predicate.Authorization(sql.FieldIsNull(FieldExpireAt))
-}
-
-// ExpireAtNotNil applies the NotNil predicate on the "expire_at" field.
-func ExpireAtNotNil() predicate.Authorization {
-	return predicate.Authorization(sql.FieldNotNull(FieldExpireAt))
-}
-
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Authorization {
 	return predicate.Authorization(func(s *sql.Selector) {
