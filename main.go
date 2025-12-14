@@ -70,8 +70,10 @@ func main() {
 		"/application",
 		echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(proxyTargets)),
 	)
-	echo.Group("/")
-
+	echo.Group(
+		"/*",
+		echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(proxyTargets)),
+	)
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)
 	}

@@ -3,12 +3,15 @@ package sys
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"moknito/ent/user"
 	"moknito/hash"
 	"moknito/id"
 	"strconv"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type UserSys interface {
@@ -88,7 +91,9 @@ func (s *EntRdsSys) checkErrorCount(
 ) (bool, error) {
 	eKey := fmt.Sprintf("%s:%s", ERROR_KEY, email)
 	e, err := s.redis.Get(ctx, eKey).Result()
-	if err != nil {
+	if errors.Is(err, redis.Nil) {
+		return true, nil
+	} else if err != nil {
 		return false, err
 	}
 	eCount, err := strconv.Atoi(e)
@@ -135,10 +140,11 @@ func (s *EntRdsSys) UserJoin(
 		return "", false, err
 	}
 
-	register := userRegistration{}
-	if err := json.Unmarshal([]byte(r), &register); err != nil {
+	var reg []userRegistration
+	if err := json.Unmarshal([]byte(r), &reg); err != nil {
 		return "", false, err
 	}
+	register := reg[0]
 
 	ok, err = hash.Check(password, register.PwHash)
 	if err != nil {

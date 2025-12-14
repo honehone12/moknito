@@ -55,7 +55,7 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	ctx.Response().Header().Set("Location", "/user/authenticate")
+	ctx.Response().Header().Set("Location", "/user/join")
 	return ctx.NoContent(http.StatusSeeOther)
 }
 
