@@ -21,7 +21,7 @@ func TestNewRandom(t *testing.T) {
 	}
 
 	// Try to parse the bytes to ensure it's a valid UUID
-	parsedUUID, err := ToUUID(id)
+	parsedUUID, err := id.ToUUID()
 	if err != nil {
 		t.Errorf("The generated ID could not be parsed as a UUID: %v. ID string length: %d, byte slice length: %d", err, len(id), len(byteSlice))
 	}
@@ -45,7 +45,7 @@ func TestNewSequential(t *testing.T) {
 	}
 
 	// Try to parse the bytes to ensure it's a valid UUID
-	parsedUUID, err := ToUUID(id)
+	parsedUUID, err := id.ToUUID()
 	if err != nil {
 		t.Fatalf("The generated ID could not be parsed as a UUID: %v. ID string length: %d, byte slice length: %d", err, len(id), len(byteSlice))
 	}
@@ -58,7 +58,7 @@ func TestNewSequential(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSequential() returned an unexpected error on second call: %v", err)
 	}
-	parsedUUID2, err := ToUUID(id2)
+	parsedUUID2, err := id2.ToUUID()
 	if err != nil {
 		t.Fatalf("ToUUID failed on second sequential ID: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestUUIDConversion(t *testing.T) {
 			t.Fatalf("Expected byte slice length of 16, got %d", len(byteSlice))
 		}
 
-		resultUUID, err := ToUUID(idString)
+		resultUUID, err := idString.ToUUID()
 		if err != nil {
 			t.Fatalf("ToUUID() returned an unexpected error: %v", err)
 		}
@@ -97,7 +97,7 @@ func TestUUIDConversion(t *testing.T) {
 
 	t.Run("InvalidStringToUUID", func(t *testing.T) {
 		invalidIDString := "this-is-not-a-uuid" // length is 20
-		_, err := ToUUID(invalidIDString)
+		_, err := Id(invalidIDString).ToUUID()
 		if err == nil {
 			t.Error("ToUUID() did not return an error for an invalid ID string")
 		}

@@ -3,6 +3,7 @@ package moknito
 import (
 	"moknito/ent"
 	"moknito/sys"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -10,6 +11,8 @@ import (
 type Moknito struct {
 	system    sys.Sys
 	validator *validator.Validate
+
+	tokenTtl time.Duration
 }
 
 func NewMocknito() (*Moknito, error) {
@@ -19,10 +22,12 @@ func NewMocknito() (*Moknito, error) {
 	}
 
 	validator := validator.New()
+	tokenTtl := time.Hour * 24
 
 	return &Moknito{
 		system,
 		validator,
+		tokenTtl,
 	}, nil
 }
 

@@ -1,7 +1,9 @@
 package moknito
 
 import (
+	"moknito/id"
 	"moknito/res"
+	"moknito/token"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -18,24 +20,27 @@ type userAuthenticationRequest struct {
 	Password string `form:"password" validate:"min=8,max=128"`
 }
 
-type userConfirmResponse struct {
-	Name string `json:"name"`
+func (m *Moknito) bind(ctx echo.Context, target any) error {
+	if err := ctx.Bind(target); err != nil {
+		return err
+	}
+
+	if err := m.validator.Struct(target); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m *Moknito) UserRegister(ctx echo.Context) error {
 	form := userRegisterRequest{}
 
-	if err := ctx.Bind(&form); err != nil {
+	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)
 		return res.BadRequest(ctx)
 	}
 
-	if err := m.validator.Struct(&form); err != nil {
-		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
-	}
-
-	ok, err := m.system.RegisterUser(
+	ok, err := m.system.UserRegister(
 		ctx.Request().Context(),
 		form.Name,
 		form.Email,
@@ -50,38 +55,110 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	ctx.Response().Header().Set("Location", "/user/confirm")
+	ctx.Response().Header().Set("Location", "/user/authenticate")
 	return ctx.NoContent(http.StatusSeeOther)
 }
 
-func (m *Moknito) UserConfirm(ctx echo.Context) error {
+func (m *Moknito) UserJoin(ctx echo.Context) error {
 	form := userAuthenticationRequest{}
 
-	if err := ctx.Bind(&form); err != nil {
+	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)
 		return res.BadRequest(ctx)
 	}
 
-	if err := m.validator.Struct(&form); err != nil {
-		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
-	}
-
-	user, ok, err := m.system.ConfirmUser(
-		ctx.Request().Context(),
-		form.Email,
-		form.Password,
+	req := ctx.Request()
+	authId, ok, err := m.system.UserJoin(
+		req.Context(),
+		form.Email, form.Password,
+		ctx.RealIP(),
+		req.Header.Get("User-Agent"),
 	)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return res.InternalError(ctx)
 	}
 	if !ok {
-		ctx.Logger().Warn("wrong password")
+		ctx.Logger().Warn("wrong credentials")
 		return res.BadRequest(ctx)
 	}
 
-	return ctx.JSON(http.StatusOK, userConfirmResponse{
-		Name: user.Name,
-	})
+	if err := m.setAuthenticatedCookie(ctx, authId, form.Email); err != nil {
+		ctx.Logger().Error(err)
+		return res.InternalError(ctx)
+	}
+
+	ctx.Response().Header().Set("Location", "/")
+	return ctx.NoContent(http.StatusSeeOther)
+}
+
+func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
+	form := userAuthenticationRequest{}
+
+	if err := m.bind(ctx, &form); err != nil {
+		ctx.Logger().Warn(err)
+		return res.BadRequest(ctx)
+	}
+
+	req := ctx.Request()
+	authId, ok, err := m.system.UserAuthenticate(
+		req.Context(),
+		form.Email,
+		form.Password,
+		ctx.RealIP(),
+		req.Header.Get("User-Agent"),
+	)
+	if err != nil {
+		ctx.Logger().Error(err)
+		return res.InternalError(ctx)
+	}
+	if !ok {
+		ctx.Logger().Warn("wrong credentials")
+		return res.BadRequest(ctx)
+	}
+
+	if err := m.setAuthenticatedCookie(ctx, authId, form.Email); err != nil {
+		ctx.Logger().Error(err)
+		return res.InternalError(ctx)
+	}
+
+	ctx.Response().Header().Set("Location", "/")
+	return ctx.NoContent(http.StatusSeeOther)
+}
+
+func (m *Moknito) setAuthenticatedCookie(
+	ctx echo.Context,
+	id id.Id,
+	email string,
+) error {
+	signer, err := token.NewAuthTokenSigner()
+	if err != nil {
+		return err
+	}
+	uuid, err := id.ToUUID()
+	if err != nil {
+		return err
+	}
+
+	tkn, err := signer.CreateAuthenticatedToken(
+		uuid.String(),
+		email,
+		m.tokenTtl,
+	)
+	if err != nil {
+		return err
+	}
+
+	cookie := http.Cookie{
+		Name:     token.AUTHENTICATED_COOKIE_KEY,
+		Value:    tkn,
+		Path:     "/",
+		MaxAge:   86400, // a day
+		Secure:   false, // for local
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	ctx.SetCookie(&cookie)
+
+	return nil
 }

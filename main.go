@@ -33,29 +33,34 @@ func main() {
 	}
 	defer mocknito.Close()
 
-	api := echo.Group("/api")
 	originGuard, err := middleware.OriginGuard()
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
-	api.Use(originGuard)
+	api := echo.Group("/api", originGuard)
 	api.POST("/user/register", mocknito.UserRegister)
-	api.POST("/user/confirm", mocknito.UserConfirm)
+	api.POST("/user/join", mocknito.UserJoin)
 
-	ui := echo.Group("/*")
 	uiUrl, err := url.Parse("http://localhost:3000")
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
-	// this should be static route after build
-	ui.Use(echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(
-		[]*echo4middleware.ProxyTarget{
-			{
-				Name: "ui",
-				URL:  uiUrl,
-			},
+	proxyTargets := []*echo4middleware.ProxyTarget{
+		{
+			Name: "ui",
+			URL:  uiUrl,
 		},
-	)))
+	}
+
+	echo.Group(
+		"/user",
+		echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(proxyTargets)),
+	)
+	echo.Group(
+		"/application",
+		echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(proxyTargets)),
+	)
+	echo.Group("/")
 
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)

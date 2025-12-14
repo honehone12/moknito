@@ -24,6 +24,10 @@ const __M = 64 * 1024 //kb => 64mb
 const __P = 4
 
 func hash(password string, salt []byte, t, m uint32, p uint8) ([]byte, error) {
+	// don't inject other than env
+	// to prevent exposing sensitive info
+	// just write within module for testing
+
 	encPepper := os.Getenv("PEPPER")
 	if len(encPepper) != PEPPER_ENV_LEN {
 		return nil, errors.New("pepper env is not valid")

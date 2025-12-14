@@ -63,10 +63,10 @@ func (s *EntRdsSys) Close() error {
 	return s.ent.Close()
 }
 
-func (s *EntRdsSys) Ent() *ent.Client {
-	return s.ent
-}
+func (*EntRdsSys) rollback(tx *ent.Tx, original error) error {
+	if err := tx.Rollback(); err != nil {
+		return errors.Join(original, err)
+	}
 
-func (s *EntRdsSys) Redis() *redis.Client {
-	return s.redis
+	return original
 }
