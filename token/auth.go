@@ -9,7 +9,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const AUTHENTICATED_TOKEN_VERSION = "0.0.1"
+
 type AuthenticatedToken struct {
+	MoknitoTokenVersion string `json:"version"`
 	jwt.RegisteredClaims
 }
 
@@ -52,7 +55,8 @@ func (s *tokenSigner) CreateAuthenticatedToken(
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
 		AuthenticatedToken{
-			jwt.RegisteredClaims{
+			MoknitoTokenVersion: AUTHENTICATED_TOKEN_VERSION,
+			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    s.host,
 				Subject:   email,
 				Audience:  []string{s.host},
