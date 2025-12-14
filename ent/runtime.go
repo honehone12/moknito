@@ -147,12 +147,6 @@ func init() {
 	userDescPwhash := userFields[3].Descriptor()
 	// user.PwhashValidator is a validator for the "pwhash" field. It is called by the builders before save.
 	user.PwhashValidator = userDescPwhash.Validators[0].(func(string) error)
-	// userDescError is the schema descriptor for error field.
-	userDescError := userFields[4].Descriptor()
-	// user.DefaultError holds the default value on creation for the error field.
-	user.DefaultError = userDescError.Default.(int)
-	// user.ErrorValidator is a validator for the "error" field. It is called by the builders before save.
-	user.ErrorValidator = userDescError.Validators[0].(func(int) error)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.

@@ -32,9 +32,9 @@ type Authentication struct {
 	LogoutAt *time.Time `json:"logout_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthenticationQuery when eager-loading is set.
-	Edges         AuthenticationEdges `json:"edges"`
-	user_sessions *string
-	selectValues  sql.SelectValues
+	Edges                AuthenticationEdges `json:"edges"`
+	user_authentications *string
+	selectValues         sql.SelectValues
 }
 
 // AuthenticationEdges holds the relations/edges for other nodes in the graph.
@@ -66,7 +66,7 @@ func (*Authentication) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case authentication.FieldCreatedAt, authentication.FieldUpdatedAt, authentication.FieldDeletedAt, authentication.FieldLogoutAt:
 			values[i] = new(sql.NullTime)
-		case authentication.ForeignKeys[0]: // user_sessions
+		case authentication.ForeignKeys[0]: // user_authentications
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -129,10 +129,10 @@ func (_m *Authentication) assignValues(columns []string, values []any) error {
 			}
 		case authentication.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_sessions", values[i])
+				return fmt.Errorf("unexpected type %T for field user_authentications", values[i])
 			} else if value.Valid {
-				_m.user_sessions = new(string)
-				*_m.user_sessions = value.String
+				_m.user_authentications = new(string)
+				*_m.user_authentications = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

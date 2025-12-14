@@ -95,16 +95,6 @@ func Pwhash(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldPwhash, v))
 }
 
-// Error applies equality check predicate on the "error" field. It's identical to ErrorEQ.
-func Error(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldError, v))
-}
-
-// LockedUntil applies equality check predicate on the "locked_until" field. It's identical to LockedUntilEQ.
-func LockedUntil(v time.Time) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldLockedUntil, v))
-}
-
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldCreatedAt, v))
@@ -430,96 +420,6 @@ func PwhashContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldPwhash, v))
 }
 
-// ErrorEQ applies the EQ predicate on the "error" field.
-func ErrorEQ(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldError, v))
-}
-
-// ErrorNEQ applies the NEQ predicate on the "error" field.
-func ErrorNEQ(v int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldError, v))
-}
-
-// ErrorIn applies the In predicate on the "error" field.
-func ErrorIn(vs ...int) predicate.User {
-	return predicate.User(sql.FieldIn(FieldError, vs...))
-}
-
-// ErrorNotIn applies the NotIn predicate on the "error" field.
-func ErrorNotIn(vs ...int) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldError, vs...))
-}
-
-// ErrorGT applies the GT predicate on the "error" field.
-func ErrorGT(v int) predicate.User {
-	return predicate.User(sql.FieldGT(FieldError, v))
-}
-
-// ErrorGTE applies the GTE predicate on the "error" field.
-func ErrorGTE(v int) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldError, v))
-}
-
-// ErrorLT applies the LT predicate on the "error" field.
-func ErrorLT(v int) predicate.User {
-	return predicate.User(sql.FieldLT(FieldError, v))
-}
-
-// ErrorLTE applies the LTE predicate on the "error" field.
-func ErrorLTE(v int) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldError, v))
-}
-
-// LockedUntilEQ applies the EQ predicate on the "locked_until" field.
-func LockedUntilEQ(v time.Time) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldLockedUntil, v))
-}
-
-// LockedUntilNEQ applies the NEQ predicate on the "locked_until" field.
-func LockedUntilNEQ(v time.Time) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldLockedUntil, v))
-}
-
-// LockedUntilIn applies the In predicate on the "locked_until" field.
-func LockedUntilIn(vs ...time.Time) predicate.User {
-	return predicate.User(sql.FieldIn(FieldLockedUntil, vs...))
-}
-
-// LockedUntilNotIn applies the NotIn predicate on the "locked_until" field.
-func LockedUntilNotIn(vs ...time.Time) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldLockedUntil, vs...))
-}
-
-// LockedUntilGT applies the GT predicate on the "locked_until" field.
-func LockedUntilGT(v time.Time) predicate.User {
-	return predicate.User(sql.FieldGT(FieldLockedUntil, v))
-}
-
-// LockedUntilGTE applies the GTE predicate on the "locked_until" field.
-func LockedUntilGTE(v time.Time) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldLockedUntil, v))
-}
-
-// LockedUntilLT applies the LT predicate on the "locked_until" field.
-func LockedUntilLT(v time.Time) predicate.User {
-	return predicate.User(sql.FieldLT(FieldLockedUntil, v))
-}
-
-// LockedUntilLTE applies the LTE predicate on the "locked_until" field.
-func LockedUntilLTE(v time.Time) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldLockedUntil, v))
-}
-
-// LockedUntilIsNil applies the IsNil predicate on the "locked_until" field.
-func LockedUntilIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldLockedUntil))
-}
-
-// LockedUntilNotNil applies the NotNil predicate on the "locked_until" field.
-func LockedUntilNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldLockedUntil))
-}
-
 // HasAuthentications applies the HasEdge predicate on the "authentications" edge.
 func HasAuthentications() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -532,7 +432,7 @@ func HasAuthentications() predicate.User {
 }
 
 // HasAuthenticationsWith applies the HasEdge predicate on the "authentications" edge with a given conditions (other predicates).
-func HasAuthenticationsWith(preds ...predicate.Authorization) predicate.User {
+func HasAuthenticationsWith(preds ...predicate.Authentication) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newAuthenticationsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
@@ -555,7 +455,7 @@ func HasAuthorizations() predicate.User {
 }
 
 // HasAuthorizationsWith applies the HasEdge predicate on the "authorizations" edge with a given conditions (other predicates).
-func HasAuthorizationsWith(preds ...predicate.Application) predicate.User {
+func HasAuthorizationsWith(preds ...predicate.Authorization) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newAuthorizationsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
@@ -566,21 +466,21 @@ func HasAuthorizationsWith(preds ...predicate.Application) predicate.User {
 	})
 }
 
-// HasSessions applies the HasEdge predicate on the "sessions" edge.
-func HasSessions() predicate.User {
+// HasApplications applies the HasEdge predicate on the "applications" edge.
+func HasApplications() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, ApplicationsTable, ApplicationsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
-func HasSessionsWith(preds ...predicate.Authentication) predicate.User {
+// HasApplicationsWith applies the HasEdge predicate on the "applications" edge with a given conditions (other predicates).
+func HasApplicationsWith(preds ...predicate.Application) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newSessionsStep()
+		step := newApplicationsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

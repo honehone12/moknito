@@ -2232,9 +2232,6 @@ type UserMutation struct {
 	name                   *string
 	email                  *string
 	pwhash                 *string
-	error                  *int
-	adderror               *int
-	locked_until           *time.Time
 	clearedFields          map[string]struct{}
 	authentications        map[string]struct{}
 	removedauthentications map[string]struct{}
@@ -2242,9 +2239,9 @@ type UserMutation struct {
 	authorizations         map[string]struct{}
 	removedauthorizations  map[string]struct{}
 	clearedauthorizations  bool
-	sessions               map[string]struct{}
-	removedsessions        map[string]struct{}
-	clearedsessions        bool
+	applications           map[string]struct{}
+	removedapplications    map[string]struct{}
+	clearedapplications    bool
 	done                   bool
 	oldValue               func(context.Context) (*User, error)
 	predicates             []predicate.User
@@ -2583,112 +2580,7 @@ func (m *UserMutation) ResetPwhash() {
 	m.pwhash = nil
 }
 
-// SetError sets the "error" field.
-func (m *UserMutation) SetError(i int) {
-	m.error = &i
-	m.adderror = nil
-}
-
-// Error returns the value of the "error" field in the mutation.
-func (m *UserMutation) Error() (r int, exists bool) {
-	v := m.error
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldError returns the old "error" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldError(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldError is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldError requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldError: %w", err)
-	}
-	return oldValue.Error, nil
-}
-
-// AddError adds i to the "error" field.
-func (m *UserMutation) AddError(i int) {
-	if m.adderror != nil {
-		*m.adderror += i
-	} else {
-		m.adderror = &i
-	}
-}
-
-// AddedError returns the value that was added to the "error" field in this mutation.
-func (m *UserMutation) AddedError() (r int, exists bool) {
-	v := m.adderror
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetError resets all changes to the "error" field.
-func (m *UserMutation) ResetError() {
-	m.error = nil
-	m.adderror = nil
-}
-
-// SetLockedUntil sets the "locked_until" field.
-func (m *UserMutation) SetLockedUntil(t time.Time) {
-	m.locked_until = &t
-}
-
-// LockedUntil returns the value of the "locked_until" field in the mutation.
-func (m *UserMutation) LockedUntil() (r time.Time, exists bool) {
-	v := m.locked_until
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLockedUntil returns the old "locked_until" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldLockedUntil(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLockedUntil is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLockedUntil requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLockedUntil: %w", err)
-	}
-	return oldValue.LockedUntil, nil
-}
-
-// ClearLockedUntil clears the value of the "locked_until" field.
-func (m *UserMutation) ClearLockedUntil() {
-	m.locked_until = nil
-	m.clearedFields[user.FieldLockedUntil] = struct{}{}
-}
-
-// LockedUntilCleared returns if the "locked_until" field was cleared in this mutation.
-func (m *UserMutation) LockedUntilCleared() bool {
-	_, ok := m.clearedFields[user.FieldLockedUntil]
-	return ok
-}
-
-// ResetLockedUntil resets all changes to the "locked_until" field.
-func (m *UserMutation) ResetLockedUntil() {
-	m.locked_until = nil
-	delete(m.clearedFields, user.FieldLockedUntil)
-}
-
-// AddAuthenticationIDs adds the "authentications" edge to the Authorization entity by ids.
+// AddAuthenticationIDs adds the "authentications" edge to the Authentication entity by ids.
 func (m *UserMutation) AddAuthenticationIDs(ids ...string) {
 	if m.authentications == nil {
 		m.authentications = make(map[string]struct{})
@@ -2698,17 +2590,17 @@ func (m *UserMutation) AddAuthenticationIDs(ids ...string) {
 	}
 }
 
-// ClearAuthentications clears the "authentications" edge to the Authorization entity.
+// ClearAuthentications clears the "authentications" edge to the Authentication entity.
 func (m *UserMutation) ClearAuthentications() {
 	m.clearedauthentications = true
 }
 
-// AuthenticationsCleared reports if the "authentications" edge to the Authorization entity was cleared.
+// AuthenticationsCleared reports if the "authentications" edge to the Authentication entity was cleared.
 func (m *UserMutation) AuthenticationsCleared() bool {
 	return m.clearedauthentications
 }
 
-// RemoveAuthenticationIDs removes the "authentications" edge to the Authorization entity by IDs.
+// RemoveAuthenticationIDs removes the "authentications" edge to the Authentication entity by IDs.
 func (m *UserMutation) RemoveAuthenticationIDs(ids ...string) {
 	if m.removedauthentications == nil {
 		m.removedauthentications = make(map[string]struct{})
@@ -2719,7 +2611,7 @@ func (m *UserMutation) RemoveAuthenticationIDs(ids ...string) {
 	}
 }
 
-// RemovedAuthentications returns the removed IDs of the "authentications" edge to the Authorization entity.
+// RemovedAuthentications returns the removed IDs of the "authentications" edge to the Authentication entity.
 func (m *UserMutation) RemovedAuthenticationsIDs() (ids []string) {
 	for id := range m.removedauthentications {
 		ids = append(ids, id)
@@ -2742,7 +2634,7 @@ func (m *UserMutation) ResetAuthentications() {
 	m.removedauthentications = nil
 }
 
-// AddAuthorizationIDs adds the "authorizations" edge to the Application entity by ids.
+// AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by ids.
 func (m *UserMutation) AddAuthorizationIDs(ids ...string) {
 	if m.authorizations == nil {
 		m.authorizations = make(map[string]struct{})
@@ -2752,17 +2644,17 @@ func (m *UserMutation) AddAuthorizationIDs(ids ...string) {
 	}
 }
 
-// ClearAuthorizations clears the "authorizations" edge to the Application entity.
+// ClearAuthorizations clears the "authorizations" edge to the Authorization entity.
 func (m *UserMutation) ClearAuthorizations() {
 	m.clearedauthorizations = true
 }
 
-// AuthorizationsCleared reports if the "authorizations" edge to the Application entity was cleared.
+// AuthorizationsCleared reports if the "authorizations" edge to the Authorization entity was cleared.
 func (m *UserMutation) AuthorizationsCleared() bool {
 	return m.clearedauthorizations
 }
 
-// RemoveAuthorizationIDs removes the "authorizations" edge to the Application entity by IDs.
+// RemoveAuthorizationIDs removes the "authorizations" edge to the Authorization entity by IDs.
 func (m *UserMutation) RemoveAuthorizationIDs(ids ...string) {
 	if m.removedauthorizations == nil {
 		m.removedauthorizations = make(map[string]struct{})
@@ -2773,7 +2665,7 @@ func (m *UserMutation) RemoveAuthorizationIDs(ids ...string) {
 	}
 }
 
-// RemovedAuthorizations returns the removed IDs of the "authorizations" edge to the Application entity.
+// RemovedAuthorizations returns the removed IDs of the "authorizations" edge to the Authorization entity.
 func (m *UserMutation) RemovedAuthorizationsIDs() (ids []string) {
 	for id := range m.removedauthorizations {
 		ids = append(ids, id)
@@ -2796,58 +2688,58 @@ func (m *UserMutation) ResetAuthorizations() {
 	m.removedauthorizations = nil
 }
 
-// AddSessionIDs adds the "sessions" edge to the Authentication entity by ids.
-func (m *UserMutation) AddSessionIDs(ids ...string) {
-	if m.sessions == nil {
-		m.sessions = make(map[string]struct{})
+// AddApplicationIDs adds the "applications" edge to the Application entity by ids.
+func (m *UserMutation) AddApplicationIDs(ids ...string) {
+	if m.applications == nil {
+		m.applications = make(map[string]struct{})
 	}
 	for i := range ids {
-		m.sessions[ids[i]] = struct{}{}
+		m.applications[ids[i]] = struct{}{}
 	}
 }
 
-// ClearSessions clears the "sessions" edge to the Authentication entity.
-func (m *UserMutation) ClearSessions() {
-	m.clearedsessions = true
+// ClearApplications clears the "applications" edge to the Application entity.
+func (m *UserMutation) ClearApplications() {
+	m.clearedapplications = true
 }
 
-// SessionsCleared reports if the "sessions" edge to the Authentication entity was cleared.
-func (m *UserMutation) SessionsCleared() bool {
-	return m.clearedsessions
+// ApplicationsCleared reports if the "applications" edge to the Application entity was cleared.
+func (m *UserMutation) ApplicationsCleared() bool {
+	return m.clearedapplications
 }
 
-// RemoveSessionIDs removes the "sessions" edge to the Authentication entity by IDs.
-func (m *UserMutation) RemoveSessionIDs(ids ...string) {
-	if m.removedsessions == nil {
-		m.removedsessions = make(map[string]struct{})
+// RemoveApplicationIDs removes the "applications" edge to the Application entity by IDs.
+func (m *UserMutation) RemoveApplicationIDs(ids ...string) {
+	if m.removedapplications == nil {
+		m.removedapplications = make(map[string]struct{})
 	}
 	for i := range ids {
-		delete(m.sessions, ids[i])
-		m.removedsessions[ids[i]] = struct{}{}
+		delete(m.applications, ids[i])
+		m.removedapplications[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedSessions returns the removed IDs of the "sessions" edge to the Authentication entity.
-func (m *UserMutation) RemovedSessionsIDs() (ids []string) {
-	for id := range m.removedsessions {
+// RemovedApplications returns the removed IDs of the "applications" edge to the Application entity.
+func (m *UserMutation) RemovedApplicationsIDs() (ids []string) {
+	for id := range m.removedapplications {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// SessionsIDs returns the "sessions" edge IDs in the mutation.
-func (m *UserMutation) SessionsIDs() (ids []string) {
-	for id := range m.sessions {
+// ApplicationsIDs returns the "applications" edge IDs in the mutation.
+func (m *UserMutation) ApplicationsIDs() (ids []string) {
+	for id := range m.applications {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetSessions resets all changes to the "sessions" edge.
-func (m *UserMutation) ResetSessions() {
-	m.sessions = nil
-	m.clearedsessions = false
-	m.removedsessions = nil
+// ResetApplications resets all changes to the "applications" edge.
+func (m *UserMutation) ResetApplications() {
+	m.applications = nil
+	m.clearedapplications = false
+	m.removedapplications = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -2884,7 +2776,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -2902,12 +2794,6 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.pwhash != nil {
 		fields = append(fields, user.FieldPwhash)
-	}
-	if m.error != nil {
-		fields = append(fields, user.FieldError)
-	}
-	if m.locked_until != nil {
-		fields = append(fields, user.FieldLockedUntil)
 	}
 	return fields
 }
@@ -2929,10 +2815,6 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Email()
 	case user.FieldPwhash:
 		return m.Pwhash()
-	case user.FieldError:
-		return m.Error()
-	case user.FieldLockedUntil:
-		return m.LockedUntil()
 	}
 	return nil, false
 }
@@ -2954,10 +2836,6 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldEmail(ctx)
 	case user.FieldPwhash:
 		return m.OldPwhash(ctx)
-	case user.FieldError:
-		return m.OldError(ctx)
-	case user.FieldLockedUntil:
-		return m.OldLockedUntil(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -3009,20 +2887,6 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPwhash(v)
 		return nil
-	case user.FieldError:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetError(v)
-		return nil
-	case user.FieldLockedUntil:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLockedUntil(v)
-		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -3030,21 +2894,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	var fields []string
-	if m.adderror != nil {
-		fields = append(fields, user.FieldError)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case user.FieldError:
-		return m.AddedError()
-	}
 	return nil, false
 }
 
@@ -3053,13 +2909,6 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldError:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddError(v)
-		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -3070,9 +2919,6 @@ func (m *UserMutation) ClearedFields() []string {
 	var fields []string
 	if m.FieldCleared(user.FieldDeletedAt) {
 		fields = append(fields, user.FieldDeletedAt)
-	}
-	if m.FieldCleared(user.FieldLockedUntil) {
-		fields = append(fields, user.FieldLockedUntil)
 	}
 	return fields
 }
@@ -3090,9 +2936,6 @@ func (m *UserMutation) ClearField(name string) error {
 	switch name {
 	case user.FieldDeletedAt:
 		m.ClearDeletedAt()
-		return nil
-	case user.FieldLockedUntil:
-		m.ClearLockedUntil()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -3120,12 +2963,6 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldPwhash:
 		m.ResetPwhash()
 		return nil
-	case user.FieldError:
-		m.ResetError()
-		return nil
-	case user.FieldLockedUntil:
-		m.ResetLockedUntil()
-		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -3139,8 +2976,8 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.authorizations != nil {
 		edges = append(edges, user.EdgeAuthorizations)
 	}
-	if m.sessions != nil {
-		edges = append(edges, user.EdgeSessions)
+	if m.applications != nil {
+		edges = append(edges, user.EdgeApplications)
 	}
 	return edges
 }
@@ -3161,9 +2998,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeSessions:
-		ids := make([]ent.Value, 0, len(m.sessions))
-		for id := range m.sessions {
+	case user.EdgeApplications:
+		ids := make([]ent.Value, 0, len(m.applications))
+		for id := range m.applications {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3180,8 +3017,8 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedauthorizations != nil {
 		edges = append(edges, user.EdgeAuthorizations)
 	}
-	if m.removedsessions != nil {
-		edges = append(edges, user.EdgeSessions)
+	if m.removedapplications != nil {
+		edges = append(edges, user.EdgeApplications)
 	}
 	return edges
 }
@@ -3202,9 +3039,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeSessions:
-		ids := make([]ent.Value, 0, len(m.removedsessions))
-		for id := range m.removedsessions {
+	case user.EdgeApplications:
+		ids := make([]ent.Value, 0, len(m.removedapplications))
+		for id := range m.removedapplications {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3221,8 +3058,8 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedauthorizations {
 		edges = append(edges, user.EdgeAuthorizations)
 	}
-	if m.clearedsessions {
-		edges = append(edges, user.EdgeSessions)
+	if m.clearedapplications {
+		edges = append(edges, user.EdgeApplications)
 	}
 	return edges
 }
@@ -3235,8 +3072,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedauthentications
 	case user.EdgeAuthorizations:
 		return m.clearedauthorizations
-	case user.EdgeSessions:
-		return m.clearedsessions
+	case user.EdgeApplications:
+		return m.clearedapplications
 	}
 	return false
 }
@@ -3259,8 +3096,8 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeAuthorizations:
 		m.ResetAuthorizations()
 		return nil
-	case user.EdgeSessions:
-		m.ResetSessions()
+	case user.EdgeApplications:
+		m.ResetApplications()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

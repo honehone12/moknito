@@ -784,13 +784,13 @@ func (c *UserClient) GetX(ctx context.Context, id string) *User {
 }
 
 // QueryAuthentications queries the authentications edge of a User.
-func (c *UserClient) QueryAuthentications(_m *User) *AuthorizationQuery {
-	query := (&AuthorizationClient{config: c.config}).Query()
+func (c *UserClient) QueryAuthentications(_m *User) *AuthenticationQuery {
+	query := (&AuthenticationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(authorization.Table, authorization.FieldID),
+			sqlgraph.To(authentication.Table, authentication.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthenticationsTable, user.AuthenticationsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -800,13 +800,13 @@ func (c *UserClient) QueryAuthentications(_m *User) *AuthorizationQuery {
 }
 
 // QueryAuthorizations queries the authorizations edge of a User.
-func (c *UserClient) QueryAuthorizations(_m *User) *ApplicationQuery {
-	query := (&ApplicationClient{config: c.config}).Query()
+func (c *UserClient) QueryAuthorizations(_m *User) *AuthorizationQuery {
+	query := (&AuthorizationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.To(authorization.Table, authorization.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.AuthorizationsTable, user.AuthorizationsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
@@ -815,15 +815,15 @@ func (c *UserClient) QueryAuthorizations(_m *User) *ApplicationQuery {
 	return query
 }
 
-// QuerySessions queries the sessions edge of a User.
-func (c *UserClient) QuerySessions(_m *User) *AuthenticationQuery {
-	query := (&AuthenticationClient{config: c.config}).Query()
+// QueryApplications queries the applications edge of a User.
+func (c *UserClient) QueryApplications(_m *User) *ApplicationQuery {
+	query := (&ApplicationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(authentication.Table, authentication.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ApplicationsTable, user.ApplicationsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

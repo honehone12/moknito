@@ -26,39 +26,35 @@ const (
 	FieldEmail = "email"
 	// FieldPwhash holds the string denoting the pwhash field in the database.
 	FieldPwhash = "pwhash"
-	// FieldError holds the string denoting the error field in the database.
-	FieldError = "error"
-	// FieldLockedUntil holds the string denoting the locked_until field in the database.
-	FieldLockedUntil = "locked_until"
 	// EdgeAuthentications holds the string denoting the authentications edge name in mutations.
 	EdgeAuthentications = "authentications"
 	// EdgeAuthorizations holds the string denoting the authorizations edge name in mutations.
 	EdgeAuthorizations = "authorizations"
-	// EdgeSessions holds the string denoting the sessions edge name in mutations.
-	EdgeSessions = "sessions"
+	// EdgeApplications holds the string denoting the applications edge name in mutations.
+	EdgeApplications = "applications"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// AuthenticationsTable is the table that holds the authentications relation/edge.
-	AuthenticationsTable = "authorizations"
-	// AuthenticationsInverseTable is the table name for the Authorization entity.
-	// It exists in this package in order to avoid circular dependency with the "authorization" package.
-	AuthenticationsInverseTable = "authorizations"
+	AuthenticationsTable = "authentications"
+	// AuthenticationsInverseTable is the table name for the Authentication entity.
+	// It exists in this package in order to avoid circular dependency with the "authentication" package.
+	AuthenticationsInverseTable = "authentications"
 	// AuthenticationsColumn is the table column denoting the authentications relation/edge.
 	AuthenticationsColumn = "user_authentications"
 	// AuthorizationsTable is the table that holds the authorizations relation/edge.
-	AuthorizationsTable = "applications"
-	// AuthorizationsInverseTable is the table name for the Application entity.
-	// It exists in this package in order to avoid circular dependency with the "application" package.
-	AuthorizationsInverseTable = "applications"
+	AuthorizationsTable = "authorizations"
+	// AuthorizationsInverseTable is the table name for the Authorization entity.
+	// It exists in this package in order to avoid circular dependency with the "authorization" package.
+	AuthorizationsInverseTable = "authorizations"
 	// AuthorizationsColumn is the table column denoting the authorizations relation/edge.
 	AuthorizationsColumn = "user_authorizations"
-	// SessionsTable is the table that holds the sessions relation/edge.
-	SessionsTable = "authentications"
-	// SessionsInverseTable is the table name for the Authentication entity.
-	// It exists in this package in order to avoid circular dependency with the "authentication" package.
-	SessionsInverseTable = "authentications"
-	// SessionsColumn is the table column denoting the sessions relation/edge.
-	SessionsColumn = "user_sessions"
+	// ApplicationsTable is the table that holds the applications relation/edge.
+	ApplicationsTable = "applications"
+	// ApplicationsInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	ApplicationsInverseTable = "applications"
+	// ApplicationsColumn is the table column denoting the applications relation/edge.
+	ApplicationsColumn = "user_applications"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -70,8 +66,6 @@ var Columns = []string{
 	FieldName,
 	FieldEmail,
 	FieldPwhash,
-	FieldError,
-	FieldLockedUntil,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -97,10 +91,6 @@ var (
 	EmailValidator func(string) error
 	// PwhashValidator is a validator for the "pwhash" field. It is called by the builders before save.
 	PwhashValidator func(string) error
-	// DefaultError holds the default value on creation for the "error" field.
-	DefaultError int
-	// ErrorValidator is a validator for the "error" field. It is called by the builders before save.
-	ErrorValidator func(int) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -143,16 +133,6 @@ func ByPwhash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPwhash, opts...).ToFunc()
 }
 
-// ByError orders the results by the error field.
-func ByError(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldError, opts...).ToFunc()
-}
-
-// ByLockedUntil orders the results by the locked_until field.
-func ByLockedUntil(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLockedUntil, opts...).ToFunc()
-}
-
 // ByAuthenticationsCount orders the results by authentications count.
 func ByAuthenticationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -181,17 +161,17 @@ func ByAuthorizations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// BySessionsCount orders the results by sessions count.
-func BySessionsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByApplicationsCount orders the results by applications count.
+func ByApplicationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newSessionsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newApplicationsStep(), opts...)
 	}
 }
 
-// BySessions orders the results by sessions terms.
-func BySessions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByApplications orders the results by applications terms.
+func ByApplications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSessionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newApplicationsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newAuthenticationsStep() *sqlgraph.Step {
@@ -208,10 +188,10 @@ func newAuthorizationsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, AuthorizationsTable, AuthorizationsColumn),
 	)
 }
-func newSessionsStep() *sqlgraph.Step {
+func newApplicationsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SessionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
+		sqlgraph.To(ApplicationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ApplicationsTable, ApplicationsColumn),
 	)
 }

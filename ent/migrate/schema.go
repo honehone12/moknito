@@ -17,7 +17,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "domain", Type: field.TypeString},
 		{Name: "client_id", Type: field.TypeString},
-		{Name: "user_authorizations", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_applications", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// ApplicationsTable holds the schema information for the "applications" table.
 	ApplicationsTable = &schema.Table{
@@ -26,7 +26,7 @@ var (
 		PrimaryKey: []*schema.Column{ApplicationsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "applications_users_authorizations",
+				Symbol:     "applications_users_applications",
 				Columns:    []*schema.Column{ApplicationsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
@@ -42,7 +42,7 @@ var (
 		{Name: "ip", Type: field.TypeString, Nullable: true, Size: 256},
 		{Name: "user_agent", Type: field.TypeString, Nullable: true, Size: 256},
 		{Name: "logout_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_sessions", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_authentications", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthenticationsTable holds the schema information for the "authentications" table.
 	AuthenticationsTable = &schema.Table{
@@ -51,7 +51,7 @@ var (
 		PrimaryKey: []*schema.Column{AuthenticationsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "authentications_users_sessions",
+				Symbol:     "authentications_users_authentications",
 				Columns:    []*schema.Column{AuthenticationsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
@@ -67,7 +67,7 @@ var (
 		{Name: "code", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "challenge", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"mysql": "binary(32)"}},
 		{Name: "expire_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_authentications", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_authorizations", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthorizationsTable holds the schema information for the "authorizations" table.
 	AuthorizationsTable = &schema.Table{
@@ -76,7 +76,7 @@ var (
 		PrimaryKey: []*schema.Column{AuthorizationsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "authorizations_users_authentications",
+				Symbol:     "authorizations_users_authorizations",
 				Columns:    []*schema.Column{AuthorizationsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
@@ -92,8 +92,6 @@ var (
 		{Name: "name", Type: field.TypeString, Size: 256},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 256},
 		{Name: "pwhash", Type: field.TypeString},
-		{Name: "error", Type: field.TypeInt, Default: 0},
-		{Name: "locked_until", Type: field.TypeTime, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

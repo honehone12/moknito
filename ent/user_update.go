@@ -99,55 +99,14 @@ func (_u *UserUpdate) SetNillablePwhash(v *string) *UserUpdate {
 	return _u
 }
 
-// SetError sets the "error" field.
-func (_u *UserUpdate) SetError(v int) *UserUpdate {
-	_u.mutation.ResetError()
-	_u.mutation.SetError(v)
-	return _u
-}
-
-// SetNillableError sets the "error" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableError(v *int) *UserUpdate {
-	if v != nil {
-		_u.SetError(*v)
-	}
-	return _u
-}
-
-// AddError adds value to the "error" field.
-func (_u *UserUpdate) AddError(v int) *UserUpdate {
-	_u.mutation.AddError(v)
-	return _u
-}
-
-// SetLockedUntil sets the "locked_until" field.
-func (_u *UserUpdate) SetLockedUntil(v time.Time) *UserUpdate {
-	_u.mutation.SetLockedUntil(v)
-	return _u
-}
-
-// SetNillableLockedUntil sets the "locked_until" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableLockedUntil(v *time.Time) *UserUpdate {
-	if v != nil {
-		_u.SetLockedUntil(*v)
-	}
-	return _u
-}
-
-// ClearLockedUntil clears the value of the "locked_until" field.
-func (_u *UserUpdate) ClearLockedUntil() *UserUpdate {
-	_u.mutation.ClearLockedUntil()
-	return _u
-}
-
-// AddAuthenticationIDs adds the "authentications" edge to the Authorization entity by IDs.
+// AddAuthenticationIDs adds the "authentications" edge to the Authentication entity by IDs.
 func (_u *UserUpdate) AddAuthenticationIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddAuthenticationIDs(ids...)
 	return _u
 }
 
-// AddAuthentications adds the "authentications" edges to the Authorization entity.
-func (_u *UserUpdate) AddAuthentications(v ...*Authorization) *UserUpdate {
+// AddAuthentications adds the "authentications" edges to the Authentication entity.
+func (_u *UserUpdate) AddAuthentications(v ...*Authentication) *UserUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -155,14 +114,14 @@ func (_u *UserUpdate) AddAuthentications(v ...*Authorization) *UserUpdate {
 	return _u.AddAuthenticationIDs(ids...)
 }
 
-// AddAuthorizationIDs adds the "authorizations" edge to the Application entity by IDs.
+// AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by IDs.
 func (_u *UserUpdate) AddAuthorizationIDs(ids ...string) *UserUpdate {
 	_u.mutation.AddAuthorizationIDs(ids...)
 	return _u
 }
 
-// AddAuthorizations adds the "authorizations" edges to the Application entity.
-func (_u *UserUpdate) AddAuthorizations(v ...*Application) *UserUpdate {
+// AddAuthorizations adds the "authorizations" edges to the Authorization entity.
+func (_u *UserUpdate) AddAuthorizations(v ...*Authorization) *UserUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -170,19 +129,19 @@ func (_u *UserUpdate) AddAuthorizations(v ...*Application) *UserUpdate {
 	return _u.AddAuthorizationIDs(ids...)
 }
 
-// AddSessionIDs adds the "sessions" edge to the Authentication entity by IDs.
-func (_u *UserUpdate) AddSessionIDs(ids ...string) *UserUpdate {
-	_u.mutation.AddSessionIDs(ids...)
+// AddApplicationIDs adds the "applications" edge to the Application entity by IDs.
+func (_u *UserUpdate) AddApplicationIDs(ids ...string) *UserUpdate {
+	_u.mutation.AddApplicationIDs(ids...)
 	return _u
 }
 
-// AddSessions adds the "sessions" edges to the Authentication entity.
-func (_u *UserUpdate) AddSessions(v ...*Authentication) *UserUpdate {
+// AddApplications adds the "applications" edges to the Application entity.
+func (_u *UserUpdate) AddApplications(v ...*Application) *UserUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddSessionIDs(ids...)
+	return _u.AddApplicationIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -190,20 +149,20 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
 }
 
-// ClearAuthentications clears all "authentications" edges to the Authorization entity.
+// ClearAuthentications clears all "authentications" edges to the Authentication entity.
 func (_u *UserUpdate) ClearAuthentications() *UserUpdate {
 	_u.mutation.ClearAuthentications()
 	return _u
 }
 
-// RemoveAuthenticationIDs removes the "authentications" edge to Authorization entities by IDs.
+// RemoveAuthenticationIDs removes the "authentications" edge to Authentication entities by IDs.
 func (_u *UserUpdate) RemoveAuthenticationIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveAuthenticationIDs(ids...)
 	return _u
 }
 
-// RemoveAuthentications removes "authentications" edges to Authorization entities.
-func (_u *UserUpdate) RemoveAuthentications(v ...*Authorization) *UserUpdate {
+// RemoveAuthentications removes "authentications" edges to Authentication entities.
+func (_u *UserUpdate) RemoveAuthentications(v ...*Authentication) *UserUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -211,20 +170,20 @@ func (_u *UserUpdate) RemoveAuthentications(v ...*Authorization) *UserUpdate {
 	return _u.RemoveAuthenticationIDs(ids...)
 }
 
-// ClearAuthorizations clears all "authorizations" edges to the Application entity.
+// ClearAuthorizations clears all "authorizations" edges to the Authorization entity.
 func (_u *UserUpdate) ClearAuthorizations() *UserUpdate {
 	_u.mutation.ClearAuthorizations()
 	return _u
 }
 
-// RemoveAuthorizationIDs removes the "authorizations" edge to Application entities by IDs.
+// RemoveAuthorizationIDs removes the "authorizations" edge to Authorization entities by IDs.
 func (_u *UserUpdate) RemoveAuthorizationIDs(ids ...string) *UserUpdate {
 	_u.mutation.RemoveAuthorizationIDs(ids...)
 	return _u
 }
 
-// RemoveAuthorizations removes "authorizations" edges to Application entities.
-func (_u *UserUpdate) RemoveAuthorizations(v ...*Application) *UserUpdate {
+// RemoveAuthorizations removes "authorizations" edges to Authorization entities.
+func (_u *UserUpdate) RemoveAuthorizations(v ...*Authorization) *UserUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -232,25 +191,25 @@ func (_u *UserUpdate) RemoveAuthorizations(v ...*Application) *UserUpdate {
 	return _u.RemoveAuthorizationIDs(ids...)
 }
 
-// ClearSessions clears all "sessions" edges to the Authentication entity.
-func (_u *UserUpdate) ClearSessions() *UserUpdate {
-	_u.mutation.ClearSessions()
+// ClearApplications clears all "applications" edges to the Application entity.
+func (_u *UserUpdate) ClearApplications() *UserUpdate {
+	_u.mutation.ClearApplications()
 	return _u
 }
 
-// RemoveSessionIDs removes the "sessions" edge to Authentication entities by IDs.
-func (_u *UserUpdate) RemoveSessionIDs(ids ...string) *UserUpdate {
-	_u.mutation.RemoveSessionIDs(ids...)
+// RemoveApplicationIDs removes the "applications" edge to Application entities by IDs.
+func (_u *UserUpdate) RemoveApplicationIDs(ids ...string) *UserUpdate {
+	_u.mutation.RemoveApplicationIDs(ids...)
 	return _u
 }
 
-// RemoveSessions removes "sessions" edges to Authentication entities.
-func (_u *UserUpdate) RemoveSessions(v ...*Authentication) *UserUpdate {
+// RemoveApplications removes "applications" edges to Application entities.
+func (_u *UserUpdate) RemoveApplications(v ...*Application) *UserUpdate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveSessionIDs(ids...)
+	return _u.RemoveApplicationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -306,11 +265,6 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Error(); ok {
-		if err := user.ErrorValidator(v); err != nil {
-			return &ValidationError{Name: "error", err: fmt.Errorf(`ent: validator failed for field "User.error": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -344,18 +298,6 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Pwhash(); ok {
 		_spec.SetField(user.FieldPwhash, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Error(); ok {
-		_spec.SetField(user.FieldError, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedError(); ok {
-		_spec.AddField(user.FieldError, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.LockedUntil(); ok {
-		_spec.SetField(user.FieldLockedUntil, field.TypeTime, value)
-	}
-	if _u.mutation.LockedUntilCleared() {
-		_spec.ClearField(user.FieldLockedUntil, field.TypeTime)
-	}
 	if _u.mutation.AuthenticationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -364,7 +306,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -377,7 +319,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -393,7 +335,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -409,7 +351,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -422,7 +364,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -438,7 +380,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -446,28 +388,28 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SessionsCleared() {
+	if _u.mutation.ApplicationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.ApplicationsTable,
+			Columns: []string{user.ApplicationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
+	if nodes := _u.mutation.RemovedApplicationsIDs(); len(nodes) > 0 && !_u.mutation.ApplicationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.ApplicationsTable,
+			Columns: []string{user.ApplicationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -475,15 +417,15 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.ApplicationsTable,
+			Columns: []string{user.ApplicationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -579,55 +521,14 @@ func (_u *UserUpdateOne) SetNillablePwhash(v *string) *UserUpdateOne {
 	return _u
 }
 
-// SetError sets the "error" field.
-func (_u *UserUpdateOne) SetError(v int) *UserUpdateOne {
-	_u.mutation.ResetError()
-	_u.mutation.SetError(v)
-	return _u
-}
-
-// SetNillableError sets the "error" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableError(v *int) *UserUpdateOne {
-	if v != nil {
-		_u.SetError(*v)
-	}
-	return _u
-}
-
-// AddError adds value to the "error" field.
-func (_u *UserUpdateOne) AddError(v int) *UserUpdateOne {
-	_u.mutation.AddError(v)
-	return _u
-}
-
-// SetLockedUntil sets the "locked_until" field.
-func (_u *UserUpdateOne) SetLockedUntil(v time.Time) *UserUpdateOne {
-	_u.mutation.SetLockedUntil(v)
-	return _u
-}
-
-// SetNillableLockedUntil sets the "locked_until" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableLockedUntil(v *time.Time) *UserUpdateOne {
-	if v != nil {
-		_u.SetLockedUntil(*v)
-	}
-	return _u
-}
-
-// ClearLockedUntil clears the value of the "locked_until" field.
-func (_u *UserUpdateOne) ClearLockedUntil() *UserUpdateOne {
-	_u.mutation.ClearLockedUntil()
-	return _u
-}
-
-// AddAuthenticationIDs adds the "authentications" edge to the Authorization entity by IDs.
+// AddAuthenticationIDs adds the "authentications" edge to the Authentication entity by IDs.
 func (_u *UserUpdateOne) AddAuthenticationIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddAuthenticationIDs(ids...)
 	return _u
 }
 
-// AddAuthentications adds the "authentications" edges to the Authorization entity.
-func (_u *UserUpdateOne) AddAuthentications(v ...*Authorization) *UserUpdateOne {
+// AddAuthentications adds the "authentications" edges to the Authentication entity.
+func (_u *UserUpdateOne) AddAuthentications(v ...*Authentication) *UserUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -635,14 +536,14 @@ func (_u *UserUpdateOne) AddAuthentications(v ...*Authorization) *UserUpdateOne 
 	return _u.AddAuthenticationIDs(ids...)
 }
 
-// AddAuthorizationIDs adds the "authorizations" edge to the Application entity by IDs.
+// AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by IDs.
 func (_u *UserUpdateOne) AddAuthorizationIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.AddAuthorizationIDs(ids...)
 	return _u
 }
 
-// AddAuthorizations adds the "authorizations" edges to the Application entity.
-func (_u *UserUpdateOne) AddAuthorizations(v ...*Application) *UserUpdateOne {
+// AddAuthorizations adds the "authorizations" edges to the Authorization entity.
+func (_u *UserUpdateOne) AddAuthorizations(v ...*Authorization) *UserUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -650,19 +551,19 @@ func (_u *UserUpdateOne) AddAuthorizations(v ...*Application) *UserUpdateOne {
 	return _u.AddAuthorizationIDs(ids...)
 }
 
-// AddSessionIDs adds the "sessions" edge to the Authentication entity by IDs.
-func (_u *UserUpdateOne) AddSessionIDs(ids ...string) *UserUpdateOne {
-	_u.mutation.AddSessionIDs(ids...)
+// AddApplicationIDs adds the "applications" edge to the Application entity by IDs.
+func (_u *UserUpdateOne) AddApplicationIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.AddApplicationIDs(ids...)
 	return _u
 }
 
-// AddSessions adds the "sessions" edges to the Authentication entity.
-func (_u *UserUpdateOne) AddSessions(v ...*Authentication) *UserUpdateOne {
+// AddApplications adds the "applications" edges to the Application entity.
+func (_u *UserUpdateOne) AddApplications(v ...*Application) *UserUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.AddSessionIDs(ids...)
+	return _u.AddApplicationIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -670,20 +571,20 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
 }
 
-// ClearAuthentications clears all "authentications" edges to the Authorization entity.
+// ClearAuthentications clears all "authentications" edges to the Authentication entity.
 func (_u *UserUpdateOne) ClearAuthentications() *UserUpdateOne {
 	_u.mutation.ClearAuthentications()
 	return _u
 }
 
-// RemoveAuthenticationIDs removes the "authentications" edge to Authorization entities by IDs.
+// RemoveAuthenticationIDs removes the "authentications" edge to Authentication entities by IDs.
 func (_u *UserUpdateOne) RemoveAuthenticationIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveAuthenticationIDs(ids...)
 	return _u
 }
 
-// RemoveAuthentications removes "authentications" edges to Authorization entities.
-func (_u *UserUpdateOne) RemoveAuthentications(v ...*Authorization) *UserUpdateOne {
+// RemoveAuthentications removes "authentications" edges to Authentication entities.
+func (_u *UserUpdateOne) RemoveAuthentications(v ...*Authentication) *UserUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -691,20 +592,20 @@ func (_u *UserUpdateOne) RemoveAuthentications(v ...*Authorization) *UserUpdateO
 	return _u.RemoveAuthenticationIDs(ids...)
 }
 
-// ClearAuthorizations clears all "authorizations" edges to the Application entity.
+// ClearAuthorizations clears all "authorizations" edges to the Authorization entity.
 func (_u *UserUpdateOne) ClearAuthorizations() *UserUpdateOne {
 	_u.mutation.ClearAuthorizations()
 	return _u
 }
 
-// RemoveAuthorizationIDs removes the "authorizations" edge to Application entities by IDs.
+// RemoveAuthorizationIDs removes the "authorizations" edge to Authorization entities by IDs.
 func (_u *UserUpdateOne) RemoveAuthorizationIDs(ids ...string) *UserUpdateOne {
 	_u.mutation.RemoveAuthorizationIDs(ids...)
 	return _u
 }
 
-// RemoveAuthorizations removes "authorizations" edges to Application entities.
-func (_u *UserUpdateOne) RemoveAuthorizations(v ...*Application) *UserUpdateOne {
+// RemoveAuthorizations removes "authorizations" edges to Authorization entities.
+func (_u *UserUpdateOne) RemoveAuthorizations(v ...*Authorization) *UserUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -712,25 +613,25 @@ func (_u *UserUpdateOne) RemoveAuthorizations(v ...*Application) *UserUpdateOne 
 	return _u.RemoveAuthorizationIDs(ids...)
 }
 
-// ClearSessions clears all "sessions" edges to the Authentication entity.
-func (_u *UserUpdateOne) ClearSessions() *UserUpdateOne {
-	_u.mutation.ClearSessions()
+// ClearApplications clears all "applications" edges to the Application entity.
+func (_u *UserUpdateOne) ClearApplications() *UserUpdateOne {
+	_u.mutation.ClearApplications()
 	return _u
 }
 
-// RemoveSessionIDs removes the "sessions" edge to Authentication entities by IDs.
-func (_u *UserUpdateOne) RemoveSessionIDs(ids ...string) *UserUpdateOne {
-	_u.mutation.RemoveSessionIDs(ids...)
+// RemoveApplicationIDs removes the "applications" edge to Application entities by IDs.
+func (_u *UserUpdateOne) RemoveApplicationIDs(ids ...string) *UserUpdateOne {
+	_u.mutation.RemoveApplicationIDs(ids...)
 	return _u
 }
 
-// RemoveSessions removes "sessions" edges to Authentication entities.
-func (_u *UserUpdateOne) RemoveSessions(v ...*Authentication) *UserUpdateOne {
+// RemoveApplications removes "applications" edges to Application entities.
+func (_u *UserUpdateOne) RemoveApplications(v ...*Application) *UserUpdateOne {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _u.RemoveSessionIDs(ids...)
+	return _u.RemoveApplicationIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -799,11 +700,6 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.Error(); ok {
-		if err := user.ErrorValidator(v); err != nil {
-			return &ValidationError{Name: "error", err: fmt.Errorf(`ent: validator failed for field "User.error": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -854,18 +750,6 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	if value, ok := _u.mutation.Pwhash(); ok {
 		_spec.SetField(user.FieldPwhash, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Error(); ok {
-		_spec.SetField(user.FieldError, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedError(); ok {
-		_spec.AddField(user.FieldError, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.LockedUntil(); ok {
-		_spec.SetField(user.FieldLockedUntil, field.TypeTime, value)
-	}
-	if _u.mutation.LockedUntilCleared() {
-		_spec.ClearField(user.FieldLockedUntil, field.TypeTime)
-	}
 	if _u.mutation.AuthenticationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -874,7 +758,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -887,7 +771,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -903,7 +787,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -919,7 +803,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -932,7 +816,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -948,7 +832,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -956,28 +840,28 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SessionsCleared() {
+	if _u.mutation.ApplicationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.ApplicationsTable,
+			Columns: []string{user.ApplicationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
+	if nodes := _u.mutation.RemovedApplicationsIDs(); len(nodes) > 0 && !_u.mutation.ApplicationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.ApplicationsTable,
+			Columns: []string{user.ApplicationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -985,15 +869,15 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ApplicationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.ApplicationsTable,
+			Columns: []string{user.ApplicationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

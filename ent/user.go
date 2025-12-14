@@ -29,10 +29,6 @@ type User struct {
 	Email string `json:"email,omitempty"`
 	// Pwhash holds the value of the "pwhash" field.
 	Pwhash string `json:"pwhash,omitempty"`
-	// Error holds the value of the "error" field.
-	Error int `json:"error,omitempty"`
-	// LockedUntil holds the value of the "locked_until" field.
-	LockedUntil *time.Time `json:"locked_until,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -42,11 +38,11 @@ type User struct {
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Authentications holds the value of the authentications edge.
-	Authentications []*Authorization `json:"authentications,omitempty"`
+	Authentications []*Authentication `json:"authentications,omitempty"`
 	// Authorizations holds the value of the authorizations edge.
-	Authorizations []*Application `json:"authorizations,omitempty"`
-	// Sessions holds the value of the sessions edge.
-	Sessions []*Authentication `json:"sessions,omitempty"`
+	Authorizations []*Authorization `json:"authorizations,omitempty"`
+	// Applications holds the value of the applications edge.
+	Applications []*Application `json:"applications,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -54,7 +50,7 @@ type UserEdges struct {
 
 // AuthenticationsOrErr returns the Authentications value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) AuthenticationsOrErr() ([]*Authorization, error) {
+func (e UserEdges) AuthenticationsOrErr() ([]*Authentication, error) {
 	if e.loadedTypes[0] {
 		return e.Authentications, nil
 	}
@@ -63,20 +59,20 @@ func (e UserEdges) AuthenticationsOrErr() ([]*Authorization, error) {
 
 // AuthorizationsOrErr returns the Authorizations value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) AuthorizationsOrErr() ([]*Application, error) {
+func (e UserEdges) AuthorizationsOrErr() ([]*Authorization, error) {
 	if e.loadedTypes[1] {
 		return e.Authorizations, nil
 	}
 	return nil, &NotLoadedError{edge: "authorizations"}
 }
 
-// SessionsOrErr returns the Sessions value or an error if the edge
+// ApplicationsOrErr returns the Applications value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) SessionsOrErr() ([]*Authentication, error) {
+func (e UserEdges) ApplicationsOrErr() ([]*Application, error) {
 	if e.loadedTypes[2] {
-		return e.Sessions, nil
+		return e.Applications, nil
 	}
-	return nil, &NotLoadedError{edge: "sessions"}
+	return nil, &NotLoadedError{edge: "applications"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -84,11 +80,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldError:
-			values[i] = new(sql.NullInt64)
 		case user.FieldID, user.FieldName, user.FieldEmail, user.FieldPwhash:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldLockedUntil:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -148,19 +142,6 @@ func (_m *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Pwhash = value.String
 			}
-		case user.FieldError:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field error", values[i])
-			} else if value.Valid {
-				_m.Error = int(value.Int64)
-			}
-		case user.FieldLockedUntil:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field locked_until", values[i])
-			} else if value.Valid {
-				_m.LockedUntil = new(time.Time)
-				*_m.LockedUntil = value.Time
-			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -175,18 +156,18 @@ func (_m *User) Value(name string) (ent.Value, error) {
 }
 
 // QueryAuthentications queries the "authentications" edge of the User entity.
-func (_m *User) QueryAuthentications() *AuthorizationQuery {
+func (_m *User) QueryAuthentications() *AuthenticationQuery {
 	return NewUserClient(_m.config).QueryAuthentications(_m)
 }
 
 // QueryAuthorizations queries the "authorizations" edge of the User entity.
-func (_m *User) QueryAuthorizations() *ApplicationQuery {
+func (_m *User) QueryAuthorizations() *AuthorizationQuery {
 	return NewUserClient(_m.config).QueryAuthorizations(_m)
 }
 
-// QuerySessions queries the "sessions" edge of the User entity.
-func (_m *User) QuerySessions() *AuthenticationQuery {
-	return NewUserClient(_m.config).QuerySessions(_m)
+// QueryApplications queries the "applications" edge of the User entity.
+func (_m *User) QueryApplications() *ApplicationQuery {
+	return NewUserClient(_m.config).QueryApplications(_m)
 }
 
 // Update returns a builder for updating this User.
@@ -231,14 +212,6 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("pwhash=")
 	builder.WriteString(_m.Pwhash)
-	builder.WriteString(", ")
-	builder.WriteString("error=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Error))
-	builder.WriteString(", ")
-	if v := _m.LockedUntil; v != nil {
-		builder.WriteString("locked_until=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
 	builder.WriteByte(')')
 	return builder.String()
 }

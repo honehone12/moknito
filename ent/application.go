@@ -32,9 +32,9 @@ type Application struct {
 	ClientID string `json:"client_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ApplicationQuery when eager-loading is set.
-	Edges               ApplicationEdges `json:"edges"`
-	user_authorizations *string
-	selectValues        sql.SelectValues
+	Edges             ApplicationEdges `json:"edges"`
+	user_applications *string
+	selectValues      sql.SelectValues
 }
 
 // ApplicationEdges holds the relations/edges for other nodes in the graph.
@@ -66,7 +66,7 @@ func (*Application) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case application.FieldCreatedAt, application.FieldUpdatedAt, application.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case application.ForeignKeys[0]: // user_authorizations
+		case application.ForeignKeys[0]: // user_applications
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -128,10 +128,10 @@ func (_m *Application) assignValues(columns []string, values []any) error {
 			}
 		case application.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_authorizations", values[i])
+				return fmt.Errorf("unexpected type %T for field user_applications", values[i])
 			} else if value.Valid {
-				_m.user_authorizations = new(string)
-				*_m.user_authorizations = value.String
+				_m.user_applications = new(string)
+				*_m.user_applications = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

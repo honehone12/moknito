@@ -32,9 +32,9 @@ type Authorization struct {
 	ExpireAt time.Time `json:"expire_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthorizationQuery when eager-loading is set.
-	Edges                AuthorizationEdges `json:"edges"`
-	user_authentications *string
-	selectValues         sql.SelectValues
+	Edges               AuthorizationEdges `json:"edges"`
+	user_authorizations *string
+	selectValues        sql.SelectValues
 }
 
 // AuthorizationEdges holds the relations/edges for other nodes in the graph.
@@ -68,7 +68,7 @@ func (*Authorization) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldExpireAt:
 			values[i] = new(sql.NullTime)
-		case authorization.ForeignKeys[0]: // user_authentications
+		case authorization.ForeignKeys[0]: // user_authorizations
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -130,10 +130,10 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 			}
 		case authorization.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_authentications", values[i])
+				return fmt.Errorf("unexpected type %T for field user_authorizations", values[i])
 			} else if value.Valid {
-				_m.user_authentications = new(string)
-				*_m.user_authentications = value.String
+				_m.user_authorizations = new(string)
+				*_m.user_authorizations = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])

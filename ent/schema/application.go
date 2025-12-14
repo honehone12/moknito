@@ -36,7 +36,7 @@ func (Application) Fields() []ent.Field {
 func (Application) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
-			Ref("authorizations").
+			Ref("applications").
 			Required().
 			Unique(),
 	}

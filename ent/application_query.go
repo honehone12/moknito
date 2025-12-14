@@ -413,10 +413,10 @@ func (_q *ApplicationQuery) loadUser(ctx context.Context, query *UserQuery, node
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*Application)
 	for i := range nodes {
-		if nodes[i].user_authorizations == nil {
+		if nodes[i].user_applications == nil {
 			continue
 		}
-		fk := *nodes[i].user_authorizations
+		fk := *nodes[i].user_applications
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -433,7 +433,7 @@ func (_q *ApplicationQuery) loadUser(ctx context.Context, query *UserQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_authorizations" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_applications" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

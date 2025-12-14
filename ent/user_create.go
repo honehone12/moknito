@@ -83,48 +83,20 @@ func (_c *UserCreate) SetPwhash(v string) *UserCreate {
 	return _c
 }
 
-// SetError sets the "error" field.
-func (_c *UserCreate) SetError(v int) *UserCreate {
-	_c.mutation.SetError(v)
-	return _c
-}
-
-// SetNillableError sets the "error" field if the given value is not nil.
-func (_c *UserCreate) SetNillableError(v *int) *UserCreate {
-	if v != nil {
-		_c.SetError(*v)
-	}
-	return _c
-}
-
-// SetLockedUntil sets the "locked_until" field.
-func (_c *UserCreate) SetLockedUntil(v time.Time) *UserCreate {
-	_c.mutation.SetLockedUntil(v)
-	return _c
-}
-
-// SetNillableLockedUntil sets the "locked_until" field if the given value is not nil.
-func (_c *UserCreate) SetNillableLockedUntil(v *time.Time) *UserCreate {
-	if v != nil {
-		_c.SetLockedUntil(*v)
-	}
-	return _c
-}
-
 // SetID sets the "id" field.
 func (_c *UserCreate) SetID(v string) *UserCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
-// AddAuthenticationIDs adds the "authentications" edge to the Authorization entity by IDs.
+// AddAuthenticationIDs adds the "authentications" edge to the Authentication entity by IDs.
 func (_c *UserCreate) AddAuthenticationIDs(ids ...string) *UserCreate {
 	_c.mutation.AddAuthenticationIDs(ids...)
 	return _c
 }
 
-// AddAuthentications adds the "authentications" edges to the Authorization entity.
-func (_c *UserCreate) AddAuthentications(v ...*Authorization) *UserCreate {
+// AddAuthentications adds the "authentications" edges to the Authentication entity.
+func (_c *UserCreate) AddAuthentications(v ...*Authentication) *UserCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -132,14 +104,14 @@ func (_c *UserCreate) AddAuthentications(v ...*Authorization) *UserCreate {
 	return _c.AddAuthenticationIDs(ids...)
 }
 
-// AddAuthorizationIDs adds the "authorizations" edge to the Application entity by IDs.
+// AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by IDs.
 func (_c *UserCreate) AddAuthorizationIDs(ids ...string) *UserCreate {
 	_c.mutation.AddAuthorizationIDs(ids...)
 	return _c
 }
 
-// AddAuthorizations adds the "authorizations" edges to the Application entity.
-func (_c *UserCreate) AddAuthorizations(v ...*Application) *UserCreate {
+// AddAuthorizations adds the "authorizations" edges to the Authorization entity.
+func (_c *UserCreate) AddAuthorizations(v ...*Authorization) *UserCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -147,19 +119,19 @@ func (_c *UserCreate) AddAuthorizations(v ...*Application) *UserCreate {
 	return _c.AddAuthorizationIDs(ids...)
 }
 
-// AddSessionIDs adds the "sessions" edge to the Authentication entity by IDs.
-func (_c *UserCreate) AddSessionIDs(ids ...string) *UserCreate {
-	_c.mutation.AddSessionIDs(ids...)
+// AddApplicationIDs adds the "applications" edge to the Application entity by IDs.
+func (_c *UserCreate) AddApplicationIDs(ids ...string) *UserCreate {
+	_c.mutation.AddApplicationIDs(ids...)
 	return _c
 }
 
-// AddSessions adds the "sessions" edges to the Authentication entity.
-func (_c *UserCreate) AddSessions(v ...*Authentication) *UserCreate {
+// AddApplications adds the "applications" edges to the Application entity.
+func (_c *UserCreate) AddApplications(v ...*Application) *UserCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddSessionIDs(ids...)
+	return _c.AddApplicationIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -205,10 +177,6 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := _c.mutation.Error(); !ok {
-		v := user.DefaultError
-		_c.mutation.SetError(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -241,14 +209,6 @@ func (_c *UserCreate) check() error {
 	if v, ok := _c.mutation.Pwhash(); ok {
 		if err := user.PwhashValidator(v); err != nil {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Error(); !ok {
-		return &ValidationError{Name: "error", err: errors.New(`ent: missing required field "User.error"`)}
-	}
-	if v, ok := _c.mutation.Error(); ok {
-		if err := user.ErrorValidator(v); err != nil {
-			return &ValidationError{Name: "error", err: fmt.Errorf(`ent: validator failed for field "User.error": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
@@ -315,14 +275,6 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldPwhash, field.TypeString, value)
 		_node.Pwhash = value
 	}
-	if value, ok := _c.mutation.Error(); ok {
-		_spec.SetField(user.FieldError, field.TypeInt, value)
-		_node.Error = value
-	}
-	if value, ok := _c.mutation.LockedUntil(); ok {
-		_spec.SetField(user.FieldLockedUntil, field.TypeTime, value)
-		_node.LockedUntil = &value
-	}
 	if nodes := _c.mutation.AuthenticationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -331,7 +283,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -347,7 +299,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -355,15 +307,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ApplicationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionsTable,
-			Columns: []string{user.SessionsColumn},
+			Table:   user.ApplicationsTable,
+			Columns: []string{user.ApplicationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
