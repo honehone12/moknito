@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const AUTHENTICATED_COOKIE_KEY = "ae"
 const AUTHENTICATED_TOKEN_VERSION = "0.0.1"
 
 type AuthenticatedToken struct {
@@ -16,12 +17,12 @@ type AuthenticatedToken struct {
 	jwt.RegisteredClaims
 }
 
-type tokenSigner struct {
+type AuthTokenSigner struct {
 	host string
 	key  []byte
 }
 
-func NewAuthTokenSigner() (*tokenSigner, error) {
+func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 	// don't inject other than env
 	// to prevent exposing sensitive info
 	// just write within module for testing
@@ -43,10 +44,10 @@ func NewAuthTokenSigner() (*tokenSigner, error) {
 		return nil, errors.New("could not find env for host")
 	}
 
-	return &tokenSigner{host, key}, nil
+	return &AuthTokenSigner{host, key}, nil
 }
 
-func (s *tokenSigner) CreateAuthenticatedToken(
+func (a *AuthTokenSigner) CreateAuthenticatedToken(
 	id,
 	email string,
 	ttl time.Duration,
@@ -57,9 +58,9 @@ func (s *tokenSigner) CreateAuthenticatedToken(
 		AuthenticatedToken{
 			MoknitoTokenVersion: AUTHENTICATED_TOKEN_VERSION,
 			RegisteredClaims: jwt.RegisteredClaims{
-				Issuer:    s.host,
+				Issuer:    a.host,
 				Subject:   email,
-				Audience:  []string{s.host},
+				Audience:  []string{a.host},
 				ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
 				NotBefore: jwt.NewNumericDate(now),
 				IssuedAt:  jwt.NewNumericDate(now),
@@ -67,7 +68,7 @@ func (s *tokenSigner) CreateAuthenticatedToken(
 			},
 		},
 	)
-	signed, err := token.SignedString(s.key)
+	signed, err := token.SignedString(a.key)
 	if err != nil {
 		return "", err
 	}

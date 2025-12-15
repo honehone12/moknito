@@ -23,13 +23,11 @@ type UserSys interface {
 		ctx context.Context,
 		email, password,
 		ip, userAgent string,
-		ttl time.Duration,
 	) (id.Id, bool, error)
 	UserAuthenticate(
 		ctx context.Context,
 		email, password,
 		ip, userAgent string,
-		ttl time.Duration,
 	) (id.Id, bool, error)
 }
 
@@ -40,8 +38,8 @@ type userRegistration struct {
 }
 
 const MAX_AUTHENTICATION_ERROR = 10
-const USER_REGISTRATION_KEY = "USERREG"
-const ERROR_KEY = "ERROR"
+const USER_REGISTRATION_REDIS_KEY = "USERREG"
+const ERROR_REDIS_KEY = "ERROR"
 
 func (s *EntRdsSys) UserRegister(
 	ctx context.Context,
@@ -65,7 +63,7 @@ func (s *EntRdsSys) UserRegister(
 		return false, err
 	}
 
-	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_KEY, email)
+	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_REDIS_KEY, email)
 	if err := s.redis.JSONSetMode(
 		ctx,
 		key,
@@ -89,7 +87,7 @@ func (s *EntRdsSys) checkErrorCount(
 	ctx context.Context,
 	email string,
 ) (bool, error) {
-	eKey := fmt.Sprintf("%s:%s", ERROR_KEY, email)
+	eKey := fmt.Sprintf("%s:%s", ERROR_REDIS_KEY, email)
 	e, err := s.redis.Get(ctx, eKey).Result()
 	if errors.Is(err, redis.Nil) {
 		return true, nil
@@ -109,7 +107,7 @@ func (s *EntRdsSys) incrErrCount(
 	ctx context.Context,
 	email string,
 ) error {
-	eKey := fmt.Sprintf("%s:%s", ERROR_KEY, email)
+	eKey := fmt.Sprintf("%s:%s", ERROR_REDIS_KEY, email)
 	if err := s.redis.Incr(ctx, eKey).Err(); err != nil {
 		return err
 	}
@@ -124,7 +122,6 @@ func (s *EntRdsSys) UserJoin(
 	ctx context.Context,
 	email, password,
 	ip, userAgent string,
-	ttl time.Duration,
 ) (id.Id, bool, error) {
 	ok, err := s.checkErrorCount(ctx, email)
 	if err != nil {
@@ -134,7 +131,7 @@ func (s *EntRdsSys) UserJoin(
 		return "", false, nil
 	}
 
-	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_KEY, email)
+	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_REDIS_KEY, email)
 	r, err := s.redis.JSONGet(ctx, key, "$").Result()
 	if err != nil {
 		return "", false, err
@@ -179,7 +176,7 @@ func (s *EntRdsSys) UserJoin(
 		SetID(string(authId)).
 		SetIP(ip).
 		SetUserAgent(userAgent).
-		SetExpireAt(time.Now().Add(ttl)).
+		SetExpireAt(time.Now().Add(s.tokenTtl)).
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
@@ -194,7 +191,6 @@ func (s *EntRdsSys) UserAuthenticate(
 	ctx context.Context,
 	email, password,
 	ip, userAgent string,
-	ttl time.Duration,
 ) (id.Id, bool, error) {
 	ok, err := s.checkErrorCount(ctx, email)
 	if err != nil {
@@ -232,7 +228,7 @@ func (s *EntRdsSys) UserAuthenticate(
 		SetID(string(authId)).
 		SetIP(ip).
 		SetUserAgent(userAgent).
-		SetExpireAt(time.Now().Add(ttl)).
+		SetExpireAt(time.Now().Add(s.tokenTtl)).
 		SetUser(user).
 		Save(ctx)
 	if err != nil {

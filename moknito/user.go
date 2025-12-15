@@ -1,9 +1,7 @@
 package moknito
 
 import (
-	"moknito/id"
 	"moknito/res"
-	"moknito/token"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -72,7 +70,6 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 		req.Context(),
 		form.Email, form.Password,
 		ctx.RealIP(), req.Header.Get("User-Agent"),
-		m.tokenTtl,
 	)
 	if err != nil {
 		ctx.Logger().Error(err)
@@ -83,7 +80,7 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	if err := m.setAuthenticatedCookie(ctx, authId, form.Email); err != nil {
+	if err := m.system.SetAuthenticatedCookie(ctx, authId, form.Email); err != nil {
 		ctx.Logger().Error(err)
 		return res.InternalError(ctx)
 	}
@@ -105,7 +102,6 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 		req.Context(),
 		form.Email, form.Password,
 		ctx.RealIP(), req.Header.Get("User-Agent"),
-		m.tokenTtl,
 	)
 	if err != nil {
 		ctx.Logger().Error(err)
@@ -116,48 +112,11 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	if err := m.setAuthenticatedCookie(ctx, authId, form.Email); err != nil {
+	if err := m.system.SetAuthenticatedCookie(ctx, authId, form.Email); err != nil {
 		ctx.Logger().Error(err)
 		return res.InternalError(ctx)
 	}
 
 	ctx.Response().Header().Set("Location", "/")
 	return ctx.NoContent(http.StatusSeeOther)
-}
-
-func (m *Moknito) setAuthenticatedCookie(
-	ctx echo.Context,
-	id id.Id,
-	email string,
-) error {
-	signer, err := token.NewAuthTokenSigner()
-	if err != nil {
-		return err
-	}
-	uuid, err := id.ToUUID()
-	if err != nil {
-		return err
-	}
-
-	tkn, err := signer.CreateAuthenticatedToken(
-		uuid.String(),
-		email,
-		m.tokenTtl,
-	)
-	if err != nil {
-		return err
-	}
-
-	cookie := http.Cookie{
-		Name:     token.AUTHENTICATED_COOKIE_KEY,
-		Value:    tkn,
-		Path:     "/",
-		MaxAge:   86400, // a day
-		Secure:   false, // for local
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	}
-	ctx.SetCookie(&cookie)
-
-	return nil
 }

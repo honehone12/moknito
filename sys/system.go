@@ -5,13 +5,25 @@ import (
 	"errors"
 	"io"
 	"moknito/ent"
+	"moknito/id"
+	"moknito/token"
+	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 )
 
 type Sys interface {
+	SessionCookieMiddleware() echo.MiddlewareFunc
+	SetAuthenticatedCookie(
+		ctx echo.Context,
+		id id.Id,
+		email string,
+	) error
+
 	UserSys
 	io.Closer
 }
@@ -19,12 +31,23 @@ type Sys interface {
 type EntRdsSys struct {
 	ent   *ent.Client
 	redis *redis.Client
+
+	tokenTtl      time.Duration
+	sessionSigner *token.SessionTokenSigner
 }
 
-func NewEntRdsSys(entOptions ...ent.Option) (*EntRdsSys, error) {
+func NewEntRdsSys(
+	tokenTtl time.Duration,
+	entOptions ...ent.Option,
+) (*EntRdsSys, error) {
 	// don't inject other than env
 	// to prevent exposing sensitive info
 	// just write within module for testing
+
+	sessionSigner, err := token.NewSessionTokenSigner()
+	if err != nil {
+		return nil, err
+	}
 
 	mysqlUri := os.Getenv("MYSQL_URI")
 	if len(mysqlUri) == 0 {
@@ -56,7 +79,12 @@ func NewEntRdsSys(entOptions ...ent.Option) (*EntRdsSys, error) {
 		return nil, err
 	}
 
-	return &EntRdsSys{ent, redis}, nil
+	return &EntRdsSys{
+		ent,
+		redis,
+		tokenTtl,
+		sessionSigner,
+	}, nil
 }
 
 func (s *EntRdsSys) Close() error {
@@ -69,4 +97,41 @@ func (*EntRdsSys) rollback(tx *ent.Tx, original error) error {
 	}
 
 	return original
+}
+
+func (s *EntRdsSys) SetAuthenticatedCookie(
+	ctx echo.Context,
+	id id.Id,
+	email string,
+) error {
+	signer, err := token.NewAuthTokenSigner()
+	if err != nil {
+		return err
+	}
+	uuid, err := id.ToUUID()
+	if err != nil {
+		return err
+	}
+
+	tkn, err := signer.CreateAuthenticatedToken(
+		uuid.String(),
+		email,
+		s.tokenTtl,
+	)
+	if err != nil {
+		return err
+	}
+
+	cookie := http.Cookie{
+		Name:     token.AUTHENTICATED_COOKIE_KEY,
+		Value:    tkn,
+		Path:     "/",
+		MaxAge:   int(s.tokenTtl.Seconds()),
+		Secure:   false, // for local
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	ctx.SetCookie(&cookie)
+
+	return nil
 }
