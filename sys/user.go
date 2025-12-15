@@ -185,6 +185,13 @@ func (s *EntRdsSys) UserJoin(
 		err := s.rollback(tx, err)
 		return "", false, err
 	}
+	if err := tx.Commit(); err != nil {
+		return "", false, err
+	}
+
+	if err := s.redis.JSONDel(ctx, key, "$").Err(); err != nil {
+		return "", false, err
+	}
 
 	return id.Id(authenticate.ID), true, nil
 }
