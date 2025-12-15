@@ -27,13 +27,13 @@ func main() {
 	if pepper := os.Getenv("PEPPER"); len(pepper) != hash.PEPPER_ENV_LEN {
 		echo.Logger.Fatal("env for perpper is invalid")
 	}
-	if atk := os.Getenv("PEPPER"); len(atk) != token.SIGNATURE_KEY_ENV_LEN {
+	if atk := os.Getenv("AUTH_TOKEN_KEY"); len(atk) != token.SIGNATURE_KEY_ENV_LEN {
 		echo.Logger.Fatal("env for auth token key is invalid")
 	}
 	if origin := os.Getenv("ORIGIN"); len(origin) == 0 {
 		echo.Logger.Fatal("env for origin is invalid")
 	}
-	if host := os.Getenv("ORIGIN"); len(host) == 0 {
+	if host := os.Getenv("HOST"); len(host) == 0 {
 		echo.Logger.Fatal("env for host is invalid")
 	}
 
@@ -55,25 +55,24 @@ func main() {
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
-	proxyTargets := []*echo4middleware.ProxyTarget{
-		{
+	proxy := echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(
+		[]*echo4middleware.ProxyTarget{{
 			Name: "ui",
 			URL:  uiUrl,
-		},
-	}
+		}},
+	))
 
 	echo.Group(
 		"/user",
-		echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(proxyTargets)),
+		mocknito.SetSessionCookie(),
+		proxy,
 	)
 	echo.Group(
 		"/application",
-		echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(proxyTargets)),
+		mocknito.VerifySessionCookie(),
+		proxy,
 	)
-	echo.Group(
-		"/*",
-		echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(proxyTargets)),
-	)
+	echo.Group("/*", proxy)
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)
 	}

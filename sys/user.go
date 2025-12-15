@@ -133,7 +133,9 @@ func (s *EntRdsSys) UserJoin(
 
 	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_REDIS_KEY, email)
 	r, err := s.redis.JSONGet(ctx, key, "$").Result()
-	if err != nil {
+	if errors.Is(err, redis.Nil) {
+		return "", false, nil
+	} else if err != nil {
 		return "", false, err
 	}
 

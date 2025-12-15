@@ -17,7 +17,8 @@ import (
 )
 
 type Sys interface {
-	SessionCookieMiddleware() echo.MiddlewareFunc
+	SetSessionCookie() echo.MiddlewareFunc
+	VerifySessionCookie() echo.MiddlewareFunc
 	SetAuthenticatedCookie(
 		ctx echo.Context,
 		id id.Id,
@@ -130,6 +131,9 @@ func (s *EntRdsSys) SetAuthenticatedCookie(
 		Secure:   false, // for local
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
+	}
+	if err := cookie.Valid(); err != nil {
+		return err
 	}
 	ctx.SetCookie(&cookie)
 

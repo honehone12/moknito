@@ -31,8 +31,12 @@ func NewMocknito() (*Moknito, error) {
 	}, nil
 }
 
-func (m *Moknito) SessionCookieMiddleware() echo.MiddlewareFunc {
-	return m.system.SessionCookieMiddleware()
+func (m *Moknito) SetSessionCookie() echo.MiddlewareFunc {
+	return m.system.SetSessionCookie()
+}
+
+func (m *Moknito) VerifySessionCookie() echo.MiddlewareFunc {
+	return m.system.VerifySessionCookie()
 }
 
 func (m *Moknito) Close() error {
