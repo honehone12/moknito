@@ -1,8 +1,10 @@
 package moknito
 
 import (
+	"errors"
 	"moknito/ent"
 	"moknito/sys"
+	"os"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -12,9 +14,20 @@ import (
 type Moknito struct {
 	system    sys.Sys
 	validator *validator.Validate
+
+	origin string
 }
 
 func NewMocknito() (*Moknito, error) {
+	// don't inject other than env
+	// to prevent exposing sensitive info
+	// just write within module for testing
+
+	origin := os.Getenv("ORIGIN")
+	if len(origin) == 0 {
+		return nil, errors.New("could not find origin env")
+	}
+
 	system, err := sys.NewEntRdsSys(
 		time.Hour*24,
 		ent.Debug(),
@@ -28,6 +41,7 @@ func NewMocknito() (*Moknito, error) {
 	return &Moknito{
 		system,
 		validator,
+		origin,
 	}, nil
 }
 

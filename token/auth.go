@@ -39,9 +39,9 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 		return nil, errors.New("unexpected signature key length")
 	}
 
-	host := os.Getenv("HOST")
+	host := os.Getenv("AUTH_HOST")
 	if len(host) == 0 {
-		return nil, errors.New("could not find env for host")
+		return nil, errors.New("could not find env for auth host")
 	}
 
 	return &AuthTokenSigner{host, key}, nil

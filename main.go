@@ -2,7 +2,6 @@ package main
 
 import (
 	"moknito/hash"
-	"moknito/middleware"
 	lib "moknito/moknito"
 	"moknito/token"
 	"net/url"
@@ -30,26 +29,19 @@ func main() {
 	if atk := os.Getenv("AUTH_TOKEN_KEY"); len(atk) != token.SIGNATURE_KEY_ENV_LEN {
 		echo.Logger.Fatal("env for auth token key is invalid")
 	}
-	if origin := os.Getenv("ORIGIN"); len(origin) == 0 {
-		echo.Logger.Fatal("env for origin is invalid")
-	}
-	if host := os.Getenv("HOST"); len(host) == 0 {
-		echo.Logger.Fatal("env for host is invalid")
+	if host := os.Getenv("AUTH_HOST"); len(host) == 0 {
+		echo.Logger.Fatal("env for auth host is invalid")
 	}
 
-	mocknito, err := lib.NewMocknito()
+	moknito, err := lib.NewMocknito()
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
-	defer mocknito.Close()
+	defer moknito.Close()
 
-	originGuard, err := middleware.OriginGuard()
-	if err != nil {
-		echo.Logger.Fatal(err)
-	}
-	api := echo.Group("/api", originGuard)
-	api.POST("/user/register", mocknito.UserRegister)
-	api.POST("/user/join", mocknito.UserJoin)
+	api := echo.Group("/api", moknito.OriginGuard())
+	api.POST("/user/register", moknito.UserRegister)
+	api.POST("/user/join", moknito.UserJoin)
 
 	uiUrl, err := url.Parse("http://localhost:3000")
 	if err != nil {
@@ -64,12 +56,12 @@ func main() {
 
 	echo.Group(
 		"/user",
-		mocknito.SetSessionCookie(),
+		moknito.SetSessionCookie(),
 		proxy,
 	)
 	echo.Group(
 		"/application",
-		mocknito.VerifySessionCookie(),
+		moknito.VerifySessionCookie(),
 		proxy,
 	)
 	echo.Group("/*", proxy)
