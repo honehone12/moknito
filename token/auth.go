@@ -48,8 +48,7 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 }
 
 func (a *AuthTokenSigner) CreateAuthenticatedToken(
-	id,
-	email string,
+	authId, userId string,
 	ttl time.Duration,
 ) (string, error) {
 	now := time.Now()
@@ -59,12 +58,12 @@ func (a *AuthTokenSigner) CreateAuthenticatedToken(
 			MoknitoTokenVersion: AUTHENTICATED_TOKEN_VERSION,
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    a.host,
-				Subject:   email,
+				Subject:   userId,
 				Audience:  []string{a.host},
 				ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
 				NotBefore: jwt.NewNumericDate(now),
 				IssuedAt:  jwt.NewNumericDate(now),
-				ID:        id,
+				ID:        authId,
 			},
 		},
 	)

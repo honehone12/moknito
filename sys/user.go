@@ -8,6 +8,8 @@ import (
 	"moknito/ent/user"
 	"moknito/hash"
 	"moknito/id"
+	"moknito/token"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -23,12 +25,12 @@ type UserSys interface {
 		ctx context.Context,
 		email, password,
 		ip, userAgent string,
-	) (id.Id, bool, error)
+	) (*http.Cookie, bool, error)
 	UserAuthenticate(
 		ctx context.Context,
 		email, password,
 		ip, userAgent string,
-	) (id.Id, bool, error)
+	) (*http.Cookie, bool, error)
 }
 
 type userRegistration struct {
@@ -122,45 +124,45 @@ func (s *EntRdsSys) UserJoin(
 	ctx context.Context,
 	email, password,
 	ip, userAgent string,
-) (id.Id, bool, error) {
+) (*http.Cookie, bool, error) {
 	ok, err := s.checkErrorCount(ctx, email)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 	if !ok {
-		return "", false, nil
+		return nil, false, nil
 	}
 
 	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_REDIS_KEY, email)
 	r, err := s.redis.JSONGet(ctx, key, "$").Result()
 	if errors.Is(err, redis.Nil) {
-		return "", false, nil
+		return nil, false, nil
 	} else if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
 	var reg []userRegistration
 	if err := json.Unmarshal([]byte(r), &reg); err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 	register := reg[0]
 
 	ok, err = hash.Check(password, register.PwHash)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 	if !ok {
 		err := s.incrErrCount(ctx, email)
-		return "", false, err
+		return nil, false, err
 	}
 
 	userId, err := id.NewSequential()
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 	authId, err := id.NewSequential()
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
 	tx, err := s.ent.Tx(ctx)
@@ -172,9 +174,9 @@ func (s *EntRdsSys) UserJoin(
 		Save(ctx)
 	if err != nil {
 		err := s.rollback(tx, err)
-		return "", false, err
+		return nil, false, err
 	}
-	authenticate, err := tx.Authentication.Create().
+	auth, err := tx.Authentication.Create().
 		SetID(string(authId)).
 		SetIP(ip).
 		SetUserAgent(userAgent).
@@ -183,30 +185,38 @@ func (s *EntRdsSys) UserJoin(
 		Save(ctx)
 	if err != nil {
 		err := s.rollback(tx, err)
-		return "", false, err
+		return nil, false, err
 	}
 	if err := tx.Commit(); err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
 	if err := s.redis.JSONDel(ctx, key, "$").Err(); err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
-	return id.Id(authenticate.ID), true, nil
+	cookie, err := s.createAuthenticatedCookie(
+		id.Id(auth.ID),
+		id.Id(user.ID),
+	)
+	if err != nil {
+		return nil, false, err
+	}
+
+	return cookie, true, nil
 }
 
 func (s *EntRdsSys) UserAuthenticate(
 	ctx context.Context,
 	email, password,
 	ip, userAgent string,
-) (id.Id, bool, error) {
+) (*http.Cookie, bool, error) {
 	ok, err := s.checkErrorCount(ctx, email)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 	if !ok {
-		return "", false, nil
+		return nil, false, nil
 	}
 
 	user, err := s.ent.User.Query().
@@ -216,24 +226,24 @@ func (s *EntRdsSys) UserAuthenticate(
 		).
 		Only(ctx)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
 	ok, err = hash.Check(password, user.Pwhash)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 	if !ok {
 		err := s.incrErrCount(ctx, email)
-		return "", false, err
+		return nil, false, err
 	}
 
 	authId, err := id.NewSequential()
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
-	authenticate, err := s.ent.Authentication.Create().
+	auth, err := s.ent.Authentication.Create().
 		SetID(string(authId)).
 		SetIP(ip).
 		SetUserAgent(userAgent).
@@ -241,8 +251,58 @@ func (s *EntRdsSys) UserAuthenticate(
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
-		return "", false, err
+		return nil, false, err
 	}
 
-	return id.Id(authenticate.ID), true, nil
+	cookie, err := s.createAuthenticatedCookie(
+		id.Id(auth.ID),
+		id.Id(user.ID),
+	)
+	if err != nil {
+		return nil, false, err
+	}
+
+	return cookie, true, nil
+}
+
+func (s *EntRdsSys) createAuthenticatedCookie(
+	authId, userId id.Id,
+) (*http.Cookie, error) {
+	authUuid, err := authId.ToUUID()
+	if err != nil {
+		return nil, err
+	}
+	userUuid, err := userId.ToUUID()
+	if err != nil {
+		return nil, err
+	}
+
+	signer, err := token.NewAuthTokenSigner()
+	if err != nil {
+		return nil, err
+	}
+
+	tkn, err := signer.CreateAuthenticatedToken(
+		authUuid.String(),
+		userUuid.String(),
+		s.tokenTtl,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	cookie := &http.Cookie{
+		Name:     token.AUTHENTICATED_COOKIE_KEY,
+		Value:    tkn,
+		Path:     "/",
+		MaxAge:   int(s.tokenTtl.Seconds()),
+		Secure:   false, // for local
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	if err := cookie.Valid(); err != nil {
+		return nil, err
+	}
+
+	return cookie, nil
 }

@@ -5,9 +5,7 @@ import (
 	"errors"
 	"io"
 	"moknito/ent"
-	"moknito/id"
 	"moknito/token"
-	"net/http"
 	"os"
 	"time"
 
@@ -19,11 +17,6 @@ import (
 type Sys interface {
 	SetSessionCookie() echo.MiddlewareFunc
 	VerifySessionCookie() echo.MiddlewareFunc
-	SetAuthenticatedCookie(
-		ctx echo.Context,
-		id id.Id,
-		email string,
-	) error
 
 	UserSys
 	io.Closer
@@ -98,44 +91,4 @@ func (*EntRdsSys) rollback(tx *ent.Tx, original error) error {
 	}
 
 	return original
-}
-
-func (s *EntRdsSys) SetAuthenticatedCookie(
-	ctx echo.Context,
-	id id.Id,
-	email string,
-) error {
-	signer, err := token.NewAuthTokenSigner()
-	if err != nil {
-		return err
-	}
-	uuid, err := id.ToUUID()
-	if err != nil {
-		return err
-	}
-
-	tkn, err := signer.CreateAuthenticatedToken(
-		uuid.String(),
-		email,
-		s.tokenTtl,
-	)
-	if err != nil {
-		return err
-	}
-
-	cookie := http.Cookie{
-		Name:     token.AUTHENTICATED_COOKIE_KEY,
-		Value:    tkn,
-		Path:     "/",
-		MaxAge:   int(s.tokenTtl.Seconds()),
-		Secure:   false, // for local
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	}
-	if err := cookie.Valid(); err != nil {
-		return err
-	}
-	ctx.SetCookie(&cookie)
-
-	return nil
 }

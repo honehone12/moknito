@@ -66,7 +66,7 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 	}
 
 	req := ctx.Request()
-	authId, ok, err := m.system.UserJoin(
+	cookie, ok, err := m.system.UserJoin(
 		req.Context(),
 		form.Email, form.Password,
 		ctx.RealIP(), req.Header.Get("User-Agent"),
@@ -80,11 +80,7 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	if err := m.system.SetAuthenticatedCookie(ctx, authId, form.Email); err != nil {
-		ctx.Logger().Error(err)
-		return res.InternalError(ctx)
-	}
-
+	ctx.SetCookie(cookie)
 	ctx.Response().Header().Set("Location", "/")
 	return ctx.NoContent(http.StatusSeeOther)
 }
@@ -98,7 +94,7 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 	}
 
 	req := ctx.Request()
-	authId, ok, err := m.system.UserAuthenticate(
+	cookie, ok, err := m.system.UserAuthenticate(
 		req.Context(),
 		form.Email, form.Password,
 		ctx.RealIP(), req.Header.Get("User-Agent"),
@@ -112,11 +108,7 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	if err := m.system.SetAuthenticatedCookie(ctx, authId, form.Email); err != nil {
-		ctx.Logger().Error(err)
-		return res.InternalError(ctx)
-	}
-
+	ctx.SetCookie(cookie)
 	ctx.Response().Header().Set("Location", "/")
 	return ctx.NoContent(http.StatusSeeOther)
 }
