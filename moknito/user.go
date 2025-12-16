@@ -45,8 +45,7 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 		form.Password,
 	)
 	if err != nil {
-		ctx.Logger().Error(err)
-		return res.InternalError(ctx)
+		return err
 	}
 	if !ok {
 		ctx.Logger().Warn("duplicated user")
@@ -72,8 +71,7 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 		ctx.RealIP(), req.Header.Get("User-Agent"),
 	)
 	if err != nil {
-		ctx.Logger().Error(err)
-		return res.InternalError(ctx)
+		return err
 	}
 	if !ok {
 		ctx.Logger().Warn("wrong credentials")
@@ -100,8 +98,7 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 		ctx.RealIP(), req.Header.Get("User-Agent"),
 	)
 	if err != nil {
-		ctx.Logger().Error(err)
-		return res.InternalError(ctx)
+		return err
 	}
 	if !ok {
 		ctx.Logger().Warn("wrong credentials")
