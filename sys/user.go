@@ -282,7 +282,8 @@ func (s *EntRdsSys) createAuthenticatedCookie(
 		return nil, err
 	}
 
-	tkn, err := signer.CreateAuthenticatedToken(
+	tkn, err := signer.CreateAuthToken(
+		token.TOKEN_TYPE_AUTHENTICATION,
 		authUuid.String(),
 		userUuid.String(),
 		s.tokenTtl,

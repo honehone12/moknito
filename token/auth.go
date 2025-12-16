@@ -9,11 +9,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const TOKEN_TYPE_AUTHENTICATION = "authentication"
+const TOKEN_TYPE_AUTHORIZATION = "authorization"
 const AUTHENTICATED_COOKIE_KEY = "ae"
 const AUTHENTICATED_TOKEN_VERSION = "0.0.1"
 
-type AuthenticatedToken struct {
-	MoknitoTokenVersion string `json:"version"`
+type AutheToken struct {
+	Version string `json:"version"`
+	Type    string `json:"type"`
 	jwt.RegisteredClaims
 }
 
@@ -47,19 +50,25 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 	return &AuthTokenSigner{host, key}, nil
 }
 
-func (a *AuthTokenSigner) CreateAuthenticatedToken(
+func (a *AuthTokenSigner) CreateAuthToken(
+	tokenType,
 	authId, userId string,
 	ttl time.Duration,
+	applications ...string,
 ) (string, error) {
+	if len(applications) == 0 {
+		applications = []string{a.host}
+	}
 	now := time.Now()
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
-		AuthenticatedToken{
-			MoknitoTokenVersion: AUTHENTICATED_TOKEN_VERSION,
+		AutheToken{
+			Version: AUTHENTICATED_TOKEN_VERSION,
+			Type:    tokenType,
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    a.host,
 				Subject:   userId,
-				Audience:  []string{a.host},
+				Audience:  applications,
 				ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
 				NotBefore: jwt.NewNumericDate(now),
 				IssuedAt:  jwt.NewNumericDate(now),
