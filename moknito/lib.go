@@ -53,6 +53,10 @@ func (m *Moknito) VerifySessionCookie() echo.MiddlewareFunc {
 	return m.system.VerifySessionCookie()
 }
 
+func (m *Moknito) VerifyAuthenticatedCookie() echo.MiddlewareFunc {
+	return m.system.VerifyAuthenticatedCookie()
+}
+
 func (m *Moknito) Close() error {
 	return m.system.Close()
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"moknito/ent"
 	"moknito/ent/user"
 	"moknito/hash"
 	"moknito/id"
@@ -225,6 +226,9 @@ func (s *EntRdsSys) UserAuthenticate(
 			user.DeletedAtIsNil(),
 		).
 		Only(ctx)
+	if ent.IsNotFound(err) {
+		return nil, false, nil
+	}
 	if err != nil {
 		return nil, false, err
 	}
@@ -277,12 +281,7 @@ func (s *EntRdsSys) createAuthenticatedCookie(
 		return nil, err
 	}
 
-	signer, err := token.NewAuthTokenSigner()
-	if err != nil {
-		return nil, err
-	}
-
-	tkn, err := signer.CreateAuthToken(
+	tkn, err := s.authSigner.CreateAuthToken(
 		token.TOKEN_TYPE_AUTHENTICATION,
 		authUuid.String(),
 		userUuid.String(),
@@ -293,7 +292,7 @@ func (s *EntRdsSys) createAuthenticatedCookie(
 	}
 
 	cookie := &http.Cookie{
-		Name:     token.AUTHENTICATED_COOKIE_KEY,
+		Name:     AUTHENTICATED_COOKIE_KEY,
 		Value:    tkn,
 		Path:     "/",
 		MaxAge:   int(s.tokenTtl.Seconds()),

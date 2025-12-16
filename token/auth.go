@@ -11,13 +11,27 @@ import (
 
 const TOKEN_TYPE_AUTHENTICATION = "authentication"
 const TOKEN_TYPE_AUTHORIZATION = "authorization"
-const AUTHENTICATED_COOKIE_KEY = "ae"
 const AUTHENTICATED_TOKEN_VERSION = "0.0.1"
 
-type AutheToken struct {
+type AutheClaims struct {
 	Version string `json:"version"`
 	Type    string `json:"type"`
 	jwt.RegisteredClaims
+}
+
+func (a *AutheClaims) Validate() error {
+	switch a.Version {
+	case AUTHENTICATED_TOKEN_VERSION:
+		switch a.Type {
+		case TOKEN_TYPE_AUTHENTICATION:
+		case TOKEN_TYPE_AUTHORIZATION:
+		default:
+			return errors.New("unexpected token type")
+		}
+	default:
+		return errors.New("unexpected token version")
+	}
+	return nil
 }
 
 type AuthTokenSigner struct {
@@ -62,7 +76,7 @@ func (a *AuthTokenSigner) CreateAuthToken(
 	now := time.Now()
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
-		AutheToken{
+		AutheClaims{
 			Version: AUTHENTICATED_TOKEN_VERSION,
 			Type:    tokenType,
 			RegisteredClaims: jwt.RegisteredClaims{
@@ -82,4 +96,40 @@ func (a *AuthTokenSigner) CreateAuthToken(
 	}
 
 	return signed, nil
+}
+
+// (!) token id and subject is not checked at parsing (!)
+func (a *AuthTokenSigner) Parse(
+	raw string,
+	applications ...string,
+) (*AutheClaims, error) {
+	if len(applications) == 0 {
+		applications = []string{a.host}
+	}
+	tkn, err := jwt.ParseWithClaims(
+		raw,
+		&AutheClaims{},
+		func(*jwt.Token) (any, error) {
+			return a.key, nil
+		},
+		jwt.WithAllAudiences(applications...),
+		jwt.WithExpirationRequired(),
+		jwt.WithIssuedAt(),
+		jwt.WithIssuer(a.host),
+		jwt.WithStrictDecoding(),
+		jwt.WithValidMethods([]string{"HS256"}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if !tkn.Valid {
+		return nil, errors.New("token is invalid")
+	}
+
+	c, ok := tkn.Claims.(*AutheClaims)
+	if !ok {
+		return nil, errors.New("failed to cast claims to authclaims")
+	}
+
+	return c, nil
 }

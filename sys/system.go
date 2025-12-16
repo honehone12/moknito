@@ -5,7 +5,9 @@ import (
 	"errors"
 	"io"
 	"moknito/ent"
+	"moknito/id"
 	"moknito/token"
+	"net/http"
 	"os"
 	"time"
 
@@ -14,10 +16,19 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Sys interface {
+type SessionSigner interface {
 	SetSessionCookie() echo.MiddlewareFunc
 	VerifySessionCookie() echo.MiddlewareFunc
+}
 
+type AuthSigner interface {
+	createAuthenticatedCookie(authId, userId id.Id) (*http.Cookie, error)
+	VerifyAuthenticatedCookie() echo.MiddlewareFunc
+}
+
+type Sys interface {
+	SessionSigner
+	AuthSigner
 	UserSys
 	io.Closer
 }
@@ -28,6 +39,7 @@ type EntRdsSys struct {
 
 	tokenTtl      time.Duration
 	sessionSigner *token.SessionTokenSigner
+	authSigner    *token.AuthTokenSigner
 }
 
 func NewEntRdsSys(
@@ -39,6 +51,11 @@ func NewEntRdsSys(
 	// just write within module for testing
 
 	sessionSigner, err := token.NewSessionTokenSigner()
+	if err != nil {
+		return nil, err
+	}
+
+	authSigner, err := token.NewAuthTokenSigner()
 	if err != nil {
 		return nil, err
 	}
@@ -78,6 +95,7 @@ func NewEntRdsSys(
 		redis,
 		tokenTtl,
 		sessionSigner,
+		authSigner,
 	}, nil
 }
 

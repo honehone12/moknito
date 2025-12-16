@@ -39,32 +39,41 @@ func main() {
 	}
 	defer moknito.Close()
 
-	api := echo.Group("/api", moknito.OriginGuard())
-	api.POST("/user/register", moknito.UserRegister)
-	api.POST("/user/join", moknito.UserJoin)
-
 	uiUrl, err := url.Parse("http://localhost:3000")
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}
-	proxy := echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(
+	uiProxy := echo4middleware.Proxy(echo4middleware.NewRoundRobinBalancer(
 		[]*echo4middleware.ProxyTarget{{
 			Name: "ui",
 			URL:  uiUrl,
 		}},
 	))
 
+	api := echo.Group(
+		"/api",
+		moknito.OriginGuard(),
+		moknito.VerifySessionCookie(),
+	)
+	userApi := api.Group("/user")
+	userApi.POST("/register", moknito.UserRegister)
+	userApi.POST("/join", moknito.UserJoin)
+	userApi.POST("/authenticate", moknito.UserAuthenticate)
+	api.Group("/application", moknito.VerifyAuthenticatedCookie())
+
 	echo.Group(
 		"/user",
 		moknito.SetSessionCookie(),
-		proxy,
+		uiProxy,
 	)
 	echo.Group(
 		"/application",
 		moknito.VerifySessionCookie(),
-		proxy,
+		moknito.VerifyAuthenticatedCookie(),
+		uiProxy,
 	)
-	echo.Group("/*", proxy)
+	echo.Group("/*", uiProxy)
+
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)
 	}

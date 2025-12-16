@@ -79,7 +79,7 @@ func (s *EntRdsSys) verifySessionCookie(next echo.HandlerFunc) echo.HandlerFunc 
 		cookie, err := ctx.Cookie(SESSION_COOKIE_KEY)
 		if errors.Is(err, http.ErrNoCookie) {
 			ctx.Logger().Warn("no session cookie")
-			return res.BadRequest(ctx)
+			return res.Forbidden(ctx)
 		} else if err != nil {
 			return err
 		}
