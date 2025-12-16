@@ -195,7 +195,7 @@ func (s *EntRdsSys) UserJoin(
 		return nil, false, err
 	}
 
-	cookie, err := s.createAuthenticatedCookie(
+	cookie, err := s.createAuthentication(
 		id.Id(auth.ID),
 		id.Id(user.ID),
 	)
@@ -257,7 +257,7 @@ func (s *EntRdsSys) UserAuthenticate(
 		return nil, false, err
 	}
 
-	cookie, err := s.createAuthenticatedCookie(
+	cookie, err := s.createAuthentication(
 		id.Id(auth.ID),
 		id.Id(user.ID),
 	)

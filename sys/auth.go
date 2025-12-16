@@ -16,11 +16,11 @@ import (
 
 const AUTHENTICATED_COOKIE_KEY = "ae"
 
-func (s *EntRdsSys) VerifyAuthenticatedCookie() echo.MiddlewareFunc {
-	return s.verifyAuthenticatedCookie
+func (s *EntRdsSys) VerifyAuthentication() echo.MiddlewareFunc {
+	return s.verifyAuthentication
 }
 
-func (s *EntRdsSys) verifyAuthenticatedCookie(next echo.HandlerFunc) echo.HandlerFunc {
+func (s *EntRdsSys) verifyAuthentication(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		cookie, err := ctx.Cookie(AUTHENTICATED_COOKIE_KEY)
 		if errors.Is(err, http.ErrNoCookie) {
@@ -33,8 +33,8 @@ func (s *EntRdsSys) verifyAuthenticatedCookie(next echo.HandlerFunc) echo.Handle
 			return err
 		}
 
-		if len(cookie.Value) == 0 {
-			ctx.Logger().Warn("empty auth cookie value")
+		if len(cookie.Value) <= token.SIGNATURE_ENCODED_LEN {
+			ctx.Logger().Warn("invalid encoded auth cookie value")
 			return res.BadRequest(ctx)
 		}
 
@@ -93,7 +93,7 @@ func (s *EntRdsSys) verifyAuthenticatedCookie(next echo.HandlerFunc) echo.Handle
 	}
 }
 
-func (s *EntRdsSys) createAuthenticatedCookie(
+func (s *EntRdsSys) createAuthentication(
 	authId, userId id.Id,
 ) (*http.Cookie, error) {
 	authUuid, err := authId.ToUUID()

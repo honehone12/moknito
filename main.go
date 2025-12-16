@@ -53,23 +53,23 @@ func main() {
 	api := echo.Group(
 		"/api",
 		moknito.OriginGuard(),
-		moknito.VerifySessionCookie(),
+		moknito.VerifySession(),
 	)
 	userApi := api.Group("/user")
 	userApi.POST("/register", moknito.UserRegister)
 	userApi.POST("/join", moknito.UserJoin)
 	userApi.POST("/authenticate", moknito.UserAuthenticate)
-	api.Group("/application", moknito.VerifyAuthenticatedCookie())
+	api.Group("/application", moknito.VerifyAuthentication())
 
 	echo.Group(
 		"/user",
-		moknito.SetSessionCookie(),
+		moknito.SetSession(),
 		uiProxy,
 	)
 	echo.Group(
 		"/application",
-		moknito.VerifySessionCookie(),
-		moknito.VerifyAuthenticatedCookie(),
+		moknito.VerifySession(),
+		moknito.VerifyAuthentication(),
 		uiProxy,
 	)
 	echo.Group("/*", uiProxy)

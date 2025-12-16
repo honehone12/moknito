@@ -17,13 +17,13 @@ import (
 )
 
 type SessionSigner interface {
-	SetSessionCookie() echo.MiddlewareFunc
-	VerifySessionCookie() echo.MiddlewareFunc
+	SetSession() echo.MiddlewareFunc
+	VerifySession() echo.MiddlewareFunc
 }
 
 type AuthSigner interface {
-	createAuthenticatedCookie(authId, userId id.Id) (*http.Cookie, error)
-	VerifyAuthenticatedCookie() echo.MiddlewareFunc
+	createAuthentication(authId, userId id.Id) (*http.Cookie, error)
+	VerifyAuthentication() echo.MiddlewareFunc
 }
 
 type Sys interface {

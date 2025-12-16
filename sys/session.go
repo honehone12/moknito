@@ -19,24 +19,24 @@ const SESSION_KEY_LEN = 16
 const SESSION_COOKIE_KEY = "ss"
 const SESSION_REDIS_KEY = "SESS"
 
-func (s *EntRdsSys) SetSessionCookie() echo.MiddlewareFunc {
-	return s.setSessionCookie
+func (s *EntRdsSys) SetSession() echo.MiddlewareFunc {
+	return s.setSession
 }
 
-func (s *EntRdsSys) VerifySessionCookie() echo.MiddlewareFunc {
-	return s.verifySessionCookie
+func (s *EntRdsSys) VerifySession() echo.MiddlewareFunc {
+	return s.verifySession
 }
 
-func (s *EntRdsSys) setSessionCookie(next echo.HandlerFunc) echo.HandlerFunc {
+func (s *EntRdsSys) setSession(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		c := ctx.Request().Context()
 		cookie, err := ctx.Cookie(SESSION_COOKIE_KEY)
 		if errors.Is(err, http.ErrNoCookie) {
-			value, err := s.create(c)
+			value, err := s.createSessionCookie(c)
 			if err != nil {
 				return err
 			}
-			if err := s.set(ctx, value); err != nil {
+			if err := s.setSessionCookie(ctx, value); err != nil {
 				return err
 			}
 
@@ -45,27 +45,27 @@ func (s *EntRdsSys) setSessionCookie(next echo.HandlerFunc) echo.HandlerFunc {
 			return err
 		}
 
-		sessKey, ok, err := s.verify(c, cookie)
+		sessKey, ok, err := s.verifySessionCookie(c, cookie)
 		if err != nil {
 			return err
 		}
 		if !ok {
-			value, err := s.create(c)
+			value, err := s.createSessionCookie(c)
 			if err != nil {
 				return err
 			}
-			if err := s.set(ctx, value); err != nil {
+			if err := s.setSessionCookie(ctx, value); err != nil {
 				return err
 			}
 
 			return next(ctx)
 		}
 
-		value, err := s.incr(c, sessKey)
+		value, err := s.incrSession(c, sessKey)
 		if err != nil {
 			return err
 		}
-		if err := s.set(ctx, value); err != nil {
+		if err := s.setSessionCookie(ctx, value); err != nil {
 			return err
 		}
 
@@ -73,7 +73,7 @@ func (s *EntRdsSys) setSessionCookie(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func (s *EntRdsSys) verifySessionCookie(next echo.HandlerFunc) echo.HandlerFunc {
+func (s *EntRdsSys) verifySession(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		c := ctx.Request().Context()
 		cookie, err := ctx.Cookie(SESSION_COOKIE_KEY)
@@ -87,12 +87,12 @@ func (s *EntRdsSys) verifySessionCookie(next echo.HandlerFunc) echo.HandlerFunc 
 			return err
 		}
 
-		if len(cookie.Value) == 0 {
-			ctx.Logger().Warn("empty session cookie value")
+		if len(cookie.Value) <= token.SIGNATURE_ENCODED_LEN {
+			ctx.Logger().Warn("invalid encode session cookie value")
 			return res.BadRequest(ctx)
 		}
 
-		sessKey, ok, err := s.verify(c, cookie)
+		sessKey, ok, err := s.verifySessionCookie(c, cookie)
 		if err != nil {
 			return err
 		}
@@ -101,11 +101,11 @@ func (s *EntRdsSys) verifySessionCookie(next echo.HandlerFunc) echo.HandlerFunc 
 			return res.BadRequest(ctx)
 		}
 
-		value, err := s.incr(c, sessKey)
+		value, err := s.incrSession(c, sessKey)
 		if err != nil {
 			return err
 		}
-		if err := s.set(ctx, value); err != nil {
+		if err := s.setSessionCookie(ctx, value); err != nil {
 			return err
 		}
 
@@ -113,7 +113,7 @@ func (s *EntRdsSys) verifySessionCookie(next echo.HandlerFunc) echo.HandlerFunc 
 	}
 }
 
-func (s *EntRdsSys) verify(
+func (s *EntRdsSys) verifySessionCookie(
 	ctx context.Context,
 	cookie *http.Cookie,
 ) ([]byte, bool, error) {
@@ -150,7 +150,7 @@ func (s *EntRdsSys) verify(
 	return sessKey, true, nil
 }
 
-func (s *EntRdsSys) set(ctx echo.Context, value string) error {
+func (s *EntRdsSys) setSessionCookie(ctx echo.Context, value string) error {
 	cookie := http.Cookie{
 		Name:     SESSION_COOKIE_KEY,
 		Value:    value,
@@ -168,7 +168,7 @@ func (s *EntRdsSys) set(ctx echo.Context, value string) error {
 	return nil
 }
 
-func (s *EntRdsSys) create(ctx context.Context) (string, error) {
+func (s *EntRdsSys) createSessionCookie(ctx context.Context) (string, error) {
 	sessKey := make([]byte, SESSION_KEY_LEN)
 	if _, err := rand.Read(sessKey); err != nil {
 		return "", err
@@ -183,7 +183,7 @@ func (s *EntRdsSys) create(ctx context.Context) (string, error) {
 	return s.sessionSigner.SignedCookie(sessKey, nonce)
 }
 
-func (s *EntRdsSys) incr(ctx context.Context, sessKey []byte) (string, error) {
+func (s *EntRdsSys) incrSession(ctx context.Context, sessKey []byte) (string, error) {
 	key := fmt.Sprintf("%s:%x", SESSION_REDIS_KEY, sessKey)
 	nonce, err := s.redis.Incr(ctx, key).Result()
 	if err != nil {
