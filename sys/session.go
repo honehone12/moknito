@@ -84,6 +84,11 @@ func (s *EntRdsSys) verifySessionCookie(next echo.HandlerFunc) echo.HandlerFunc 
 			return err
 		}
 
+		if len(cookie.Value) == 0 {
+			ctx.Logger().Warn("empty session cookie value")
+			return res.BadRequest(ctx)
+		}
+
 		sessKey, ok, err := s.verify(c, cookie)
 		if err != nil {
 			return err
@@ -112,6 +117,9 @@ func (s *EntRdsSys) verify(
 	dec, err := base64.RawURLEncoding.DecodeString(cookie.Value)
 	if err != nil {
 		return nil, false, err
+	}
+	if len(dec) <= token.SIGNATURE_LEN {
+		return nil, false, nil
 	}
 
 	sessKey := dec[token.SIGNATURE_LEN:]

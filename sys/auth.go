@@ -29,6 +29,11 @@ func (s *EntRdsSys) verifyAuthenticatedCookie(next echo.HandlerFunc) echo.Handle
 			return err
 		}
 
+		if len(cookie.Value) == 0 {
+			ctx.Logger().Warn("empty auth cookie value")
+			return res.BadRequest(ctx)
+		}
+
 		claim, err := s.authSigner.Parse(cookie.Value)
 		if err != nil {
 			ctx.Logger().Warn(err)
