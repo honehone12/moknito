@@ -79,6 +79,9 @@ func (s *EntRdsSys) verifySessionCookie(next echo.HandlerFunc) echo.HandlerFunc 
 		cookie, err := ctx.Cookie(SESSION_COOKIE_KEY)
 		if errors.Is(err, http.ErrNoCookie) {
 			ctx.Logger().Warn("no session cookie")
+			// here might have to be Unauthorized resonse code,
+			// but i user Forbidden because i don't want to rerun
+			// WWW-Authenticate header
 			return res.Forbidden(ctx)
 		} else if err != nil {
 			return err

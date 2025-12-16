@@ -41,43 +41,21 @@ func setupTestSys(t *testing.T) (*EntRdsSys, *miniredis.Miniredis) {
 	// NewEntRdsSys reads env vars. We can either mock env vars or manually construct the struct.
 	// Manually constructing is cleaner to avoid side effects on parallel tests if we used env.
 
-	// Helper to create signer manually if we don't want to rely on NewSessionTokenSigner reading env
-	// But NewSessionTokenSigner IS coupled to env.
-	// We can setenv here, but it's global.
-	// Better approach: Since we are in sys package, we can possibly access internal fields or
-	// just use the fact that NewEntRdsSys is what we are testing?
-	// Actually we want to test EntRdsSys methods, so constructing it manually is fine.
-	// But EntRdsSys has private fields.
-	// So we should use NewEntRdsSys but with setenv.
-	// Since tests run sequentially or we can use t.Setenv which restores env.
-
 	t.Setenv("AUTH_TOKEN_KEY", testAuthKey)
 	t.Setenv("SESSION_TOKEN_KEY", testSessKey)
 	t.Setenv("AUTH_HOST", "test-host")
-	t.Setenv("MYSQL_URI", "dummy") // Won't be used because we inject ent in real code? No, NewEntRdsSys opens ent.
-	// Ah, NewEntRdsSys opens Ent and Redis.
-	// So we cannot use NewEntRdsSys if we want to inject OUR ent client and redis client.
-	// But EntRdsSys struct fields are unexported?
-	// s.ent, s.redis
-	// Wait, internal fields are accessible within the same package.
-	// So we can manually construct &EntRdsSys{...}.
+	t.Setenv("MYSQL_URI", "dummy")
 
-	// authSignerData, _ := base64.StdEncoding.DecodeString(testAuthKey)
-    // We need to re-create the signers manually or via helper.
-    // token.NewAuthTokenSigner reads env.
-    // Let's use t.Setenv and create signers using their public constructor if their fields are private.
-    // token.AuthTokenSigner fields are private? Yes (host, key).
-    
-    // So:
-    authSigner, err := token.NewAuthTokenSigner()
-    if err != nil {
-        t.Fatalf("failed to create auth token signer: %v", err)
-    }
+	// So:
+	authSigner, err := token.NewAuthTokenSigner()
+	if err != nil {
+		t.Fatalf("failed to create auth token signer: %v", err)
+	}
 
-    sessionSigner, err := token.NewSessionTokenSigner()
-    if err != nil {
-        t.Fatalf("failed to create session token signer: %v", err)
-    }
+	sessionSigner, err := token.NewSessionTokenSigner()
+	if err != nil {
+		t.Fatalf("failed to create session token signer: %v", err)
+	}
 
 	sys := &EntRdsSys{
 		ent:           client,
@@ -91,6 +69,6 @@ func setupTestSys(t *testing.T) (*EntRdsSys, *miniredis.Miniredis) {
 }
 
 func createTestContext(t *testing.T, sys *EntRdsSys) (context.Context, *ent.Tx) {
-    // Helper to create a context/tx if needed, or just return basic context
-    return context.Background(), nil
+	// Helper to create a context/tx if needed, or just return basic context
+	return context.Background(), nil
 }
