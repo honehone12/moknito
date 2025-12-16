@@ -93,6 +93,16 @@ func TestUUIDConversion(t *testing.T) {
 		if originalUUID != resultUUID {
 			t.Errorf("Expected UUID %s, got %s", originalUUID, resultUUID)
 		}
+
+		uuidString := originalUUID.String()
+		id, err := FromUUIDString(uuidString)
+		if err != nil {
+			t.Fatalf("FromUUIDString() returned unexpected error: %v", err)
+		}
+
+		if id != idString {
+			t.Errorf("Expected Id %s, got %s", idString, id)
+		}
 	})
 
 	t.Run("InvalidStringToUUID", func(t *testing.T) {
