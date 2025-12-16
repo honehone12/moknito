@@ -9,7 +9,6 @@ import (
 	"moknito/ent/user"
 	"moknito/hash"
 	"moknito/id"
-	"moknito/token"
 	"net/http"
 	"strconv"
 	"time"
@@ -267,42 +266,4 @@ func (s *EntRdsSys) UserAuthenticate(
 	}
 
 	return cookie, true, nil
-}
-
-func (s *EntRdsSys) createAuthenticatedCookie(
-	authId, userId id.Id,
-) (*http.Cookie, error) {
-	authUuid, err := authId.ToUUID()
-	if err != nil {
-		return nil, err
-	}
-	userUuid, err := userId.ToUUID()
-	if err != nil {
-		return nil, err
-	}
-
-	tkn, err := s.authSigner.CreateAuthToken(
-		token.TOKEN_TYPE_AUTHENTICATION,
-		authUuid.String(),
-		userUuid.String(),
-		s.tokenTtl,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	cookie := &http.Cookie{
-		Name:     AUTHENTICATED_COOKIE_KEY,
-		Value:    tkn,
-		Path:     "/",
-		MaxAge:   int(s.tokenTtl.Seconds()),
-		Secure:   false, // for local
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-	}
-	if err := cookie.Valid(); err != nil {
-		return nil, err
-	}
-
-	return cookie, nil
 }

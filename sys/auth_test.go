@@ -157,3 +157,43 @@ func TestVerifyAuthenticatedCookie(t *testing.T) {
 		})
 	}
 }
+
+func TestCreateAuthenticatedCookie(t *testing.T) {
+	sys, _ := setupTestSys(t)
+
+	authId, _ := id.NewRandom()
+	userId, _ := id.NewRandom()
+
+	cookie, err := sys.createAuthenticatedCookie(authId, userId)
+	if err != nil {
+		t.Fatalf("failed to create authenticated cookie: %v", err)
+	}
+
+	if cookie.Name != AUTHENTICATED_COOKIE_KEY {
+		t.Errorf("expected cookie name %s, got %s", AUTHENTICATED_COOKIE_KEY, cookie.Name)
+	}
+
+	if cookie.Value == "" {
+		t.Error("expected cookie value to be set")
+	}
+
+	if cookie.Path != "/" {
+		t.Errorf("expected cookie path /, got %s", cookie.Path)
+	}
+
+	if cookie.MaxAge != int(sys.tokenTtl.Seconds()) {
+		t.Errorf("expected cookie max age %d, got %d", int(sys.tokenTtl.Seconds()), cookie.MaxAge)
+	}
+
+	if cookie.Secure {
+		t.Error("expected cookie secure to be false (for local)")
+	}
+
+	if !cookie.HttpOnly {
+		t.Error("expected cookie http only to be true")
+	}
+
+	if cookie.SameSite != http.SameSiteStrictMode {
+		t.Errorf("expected cookie same site %v, got %v", http.SameSiteStrictMode, cookie.SameSite)
+	}
+}
