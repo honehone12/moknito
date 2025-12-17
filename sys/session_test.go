@@ -1,44 +1,35 @@
 package sys
 
 import (
+	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"moknito/token"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/redis/go-redis/v9"
 )
 
-func TestSetSessionCookie(t *testing.T) {
+func TestCreateSession(t *testing.T) {
 	sys, mr := setupTestSys(t)
-	// sys.tokenTtl is time.Hour
+	ctx := context.Background()
 
 	t.Run("Create New Session", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		rec := httptest.NewRecorder()
-		e := sys.SetSession()(func(c echo.Context) error {
-			return nil
-		})
-
-		ctx := echo.New().NewContext(req, rec)
-		if err := e(ctx); err != nil {
-			t.Fatalf("Middleware returned error: %v", err)
+		cookie, err := sys.CreateSession(ctx)
+		if err != nil {
+			t.Fatalf("CreateSession returned error: %v", err)
 		}
 
-		// Check cookie set
-		cookie := rec.Result().Cookies()[0]
 		if cookie.Name != SESSION_COOKIE_KEY {
 			t.Errorf("Expected cookie name %s, got %s", SESSION_COOKIE_KEY, cookie.Name)
 		}
 
 		// Verify redis has session
-		// we need to decode cookie to get key
 		decoded, _ := base64.RawURLEncoding.DecodeString(cookie.Value)
 		sessKey := decoded[token.SIGNATURE_LEN:]
 
-		// Check redis
 		val, err := mr.Get(fmt.Sprintf("SESS:%x", sessKey))
 		if err != nil {
 			t.Fatalf("Redis key not found: %v", err)
@@ -47,90 +38,63 @@ func TestSetSessionCookie(t *testing.T) {
 			t.Errorf("Expected initial nonce 0, got %s", val)
 		}
 	})
+}
 
-	t.Run("Rotate Existing Session", func(t *testing.T) {
-		// Create initial session manually
-		// But better to use the middleware flow logic or manual helper?
-		// Let's create one by calling the middleware first.
-		req1 := httptest.NewRequest(http.MethodGet, "/", nil)
-		rec1 := httptest.NewRecorder()
-		ctx1 := echo.New().NewContext(req1, rec1)
-		sys.SetSession()(func(c echo.Context) error { return nil })(ctx1)
+func TestRotateSession(t *testing.T) {
+	sys, mr := setupTestSys(t)
+	ctx := context.Background()
 
-		cookie := rec1.Result().Cookies()[0]
+	// 1. Create a session first
+	cookie, err := sys.CreateSession(ctx)
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
 
-		// Now use this cookie in next request
-		req2 := httptest.NewRequest(http.MethodGet, "/", nil)
-		req2.AddCookie(cookie)
-		rec2 := httptest.NewRecorder()
-		ctx2 := echo.New().NewContext(req2, rec2)
+	// 2. Extract key
+	decoded, _ := base64.RawURLEncoding.DecodeString(cookie.Value)
+	sessKey := decoded[token.SIGNATURE_LEN:]
 
-		if err := sys.SetSession()(func(c echo.Context) error { return nil })(ctx2); err != nil {
-			t.Fatalf("Middleware 2 returned error: %v", err)
-		}
+	// 3. Rotate (IncrSession)
+	newCookie, err := sys.IncrSession(ctx, sessKey)
+	if err != nil {
+		t.Fatalf("IncrSession returned error: %v", err)
+	}
 
-		// Should have updated cookie (nonce incremented)
-		cookie2 := rec2.Result().Cookies()[0]
-		if cookie2.Value == cookie.Value {
-			t.Error("Cookie value should have changed (nonce increment)")
-		}
+	// 4. Check new cookie
+	if newCookie.Value == cookie.Value {
+		t.Error("Cookie value should have changed (nonce increment)")
+	}
 
-		// Check redis
-		decoded, _ := base64.RawURLEncoding.DecodeString(cookie2.Value)
-		sessKey := decoded[token.SIGNATURE_LEN:]
-		// Note: sessKey should be same
-
-		// Check redis
-		val, _ := mr.Get(fmt.Sprintf("SESS:%x", sessKey))
-		if val != "1" {
-			t.Errorf("Expected nonce 1, got %s", val)
-		}
-	})
-
-	t.Run("Recreate if Invalid Session", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		// Invalid cookie (random string)
-		req.AddCookie(&http.Cookie{Name: SESSION_COOKIE_KEY, Value: "invalid-cookie-value"})
-		rec := httptest.NewRecorder()
-		ctx := echo.New().NewContext(req, rec)
-
-		if err := sys.SetSession()(func(c echo.Context) error { return nil })(ctx); err != nil {
-			t.Fatalf("Middleware returned error: %v", err)
-		}
-
-		// Should set a NEW valid cookie
-		if len(rec.Result().Cookies()) == 0 {
-			t.Fatal("No cookie set")
-		}
-		// We can verify it's valid format
-	})
+	// 5. Check Redis
+	val, _ := mr.Get(fmt.Sprintf("SESS:%x", sessKey))
+	if val != "1" {
+		t.Errorf("Expected nonce 1, got %s", val)
+	}
 }
 
 func TestVerifySessionCookie(t *testing.T) {
 	sys, mr := setupTestSys(t)
+	ctx := context.Background()
 
 	t.Run("Valid Session", func(t *testing.T) {
 		// Setup valid session manually in redis and generate cookie
-		sessKey := []byte("valid-session-key")
+		sessKey := []byte("0123456789012345") // 16 bytes
 		mr.Set(fmt.Sprintf("SESS:%x", sessKey), "10")
 
 		cookieVal, _ := sys.sessionSigner.SignedCookie(sessKey, "10")
+		cookie := &http.Cookie{Name: SESSION_COOKIE_KEY, Value: cookieVal}
 
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		req.AddCookie(&http.Cookie{Name: SESSION_COOKIE_KEY, Value: cookieVal})
-		rec := httptest.NewRecorder()
-		ctx := echo.New().NewContext(req, rec)
+		newCookie, verErr, sysErr := sys.VerifySession(ctx, cookie)
 
-		handler := sys.VerifySession()(func(c echo.Context) error {
-			return c.String(http.StatusOK, "OK")
-		})
-
-		if err := handler(ctx); err != nil {
-			t.Fatalf("Handler returned error: %v", err)
+		if verErr != nil {
+			t.Errorf("Expected success, got verification error: %v", verErr)
+		}
+		if sysErr != nil {
+			t.Errorf("Expected success, got system error: %v", sysErr)
 		}
 
-		if rec.Code != http.StatusOK {
-			t.Errorf("Expected 200, got %d", rec.Code)
+		if newCookie == nil {
+			t.Fatal("Expected new cookie, got nil")
 		}
 
 		// Should increment nonce in Redis
@@ -140,77 +104,49 @@ func TestVerifySessionCookie(t *testing.T) {
 		}
 	})
 
-	t.Run("Missing Session", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		rec := httptest.NewRecorder()
-		ctx := echo.New().NewContext(req, rec)
-
-		handler := sys.VerifySession()(func(c echo.Context) error {
-			return c.String(http.StatusOK, "OK")
-		})
-
-		err := handler(ctx)
-		// Verify middleware returns error (Forbidden)
-		if err != nil {
-			he, ok := err.(*echo.HTTPError)
-			if !ok || he.Code != http.StatusForbidden {
-				t.Errorf("Expected 403 Forbidden, got %v", err)
-			}
-		} else if rec.Code != http.StatusForbidden {
-			t.Errorf("Expected 403 Forbidden, got %d", rec.Code)
-		}
-	})
-
 	t.Run("Invalid Session (Signature mismatch)", func(t *testing.T) {
-		sessKey := []byte("valid-session-key-2")
+		sessKey := []byte("1123456789012345") // distinct 16 bytes
 		mr.Set(fmt.Sprintf("SESS:%x", sessKey), "5")
 
 		// Sign with WRONG nonce
 		cookieVal, _ := sys.sessionSigner.SignedCookie(sessKey, "999")
+		cookie := &http.Cookie{Name: SESSION_COOKIE_KEY, Value: cookieVal}
 
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		req.AddCookie(&http.Cookie{Name: SESSION_COOKIE_KEY, Value: cookieVal})
-		rec := httptest.NewRecorder()
-		ctx := echo.New().NewContext(req, rec)
+		_, verErr, sysErr := sys.VerifySession(ctx, cookie)
 
-		handler := sys.VerifySession()(func(c echo.Context) error {
-			return c.String(http.StatusOK, "OK")
-		})
-
-		err := handler(ctx)
-		if err != nil {
-			he, ok := err.(*echo.HTTPError)
-			if !ok || he.Code != http.StatusBadRequest {
-				t.Errorf("Expected 400 BadRequest, got %v", err)
-			}
-		} else if rec.Code != http.StatusBadRequest {
-			t.Errorf("Expected 400 BadRequest, got %d", rec.Code)
+		if verErr == nil {
+			t.Error("Expected verification error, got nil")
+		}
+		if sysErr != nil {
+			t.Errorf("Expected verification error only, got system error: %v", sysErr)
 		}
 	})
 
 	t.Run("Session Not in Redis (Expired)", func(t *testing.T) {
-		sessKey := []byte("expired-session-key")
+		sessKey := []byte("2123456789012345") // distinct 16 bytes
 		// Don't set in Redis (simulating expiration)
 
 		cookieVal, _ := sys.sessionSigner.SignedCookie(sessKey, "0")
+		cookie := &http.Cookie{Name: SESSION_COOKIE_KEY, Value: cookieVal}
 
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
-		req.AddCookie(&http.Cookie{Name: SESSION_COOKIE_KEY, Value: cookieVal})
-		rec := httptest.NewRecorder()
-		ctx := echo.New().NewContext(req, rec)
+		_, verErr, sysErr := sys.VerifySession(ctx, cookie)
 
-		handler := sys.VerifySession()(func(c echo.Context) error {
-			return c.String(http.StatusOK, "OK")
-		})
+		// This might be treated as verification error or just redis nil error depending on impl
+		// Looking at impl:
+		// nonce, err := s.redis.Get(ctx, key).Result()
+		// if errors.Is(err, redis.Nil) { return nil, err, nil }
+		if verErr == nil {
+			t.Error("Expected verification error (redis nil -> err), got nil")
+		}
+		// Based on code:
+		// if errors.Is(err, redis.Nil) { return nil, err, nil }
+		// so it returns verErr=redis.Nil, sysErr=nil
+		if !errors.Is(verErr, redis.Nil) {
+			t.Errorf("Expected redis.Nil error, got %T: %v", verErr, verErr)
+		}
 
-		err := handler(ctx)
-		if err != nil {
-			he, ok := err.(*echo.HTTPError)
-			if !ok || he.Code != http.StatusBadRequest {
-				t.Errorf("Expected 400 BadRequest, got %v", err)
-			}
-		} else if rec.Code != http.StatusBadRequest {
-			t.Errorf("Expected 400 BadRequest, got %d", rec.Code)
+		if sysErr != nil {
+			t.Errorf("Expected no system error, got %v", sysErr)
 		}
 	})
 }

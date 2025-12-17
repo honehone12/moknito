@@ -18,18 +18,6 @@ type userAuthenticationRequest struct {
 	Password string `form:"password" validate:"min=8,max=128"`
 }
 
-func (m *Moknito) bind(ctx echo.Context, target any) error {
-	if err := ctx.Bind(target); err != nil {
-		return err
-	}
-
-	if err := m.validator.Struct(target); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *Moknito) UserRegister(ctx echo.Context) error {
 	form := userRegisterRequest{}
 

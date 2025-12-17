@@ -5,31 +5,39 @@ import (
 	"errors"
 	"io"
 	"moknito/ent"
-	"moknito/id"
 	"moknito/token"
 	"net/http"
 	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 )
 
 type SessionSigner interface {
-	SetSession() echo.MiddlewareFunc
-	VerifySession() echo.MiddlewareFunc
+	CreateSession(ctx context.Context) (*http.Cookie, error)
+	IncrSession(
+		ctx context.Context,
+		sessKey []byte,
+	) (*http.Cookie, error)
+	VerifySession(
+		ctx context.Context,
+		cookie *http.Cookie,
+	) (*http.Cookie, error, error)
 }
 
 type AuthSigner interface {
-	createAuthentication(authId, userId id.Id) (*http.Cookie, error)
-	VerifyAuthentication() echo.MiddlewareFunc
+	VerifyAuthentication(
+		ctx context.Context,
+		cookie *http.Cookie,
+	) (error, error)
 }
 
 type Sys interface {
 	SessionSigner
 	AuthSigner
 	UserSys
+	AppSys
 	io.Closer
 }
 

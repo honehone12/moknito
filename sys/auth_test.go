@@ -5,11 +5,8 @@ import (
 	"moknito/id"
 	"moknito/token"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 	"time"
-
-	"github.com/labstack/echo/v4"
 )
 
 func TestVerifyAuthenticatedCookie(t *testing.T) {
@@ -52,9 +49,10 @@ func TestVerifyAuthenticatedCookie(t *testing.T) {
 	}
 
 	testCases := []struct {
-		name           string
-		setupCookie    func() *http.Cookie
-		expectedStatus int
+		name          string
+		setupCookie   func() *http.Cookie
+		expectSuccess bool
+		expectSysErr  bool
 	}{
 		{
 			name: "Valid Token",
@@ -64,14 +62,7 @@ func TestVerifyAuthenticatedCookie(t *testing.T) {
 				tk := createToken(token.TOKEN_TYPE_AUTHENTICATION, aUUID.String(), uUUID.String(), time.Hour)
 				return &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: tk}
 			},
-			expectedStatus: http.StatusOK,
-		},
-		{
-			name: "Missing Cookie",
-			setupCookie: func() *http.Cookie {
-				return nil
-			},
-			expectedStatus: http.StatusForbidden,
+			expectSuccess: true,
 		},
 		{
 			name: "Invalid Token (Tampered)",
@@ -79,7 +70,7 @@ func TestVerifyAuthenticatedCookie(t *testing.T) {
 				tk := createToken(token.TOKEN_TYPE_AUTHENTICATION, string(auth.ID), string(usr.ID), time.Hour)
 				return &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: tk + "tamperd"}
 			},
-			expectedStatus: http.StatusBadRequest,
+			expectSuccess: false,
 		},
 		{
 			name: "Token ID mismatch (Non-existent Auth ID)",
@@ -88,7 +79,7 @@ func TestVerifyAuthenticatedCookie(t *testing.T) {
 				tk := createToken(token.TOKEN_TYPE_AUTHENTICATION, string(newAuthId), string(usr.ID), time.Hour)
 				return &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: tk}
 			},
-			expectedStatus: http.StatusBadRequest,
+			expectSuccess: false,
 		},
 		{
 			name: "User ID mismatch (Auth exists but User differs)",
@@ -97,7 +88,7 @@ func TestVerifyAuthenticatedCookie(t *testing.T) {
 				tk := createToken(token.TOKEN_TYPE_AUTHENTICATION, string(auth.ID), string(otherUser), time.Hour)
 				return &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: tk}
 			},
-			expectedStatus: http.StatusBadRequest,
+			expectSuccess: false,
 		},
 		{
 			name: "Expired Auth in DB",
@@ -118,41 +109,33 @@ func TestVerifyAuthenticatedCookie(t *testing.T) {
 				tk := createToken(token.TOKEN_TYPE_AUTHENTICATION, string(expiredAuthId), string(usr.ID), time.Hour)
 				return &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: tk}
 			},
-			expectedStatus: http.StatusBadRequest,
+			expectSuccess: false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			e := echo.New()
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			cookie := tc.setupCookie()
-			if cookie != nil {
-				req.AddCookie(cookie)
-			}
-			rec := httptest.NewRecorder()
-			c := e.NewContext(req, rec)
 
-			handler := sys.VerifyAuthentication()(func(c echo.Context) error {
-				return c.String(http.StatusOK, "OK")
-			})
+			verErr, sysErr := sys.VerifyAuthentication(ctx, cookie)
 
-			err := handler(c)
-			var status int
-			if err != nil {
-				he, ok := err.(*echo.HTTPError)
-				if ok {
-					status = he.Code
-				} else {
-					t.Errorf("Handler returned unexpected error type: %v", err)
-					return
+			if tc.expectSuccess {
+				if verErr != nil {
+					t.Errorf("Expected success, got verification error: %v", verErr)
+				}
+				if sysErr != nil {
+					t.Errorf("Expected success, got system error: %v", sysErr)
 				}
 			} else {
-				status = rec.Code
-			}
-
-			if status != tc.expectedStatus {
-				t.Errorf("Expected status %d, got %d", tc.expectedStatus, status)
+				if tc.expectSysErr {
+					if sysErr == nil {
+						t.Error("Expected system error, got nil")
+					}
+				} else {
+					if verErr == nil && sysErr == nil {
+						t.Error("Expected error, got nil")
+					}
+				}
 			}
 		})
 	}

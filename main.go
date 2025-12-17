@@ -59,7 +59,8 @@ func main() {
 	userApi.POST("/register", moknito.UserRegister)
 	userApi.POST("/join", moknito.UserJoin)
 	userApi.POST("/authenticate", moknito.UserAuthenticate)
-	api.Group("/application", moknito.VerifyAuthentication())
+	appApi := api.Group("/application", moknito.VerifyAuthentication())
+	appApi.GET("/infomation", moknito.ApplicationInfomation)
 
 	echo.Group(
 		"/user",

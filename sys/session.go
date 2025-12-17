@@ -6,12 +6,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"moknito/res"
 	"moknito/token"
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -19,110 +17,17 @@ const SESSION_KEY_LEN = 16
 const SESSION_COOKIE_KEY = "ss"
 const SESSION_REDIS_KEY = "SESS"
 
-func (s *EntRdsSys) SetSession() echo.MiddlewareFunc {
-	return s.setSession
-}
-
-func (s *EntRdsSys) VerifySession() echo.MiddlewareFunc {
-	return s.verifySession
-}
-
-func (s *EntRdsSys) setSession(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		c := ctx.Request().Context()
-		cookie, err := ctx.Cookie(SESSION_COOKIE_KEY)
-		if errors.Is(err, http.ErrNoCookie) {
-			value, err := s.createSessionCookie(c)
-			if err != nil {
-				return err
-			}
-			if err := s.setSessionCookie(ctx, value); err != nil {
-				return err
-			}
-
-			return next(ctx)
-		} else if err != nil {
-			return err
-		}
-
-		sessKey, ok, err := s.verifySessionCookie(c, cookie)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			value, err := s.createSessionCookie(c)
-			if err != nil {
-				return err
-			}
-			if err := s.setSessionCookie(ctx, value); err != nil {
-				return err
-			}
-
-			return next(ctx)
-		}
-
-		value, err := s.incrSession(c, sessKey)
-		if err != nil {
-			return err
-		}
-		if err := s.setSessionCookie(ctx, value); err != nil {
-			return err
-		}
-
-		return next(ctx)
-	}
-}
-
-func (s *EntRdsSys) verifySession(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
-		c := ctx.Request().Context()
-		cookie, err := ctx.Cookie(SESSION_COOKIE_KEY)
-		if errors.Is(err, http.ErrNoCookie) {
-			ctx.Logger().Warn("no session cookie")
-			// here might have to be Unauthorized resonse code,
-			// but i user Forbidden because i don't want to rerun
-			// WWW-Authenticate header
-			return res.Forbidden(ctx)
-		} else if err != nil {
-			return err
-		}
-
-		if len(cookie.Value) <= token.SIGNATURE_ENCODED_LEN {
-			ctx.Logger().Warn("invalid encode session cookie value")
-			return res.BadRequest(ctx)
-		}
-
-		sessKey, ok, err := s.verifySessionCookie(c, cookie)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			ctx.Logger().Warn("invalid session cookie")
-			return res.BadRequest(ctx)
-		}
-
-		value, err := s.incrSession(c, sessKey)
-		if err != nil {
-			return err
-		}
-		if err := s.setSessionCookie(ctx, value); err != nil {
-			return err
-		}
-
-		return next(ctx)
-	}
-}
-
-func (s *EntRdsSys) verifySessionCookie(
+// (!) return verification error, system error (!)
+func (s *EntRdsSys) VerifySession(
 	ctx context.Context,
 	cookie *http.Cookie,
-) ([]byte, bool, error) {
+) (*http.Cookie, error, error) {
 	dec, err := base64.RawURLEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		return nil, false, err
+		return nil, nil, err
 	}
-	if len(dec) <= token.SIGNATURE_LEN {
-		return nil, false, nil
+	if len(dec) != token.SIGNATURE_LEN+SESSION_KEY_LEN {
+		return nil, errors.New("invalid decoded session length"), nil
 	}
 
 	sessKey := dec[token.SIGNATURE_LEN:]
@@ -130,9 +35,9 @@ func (s *EntRdsSys) verifySessionCookie(
 	key := fmt.Sprintf("%s:%x", SESSION_REDIS_KEY, sessKey)
 	nonce, err := s.redis.Get(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
-		return nil, false, nil
+		return nil, err, nil
 	} else if err != nil {
-		return nil, false, err
+		return nil, nil, err
 	}
 
 	ok, err := s.sessionSigner.Verify(
@@ -141,34 +46,44 @@ func (s *EntRdsSys) verifySessionCookie(
 		nonce,
 	)
 	if err != nil {
-		return nil, false, err
+		return nil, nil, err
 	}
 	if !ok {
-		return nil, false, nil
+		return nil, errors.New("wrong session signature"), nil
 	}
 
-	return sessKey, true, nil
+	value, err := s.incrSession(ctx, sessKey)
+	if err != nil {
+		return nil, nil, err
+	}
+	c, err := s.createSessionCookie(value)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return c, nil, nil
 }
 
-func (s *EntRdsSys) setSessionCookie(ctx echo.Context, value string) error {
-	cookie := http.Cookie{
-		Name:     SESSION_COOKIE_KEY,
-		Value:    value,
-		Path:     "/",
-		MaxAge:   int(s.tokenTtl.Seconds()),
-		Secure:   false, // for local
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
+func (s *EntRdsSys) CreateSession(ctx context.Context) (*http.Cookie, error) {
+	value, err := s.createSession(ctx)
+	if err != nil {
+		return nil, err
 	}
-	if err := cookie.Valid(); err != nil {
-		return err
-	}
-	ctx.SetCookie(&cookie)
-
-	return nil
+	return s.createSessionCookie(value)
 }
 
-func (s *EntRdsSys) createSessionCookie(ctx context.Context) (string, error) {
+func (s *EntRdsSys) IncrSession(
+	ctx context.Context,
+	sessKey []byte,
+) (*http.Cookie, error) {
+	value, err := s.incrSession(ctx, sessKey)
+	if err != nil {
+		return nil, err
+	}
+	return s.createSessionCookie(value)
+}
+
+func (s *EntRdsSys) createSession(ctx context.Context) (string, error) {
 	sessKey := make([]byte, SESSION_KEY_LEN)
 	if _, err := rand.Read(sessKey); err != nil {
 		return "", err
@@ -194,4 +109,21 @@ func (s *EntRdsSys) incrSession(ctx context.Context, sessKey []byte) (string, er
 	}
 
 	return s.sessionSigner.SignedCookie(sessKey, strconv.FormatInt(nonce, 10))
+}
+
+func (s *EntRdsSys) createSessionCookie(value string) (*http.Cookie, error) {
+	cookie := &http.Cookie{
+		Name:     SESSION_COOKIE_KEY,
+		Value:    value,
+		Path:     "/",
+		MaxAge:   int(s.tokenTtl.Seconds()),
+		Secure:   false, // for local
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	if err := cookie.Valid(); err != nil {
+		return nil, err
+	}
+
+	return cookie, nil
 }

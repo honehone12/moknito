@@ -45,18 +45,18 @@ func NewMocknito() (*Moknito, error) {
 	}, nil
 }
 
-func (m *Moknito) SetSession() echo.MiddlewareFunc {
-	return m.system.SetSession()
-}
-
-func (m *Moknito) VerifySession() echo.MiddlewareFunc {
-	return m.system.VerifySession()
-}
-
-func (m *Moknito) VerifyAuthentication() echo.MiddlewareFunc {
-	return m.system.VerifyAuthentication()
-}
-
 func (m *Moknito) Close() error {
 	return m.system.Close()
+}
+
+func (m *Moknito) bind(ctx echo.Context, target any) error {
+	if err := ctx.Bind(target); err != nil {
+		return err
+	}
+
+	if err := m.validator.Struct(target); err != nil {
+		return err
+	}
+
+	return nil
 }
