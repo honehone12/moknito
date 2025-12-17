@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"flag"
 	"log"
 	"moknito/ent"
@@ -53,8 +54,11 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	encId := base64.RawURLEncoding.EncodeToString([]byte(id))
+
 	log.Printf(
-		"created application name: %s domain: %s\n",
+		"created application id: %s name: %s domain: %s\n",
+		encId,
 		app.Name,
 		app.Domain,
 	)

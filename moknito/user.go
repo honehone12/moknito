@@ -52,8 +52,7 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	ctx.Response().Header().Set("Location", "/user/join")
-	return ctx.NoContent(http.StatusSeeOther)
+	return ctx.NoContent(http.StatusOK)
 }
 
 func (m *Moknito) UserJoin(ctx echo.Context) error {
@@ -79,8 +78,7 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 	}
 
 	ctx.SetCookie(cookie)
-	ctx.Response().Header().Set("Location", "/")
-	return ctx.NoContent(http.StatusSeeOther)
+	return ctx.NoContent(http.StatusOK)
 }
 
 func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
@@ -106,6 +104,5 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 	}
 
 	ctx.SetCookie(cookie)
-	ctx.Response().Header().Set("Location", "/")
-	return ctx.NoContent(http.StatusSeeOther)
+	return ctx.NoContent(http.StatusOK)
 }
