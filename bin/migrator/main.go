@@ -12,24 +12,24 @@ import (
 
 func main() {
 	if err := godotenv.Load("../../.env"); err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	mysqlUri := os.Getenv("MYSQL_URI")
 	if len(mysqlUri) == 0 {
-		log.Fatal("could not found env for mysql uri")
+		log.Fatalln("could not found env for mysql uri")
 	}
 
-	client, err := ent.Open("mysql", mysqlUri)
+	client, err := ent.Open("mysql", mysqlUri, ent.Debug())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 	defer client.Close()
 
 	ctx := context.Background()
 	log.Println("migrating...")
 	if err := client.Schema.Create(ctx); err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	log.Println("done")
