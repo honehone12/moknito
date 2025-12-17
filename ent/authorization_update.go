@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"moknito/ent/authorization"
 	"moknito/ent/predicate"
-	"moknito/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -55,64 +54,9 @@ func (_u *AuthorizationUpdate) ClearDeletedAt() *AuthorizationUpdate {
 	return _u
 }
 
-// SetCode sets the "code" field.
-func (_u *AuthorizationUpdate) SetCode(v []byte) *AuthorizationUpdate {
-	_u.mutation.SetCode(v)
-	return _u
-}
-
-// ClearCode clears the value of the "code" field.
-func (_u *AuthorizationUpdate) ClearCode() *AuthorizationUpdate {
-	_u.mutation.ClearCode()
-	return _u
-}
-
-// SetChallenge sets the "challenge" field.
-func (_u *AuthorizationUpdate) SetChallenge(v []byte) *AuthorizationUpdate {
-	_u.mutation.SetChallenge(v)
-	return _u
-}
-
-// ClearChallenge clears the value of the "challenge" field.
-func (_u *AuthorizationUpdate) ClearChallenge() *AuthorizationUpdate {
-	_u.mutation.ClearChallenge()
-	return _u
-}
-
-// SetExpireAt sets the "expire_at" field.
-func (_u *AuthorizationUpdate) SetExpireAt(v time.Time) *AuthorizationUpdate {
-	_u.mutation.SetExpireAt(v)
-	return _u
-}
-
-// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
-func (_u *AuthorizationUpdate) SetNillableExpireAt(v *time.Time) *AuthorizationUpdate {
-	if v != nil {
-		_u.SetExpireAt(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *AuthorizationUpdate) SetUserID(id string) *AuthorizationUpdate {
-	_u.mutation.SetUserID(id)
-	return _u
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (_u *AuthorizationUpdate) SetUser(v *User) *AuthorizationUpdate {
-	return _u.SetUserID(v.ID)
-}
-
 // Mutation returns the AuthorizationMutation object of the builder.
 func (_u *AuthorizationUpdate) Mutation() *AuthorizationMutation {
 	return _u.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (_u *AuthorizationUpdate) ClearUser() *AuthorizationUpdate {
-	_u.mutation.ClearUser()
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -180,50 +124,6 @@ func (_u *AuthorizationUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authorization.FieldDeletedAt, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(authorization.FieldCode, field.TypeBytes, value)
-	}
-	if _u.mutation.CodeCleared() {
-		_spec.ClearField(authorization.FieldCode, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.Challenge(); ok {
-		_spec.SetField(authorization.FieldChallenge, field.TypeBytes, value)
-	}
-	if _u.mutation.ChallengeCleared() {
-		_spec.ClearField(authorization.FieldChallenge, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.ExpireAt(); ok {
-		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
-	}
-	if _u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   authorization.UserTable,
-			Columns: []string{authorization.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   authorization.UserTable,
-			Columns: []string{authorization.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{authorization.Label}
@@ -270,64 +170,9 @@ func (_u *AuthorizationUpdateOne) ClearDeletedAt() *AuthorizationUpdateOne {
 	return _u
 }
 
-// SetCode sets the "code" field.
-func (_u *AuthorizationUpdateOne) SetCode(v []byte) *AuthorizationUpdateOne {
-	_u.mutation.SetCode(v)
-	return _u
-}
-
-// ClearCode clears the value of the "code" field.
-func (_u *AuthorizationUpdateOne) ClearCode() *AuthorizationUpdateOne {
-	_u.mutation.ClearCode()
-	return _u
-}
-
-// SetChallenge sets the "challenge" field.
-func (_u *AuthorizationUpdateOne) SetChallenge(v []byte) *AuthorizationUpdateOne {
-	_u.mutation.SetChallenge(v)
-	return _u
-}
-
-// ClearChallenge clears the value of the "challenge" field.
-func (_u *AuthorizationUpdateOne) ClearChallenge() *AuthorizationUpdateOne {
-	_u.mutation.ClearChallenge()
-	return _u
-}
-
-// SetExpireAt sets the "expire_at" field.
-func (_u *AuthorizationUpdateOne) SetExpireAt(v time.Time) *AuthorizationUpdateOne {
-	_u.mutation.SetExpireAt(v)
-	return _u
-}
-
-// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
-func (_u *AuthorizationUpdateOne) SetNillableExpireAt(v *time.Time) *AuthorizationUpdateOne {
-	if v != nil {
-		_u.SetExpireAt(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *AuthorizationUpdateOne) SetUserID(id string) *AuthorizationUpdateOne {
-	_u.mutation.SetUserID(id)
-	return _u
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (_u *AuthorizationUpdateOne) SetUser(v *User) *AuthorizationUpdateOne {
-	return _u.SetUserID(v.ID)
-}
-
 // Mutation returns the AuthorizationMutation object of the builder.
 func (_u *AuthorizationUpdateOne) Mutation() *AuthorizationMutation {
 	return _u.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (_u *AuthorizationUpdateOne) ClearUser() *AuthorizationUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
 }
 
 // Where appends a list predicates to the AuthorizationUpdate builder.
@@ -424,50 +269,6 @@ func (_u *AuthorizationUpdateOne) sqlSave(ctx context.Context) (_node *Authoriza
 	}
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authorization.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.Code(); ok {
-		_spec.SetField(authorization.FieldCode, field.TypeBytes, value)
-	}
-	if _u.mutation.CodeCleared() {
-		_spec.ClearField(authorization.FieldCode, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.Challenge(); ok {
-		_spec.SetField(authorization.FieldChallenge, field.TypeBytes, value)
-	}
-	if _u.mutation.ChallengeCleared() {
-		_spec.ClearField(authorization.FieldChallenge, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.ExpireAt(); ok {
-		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
-	}
-	if _u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   authorization.UserTable,
-			Columns: []string{authorization.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   authorization.UserTable,
-			Columns: []string{authorization.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Authorization{config: _u.config}
 	_spec.Assign = _node.assignValues

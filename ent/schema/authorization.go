@@ -12,7 +12,6 @@ type Authorization struct {
 	ent.Schema
 }
 
-// Fields of the Authentication.
 func (Authorization) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
@@ -20,22 +19,38 @@ func (Authorization) Fields() []ent.Field {
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.Bytes("code").
-			Optional().
+		field.String("application_id").
+			NotEmpty().
+			Immutable().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
+		// this should be unique, yes
+		// but i'm not sure we should return error as constraint
+		field.Bytes("code").
+			NotEmpty().
+			Immutable().
+			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
+		// this should be unique, yes
+		// but i'm not sure we should return error as constraint
 		field.Bytes("challenge").
-			Optional().
+			NotEmpty().
+			Immutable().
 			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
-		field.Time("expire_at"),
+		field.Time("expire_at").
+			Immutable(),
+		field.String("user_id").
+			NotEmpty().
+			Immutable().
+			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 	}
 }
 
-// Edges of the Authentication.
 func (Authorization) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
 			Ref("authorizations").
+			Field("user_id").
 			Required().
+			Immutable().
 			Unique(),
 	}
 }

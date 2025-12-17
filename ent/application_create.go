@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"moknito/ent/application"
-	"moknito/ent/user"
+	"moknito/ent/ownedapp"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -75,27 +75,25 @@ func (_c *ApplicationCreate) SetDomain(v string) *ApplicationCreate {
 	return _c
 }
 
-// SetClientID sets the "client_id" field.
-func (_c *ApplicationCreate) SetClientID(v string) *ApplicationCreate {
-	_c.mutation.SetClientID(v)
-	return _c
-}
-
 // SetID sets the "id" field.
 func (_c *ApplicationCreate) SetID(v string) *ApplicationCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *ApplicationCreate) SetUserID(id string) *ApplicationCreate {
-	_c.mutation.SetUserID(id)
+// AddOwnedIDs adds the "owned" edge to the OwnedApp entity by IDs.
+func (_c *ApplicationCreate) AddOwnedIDs(ids ...string) *ApplicationCreate {
+	_c.mutation.AddOwnedIDs(ids...)
 	return _c
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (_c *ApplicationCreate) SetUser(v *User) *ApplicationCreate {
-	return _c.SetUserID(v.ID)
+// AddOwned adds the "owned" edges to the OwnedApp entity.
+func (_c *ApplicationCreate) AddOwned(v ...*OwnedApp) *ApplicationCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddOwnedIDs(ids...)
 }
 
 // Mutation returns the ApplicationMutation object of the builder.
@@ -167,21 +165,10 @@ func (_c *ApplicationCreate) check() error {
 			return &ValidationError{Name: "domain", err: fmt.Errorf(`ent: validator failed for field "Application.domain": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.ClientID(); !ok {
-		return &ValidationError{Name: "client_id", err: errors.New(`ent: missing required field "Application.client_id"`)}
-	}
-	if v, ok := _c.mutation.ClientID(); ok {
-		if err := application.ClientIDValidator(v); err != nil {
-			return &ValidationError{Name: "client_id", err: fmt.Errorf(`ent: validator failed for field "Application.client_id": %w`, err)}
-		}
-	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := application.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Application.id": %w`, err)}
 		}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Application.user"`)}
 	}
 	return nil
 }
@@ -238,25 +225,20 @@ func (_c *ApplicationCreate) createSpec() (*Application, *sqlgraph.CreateSpec) {
 		_spec.SetField(application.FieldDomain, field.TypeString, value)
 		_node.Domain = value
 	}
-	if value, ok := _c.mutation.ClientID(); ok {
-		_spec.SetField(application.FieldClientID, field.TypeString, value)
-		_node.ClientID = value
-	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.OwnedIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   application.UserTable,
-			Columns: []string{application.UserColumn},
+			Table:   application.OwnedTable,
+			Columns: []string{application.OwnedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_applications = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

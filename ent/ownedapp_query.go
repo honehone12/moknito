@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"moknito/ent/authentication"
+	"moknito/ent/application"
+	"moknito/ent/ownedapp"
 	"moknito/ent/predicate"
 	"moknito/ent/user"
 
@@ -16,52 +17,53 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// AuthenticationQuery is the builder for querying Authentication entities.
-type AuthenticationQuery struct {
+// OwnedAppQuery is the builder for querying OwnedApp entities.
+type OwnedAppQuery struct {
 	config
-	ctx        *QueryContext
-	order      []authentication.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Authentication
-	withUser   *UserQuery
+	ctx             *QueryContext
+	order           []ownedapp.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.OwnedApp
+	withUser        *UserQuery
+	withApplication *ApplicationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the AuthenticationQuery builder.
-func (_q *AuthenticationQuery) Where(ps ...predicate.Authentication) *AuthenticationQuery {
+// Where adds a new predicate for the OwnedAppQuery builder.
+func (_q *OwnedAppQuery) Where(ps ...predicate.OwnedApp) *OwnedAppQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *AuthenticationQuery) Limit(limit int) *AuthenticationQuery {
+func (_q *OwnedAppQuery) Limit(limit int) *OwnedAppQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *AuthenticationQuery) Offset(offset int) *AuthenticationQuery {
+func (_q *OwnedAppQuery) Offset(offset int) *OwnedAppQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *AuthenticationQuery) Unique(unique bool) *AuthenticationQuery {
+func (_q *OwnedAppQuery) Unique(unique bool) *OwnedAppQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *AuthenticationQuery) Order(o ...authentication.OrderOption) *AuthenticationQuery {
+func (_q *OwnedAppQuery) Order(o ...ownedapp.OrderOption) *OwnedAppQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (_q *AuthenticationQuery) QueryUser() *UserQuery {
+func (_q *OwnedAppQuery) QueryUser() *UserQuery {
 	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -72,9 +74,9 @@ func (_q *AuthenticationQuery) QueryUser() *UserQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(authentication.Table, authentication.FieldID, selector),
+			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, authentication.UserTable, authentication.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, ownedapp.UserTable, ownedapp.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -82,21 +84,43 @@ func (_q *AuthenticationQuery) QueryUser() *UserQuery {
 	return query
 }
 
-// First returns the first Authentication entity from the query.
-// Returns a *NotFoundError when no Authentication was found.
-func (_q *AuthenticationQuery) First(ctx context.Context) (*Authentication, error) {
+// QueryApplication chains the current query on the "application" edge.
+func (_q *OwnedAppQuery) QueryApplication() *ApplicationQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, selector),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ownedapp.ApplicationTable, ownedapp.ApplicationColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// First returns the first OwnedApp entity from the query.
+// Returns a *NotFoundError when no OwnedApp was found.
+func (_q *OwnedAppQuery) First(ctx context.Context) (*OwnedApp, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{authentication.Label}
+		return nil, &NotFoundError{ownedapp.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *AuthenticationQuery) FirstX(ctx context.Context) *Authentication {
+func (_q *OwnedAppQuery) FirstX(ctx context.Context) *OwnedApp {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -104,22 +128,22 @@ func (_q *AuthenticationQuery) FirstX(ctx context.Context) *Authentication {
 	return node
 }
 
-// FirstID returns the first Authentication ID from the query.
-// Returns a *NotFoundError when no Authentication ID was found.
-func (_q *AuthenticationQuery) FirstID(ctx context.Context) (id string, err error) {
+// FirstID returns the first OwnedApp ID from the query.
+// Returns a *NotFoundError when no OwnedApp ID was found.
+func (_q *OwnedAppQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{authentication.Label}
+		err = &NotFoundError{ownedapp.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *AuthenticationQuery) FirstIDX(ctx context.Context) string {
+func (_q *OwnedAppQuery) FirstIDX(ctx context.Context) string {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -127,10 +151,10 @@ func (_q *AuthenticationQuery) FirstIDX(ctx context.Context) string {
 	return id
 }
 
-// Only returns a single Authentication entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Authentication entity is found.
-// Returns a *NotFoundError when no Authentication entities are found.
-func (_q *AuthenticationQuery) Only(ctx context.Context) (*Authentication, error) {
+// Only returns a single OwnedApp entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one OwnedApp entity is found.
+// Returns a *NotFoundError when no OwnedApp entities are found.
+func (_q *OwnedAppQuery) Only(ctx context.Context) (*OwnedApp, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -139,14 +163,14 @@ func (_q *AuthenticationQuery) Only(ctx context.Context) (*Authentication, error
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{authentication.Label}
+		return nil, &NotFoundError{ownedapp.Label}
 	default:
-		return nil, &NotSingularError{authentication.Label}
+		return nil, &NotSingularError{ownedapp.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *AuthenticationQuery) OnlyX(ctx context.Context) *Authentication {
+func (_q *OwnedAppQuery) OnlyX(ctx context.Context) *OwnedApp {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -154,10 +178,10 @@ func (_q *AuthenticationQuery) OnlyX(ctx context.Context) *Authentication {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Authentication ID in the query.
-// Returns a *NotSingularError when more than one Authentication ID is found.
+// OnlyID is like Only, but returns the only OwnedApp ID in the query.
+// Returns a *NotSingularError when more than one OwnedApp ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *AuthenticationQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (_q *OwnedAppQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -166,15 +190,15 @@ func (_q *AuthenticationQuery) OnlyID(ctx context.Context) (id string, err error
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{authentication.Label}
+		err = &NotFoundError{ownedapp.Label}
 	default:
-		err = &NotSingularError{authentication.Label}
+		err = &NotSingularError{ownedapp.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *AuthenticationQuery) OnlyIDX(ctx context.Context) string {
+func (_q *OwnedAppQuery) OnlyIDX(ctx context.Context) string {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -182,18 +206,18 @@ func (_q *AuthenticationQuery) OnlyIDX(ctx context.Context) string {
 	return id
 }
 
-// All executes the query and returns a list of Authentications.
-func (_q *AuthenticationQuery) All(ctx context.Context) ([]*Authentication, error) {
+// All executes the query and returns a list of OwnedApps.
+func (_q *OwnedAppQuery) All(ctx context.Context) ([]*OwnedApp, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Authentication, *AuthenticationQuery]()
-	return withInterceptors[[]*Authentication](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*OwnedApp, *OwnedAppQuery]()
+	return withInterceptors[[]*OwnedApp](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *AuthenticationQuery) AllX(ctx context.Context) []*Authentication {
+func (_q *OwnedAppQuery) AllX(ctx context.Context) []*OwnedApp {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -201,20 +225,20 @@ func (_q *AuthenticationQuery) AllX(ctx context.Context) []*Authentication {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Authentication IDs.
-func (_q *AuthenticationQuery) IDs(ctx context.Context) (ids []string, err error) {
+// IDs executes the query and returns a list of OwnedApp IDs.
+func (_q *OwnedAppQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(authentication.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(ownedapp.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *AuthenticationQuery) IDsX(ctx context.Context) []string {
+func (_q *OwnedAppQuery) IDsX(ctx context.Context) []string {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -223,16 +247,16 @@ func (_q *AuthenticationQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (_q *AuthenticationQuery) Count(ctx context.Context) (int, error) {
+func (_q *OwnedAppQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*AuthenticationQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*OwnedAppQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *AuthenticationQuery) CountX(ctx context.Context) int {
+func (_q *OwnedAppQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -241,7 +265,7 @@ func (_q *AuthenticationQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *AuthenticationQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *OwnedAppQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -254,7 +278,7 @@ func (_q *AuthenticationQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *AuthenticationQuery) ExistX(ctx context.Context) bool {
+func (_q *OwnedAppQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -262,19 +286,20 @@ func (_q *AuthenticationQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the AuthenticationQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the OwnedAppQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *AuthenticationQuery) Clone() *AuthenticationQuery {
+func (_q *OwnedAppQuery) Clone() *OwnedAppQuery {
 	if _q == nil {
 		return nil
 	}
-	return &AuthenticationQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]authentication.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Authentication{}, _q.predicates...),
-		withUser:   _q.withUser.Clone(),
+	return &OwnedAppQuery{
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]ownedapp.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.OwnedApp{}, _q.predicates...),
+		withUser:        _q.withUser.Clone(),
+		withApplication: _q.withApplication.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -283,12 +308,23 @@ func (_q *AuthenticationQuery) Clone() *AuthenticationQuery {
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *AuthenticationQuery) WithUser(opts ...func(*UserQuery)) *AuthenticationQuery {
+func (_q *OwnedAppQuery) WithUser(opts ...func(*UserQuery)) *OwnedAppQuery {
 	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
 	_q.withUser = query
+	return _q
+}
+
+// WithApplication tells the query-builder to eager-load the nodes that are connected to
+// the "application" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *OwnedAppQuery) WithApplication(opts ...func(*ApplicationQuery)) *OwnedAppQuery {
+	query := (&ApplicationClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withApplication = query
 	return _q
 }
 
@@ -302,15 +338,15 @@ func (_q *AuthenticationQuery) WithUser(opts ...func(*UserQuery)) *Authenticatio
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Authentication.Query().
-//		GroupBy(authentication.FieldCreatedAt).
+//	client.OwnedApp.Query().
+//		GroupBy(ownedapp.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (_q *AuthenticationQuery) GroupBy(field string, fields ...string) *AuthenticationGroupBy {
+func (_q *OwnedAppQuery) GroupBy(field string, fields ...string) *OwnedAppGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &AuthenticationGroupBy{build: _q}
+	grbuild := &OwnedAppGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = authentication.Label
+	grbuild.label = ownedapp.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -324,23 +360,23 @@ func (_q *AuthenticationQuery) GroupBy(field string, fields ...string) *Authenti
 //		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
-//	client.Authentication.Query().
-//		Select(authentication.FieldCreatedAt).
+//	client.OwnedApp.Query().
+//		Select(ownedapp.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (_q *AuthenticationQuery) Select(fields ...string) *AuthenticationSelect {
+func (_q *OwnedAppQuery) Select(fields ...string) *OwnedAppSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &AuthenticationSelect{AuthenticationQuery: _q}
-	sbuild.label = authentication.Label
+	sbuild := &OwnedAppSelect{OwnedAppQuery: _q}
+	sbuild.label = ownedapp.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a AuthenticationSelect configured with the given aggregations.
-func (_q *AuthenticationQuery) Aggregate(fns ...AggregateFunc) *AuthenticationSelect {
+// Aggregate returns a OwnedAppSelect configured with the given aggregations.
+func (_q *OwnedAppQuery) Aggregate(fns ...AggregateFunc) *OwnedAppSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *AuthenticationQuery) prepareQuery(ctx context.Context) error {
+func (_q *OwnedAppQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -352,7 +388,7 @@ func (_q *AuthenticationQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !authentication.ValidColumn(f) {
+		if !ownedapp.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -366,19 +402,20 @@ func (_q *AuthenticationQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *AuthenticationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Authentication, error) {
+func (_q *OwnedAppQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*OwnedApp, error) {
 	var (
-		nodes       = []*Authentication{}
+		nodes       = []*OwnedApp{}
 		_spec       = _q.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			_q.withUser != nil,
+			_q.withApplication != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Authentication).scanValues(nil, columns)
+		return (*OwnedApp).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Authentication{config: _q.config}
+		node := &OwnedApp{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -394,16 +431,22 @@ func (_q *AuthenticationQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	}
 	if query := _q.withUser; query != nil {
 		if err := _q.loadUser(ctx, query, nodes, nil,
-			func(n *Authentication, e *User) { n.Edges.User = e }); err != nil {
+			func(n *OwnedApp, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := _q.withApplication; query != nil {
+		if err := _q.loadApplication(ctx, query, nodes, nil,
+			func(n *OwnedApp, e *Application) { n.Edges.Application = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *AuthenticationQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Authentication, init func(*Authentication), assign func(*Authentication, *User)) error {
+func (_q *OwnedAppQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*OwnedApp, init func(*OwnedApp), assign func(*OwnedApp, *User)) error {
 	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Authentication)
+	nodeids := make(map[string][]*OwnedApp)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -430,8 +473,37 @@ func (_q *AuthenticationQuery) loadUser(ctx context.Context, query *UserQuery, n
 	}
 	return nil
 }
+func (_q *OwnedAppQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*OwnedApp, init func(*OwnedApp), assign func(*OwnedApp, *Application)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*OwnedApp)
+	for i := range nodes {
+		fk := nodes[i].ApplicationID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(application.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "application_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
-func (_q *AuthenticationQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *OwnedAppQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -440,8 +512,8 @@ func (_q *AuthenticationQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *AuthenticationQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(authentication.Table, authentication.Columns, sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString))
+func (_q *OwnedAppQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(ownedapp.Table, ownedapp.Columns, sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -450,14 +522,17 @@ func (_q *AuthenticationQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, authentication.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, ownedapp.FieldID)
 		for i := range fields {
-			if fields[i] != authentication.FieldID {
+			if fields[i] != ownedapp.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
 		if _q.withUser != nil {
-			_spec.Node.AddColumnOnce(authentication.FieldUserID)
+			_spec.Node.AddColumnOnce(ownedapp.FieldUserID)
+		}
+		if _q.withApplication != nil {
+			_spec.Node.AddColumnOnce(ownedapp.FieldApplicationID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {
@@ -483,12 +558,12 @@ func (_q *AuthenticationQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *AuthenticationQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *OwnedAppQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(authentication.Table)
+	t1 := builder.Table(ownedapp.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = authentication.Columns
+		columns = ownedapp.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -515,28 +590,28 @@ func (_q *AuthenticationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// AuthenticationGroupBy is the group-by builder for Authentication entities.
-type AuthenticationGroupBy struct {
+// OwnedAppGroupBy is the group-by builder for OwnedApp entities.
+type OwnedAppGroupBy struct {
 	selector
-	build *AuthenticationQuery
+	build *OwnedAppQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *AuthenticationGroupBy) Aggregate(fns ...AggregateFunc) *AuthenticationGroupBy {
+func (_g *OwnedAppGroupBy) Aggregate(fns ...AggregateFunc) *OwnedAppGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *AuthenticationGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *OwnedAppGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*AuthenticationQuery, *AuthenticationGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*OwnedAppQuery, *OwnedAppGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *AuthenticationGroupBy) sqlScan(ctx context.Context, root *AuthenticationQuery, v any) error {
+func (_g *OwnedAppGroupBy) sqlScan(ctx context.Context, root *OwnedAppQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -563,28 +638,28 @@ func (_g *AuthenticationGroupBy) sqlScan(ctx context.Context, root *Authenticati
 	return sql.ScanSlice(rows, v)
 }
 
-// AuthenticationSelect is the builder for selecting fields of Authentication entities.
-type AuthenticationSelect struct {
-	*AuthenticationQuery
+// OwnedAppSelect is the builder for selecting fields of OwnedApp entities.
+type OwnedAppSelect struct {
+	*OwnedAppQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *AuthenticationSelect) Aggregate(fns ...AggregateFunc) *AuthenticationSelect {
+func (_s *OwnedAppSelect) Aggregate(fns ...AggregateFunc) *OwnedAppSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *AuthenticationSelect) Scan(ctx context.Context, v any) error {
+func (_s *OwnedAppSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*AuthenticationQuery, *AuthenticationSelect](ctx, _s.AuthenticationQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*OwnedAppQuery, *OwnedAppSelect](ctx, _s.OwnedAppQuery, _s, _s.inters, v)
 }
 
-func (_s *AuthenticationSelect) sqlScan(ctx context.Context, root *AuthenticationQuery, v any) error {
+func (_s *OwnedAppSelect) sqlScan(ctx context.Context, root *OwnedAppQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

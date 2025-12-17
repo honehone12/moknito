@@ -9,6 +9,7 @@ import (
 	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
+	"moknito/ent/ownedapp"
 	"moknito/ent/user"
 	"reflect"
 	"sync"
@@ -79,6 +80,7 @@ func checkColumn(t, c string) error {
 			application.Table:    application.ValidColumn,
 			authentication.Table: authentication.ValidColumn,
 			authorization.Table:  authorization.ValidColumn,
+			ownedapp.Table:       ownedapp.ValidColumn,
 			user.Table:           user.ValidColumn,
 		})
 	})

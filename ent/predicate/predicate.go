@@ -15,5 +15,8 @@ type Authentication func(*sql.Selector)
 // Authorization is the predicate function for authorization builders.
 type Authorization func(*sql.Selector)
 
+// OwnedApp is the predicate function for ownedapp builders.
+type OwnedApp func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

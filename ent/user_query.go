@@ -7,9 +7,9 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
-	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
+	"moknito/ent/ownedapp"
 	"moknito/ent/predicate"
 	"moknito/ent/user"
 
@@ -28,7 +28,7 @@ type UserQuery struct {
 	predicates          []predicate.User
 	withAuthentications *AuthenticationQuery
 	withAuthorizations  *AuthorizationQuery
-	withApplications    *ApplicationQuery
+	withOwnedApps       *OwnedAppQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -109,9 +109,9 @@ func (_q *UserQuery) QueryAuthorizations() *AuthorizationQuery {
 	return query
 }
 
-// QueryApplications chains the current query on the "applications" edge.
-func (_q *UserQuery) QueryApplications() *ApplicationQuery {
-	query := (&ApplicationClient{config: _q.config}).Query()
+// QueryOwnedApps chains the current query on the "owned_apps" edge.
+func (_q *UserQuery) QueryOwnedApps() *OwnedAppQuery {
+	query := (&OwnedAppClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -122,8 +122,8 @@ func (_q *UserQuery) QueryApplications() *ApplicationQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(application.Table, application.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.ApplicationsTable, user.ApplicationsColumn),
+			sqlgraph.To(ownedapp.Table, ownedapp.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.OwnedAppsTable, user.OwnedAppsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -325,7 +325,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		predicates:          append([]predicate.User{}, _q.predicates...),
 		withAuthentications: _q.withAuthentications.Clone(),
 		withAuthorizations:  _q.withAuthorizations.Clone(),
-		withApplications:    _q.withApplications.Clone(),
+		withOwnedApps:       _q.withOwnedApps.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
@@ -354,14 +354,14 @@ func (_q *UserQuery) WithAuthorizations(opts ...func(*AuthorizationQuery)) *User
 	return _q
 }
 
-// WithApplications tells the query-builder to eager-load the nodes that are connected to
-// the "applications" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *UserQuery) WithApplications(opts ...func(*ApplicationQuery)) *UserQuery {
-	query := (&ApplicationClient{config: _q.config}).Query()
+// WithOwnedApps tells the query-builder to eager-load the nodes that are connected to
+// the "owned_apps" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *UserQuery) WithOwnedApps(opts ...func(*OwnedAppQuery)) *UserQuery {
+	query := (&OwnedAppClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withApplications = query
+	_q.withOwnedApps = query
 	return _q
 }
 
@@ -446,7 +446,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		loadedTypes = [3]bool{
 			_q.withAuthentications != nil,
 			_q.withAuthorizations != nil,
-			_q.withApplications != nil,
+			_q.withOwnedApps != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -481,10 +481,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
-	if query := _q.withApplications; query != nil {
-		if err := _q.loadApplications(ctx, query, nodes,
-			func(n *User) { n.Edges.Applications = []*Application{} },
-			func(n *User, e *Application) { n.Edges.Applications = append(n.Edges.Applications, e) }); err != nil {
+	if query := _q.withOwnedApps; query != nil {
+		if err := _q.loadOwnedApps(ctx, query, nodes,
+			func(n *User) { n.Edges.OwnedApps = []*OwnedApp{} },
+			func(n *User, e *OwnedApp) { n.Edges.OwnedApps = append(n.Edges.OwnedApps, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -501,7 +501,9 @@ func (_q *UserQuery) loadAuthentications(ctx context.Context, query *Authenticat
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(authentication.FieldUserID)
+	}
 	query.Where(predicate.Authentication(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.AuthenticationsColumn), fks...))
 	}))
@@ -510,13 +512,10 @@ func (_q *UserQuery) loadAuthentications(ctx context.Context, query *Authenticat
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_authentications
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_authentications" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.UserID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_authentications" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -532,7 +531,9 @@ func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *Authorizatio
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(authorization.FieldUserID)
+	}
 	query.Where(predicate.Authorization(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.AuthorizationsColumn), fks...))
 	}))
@@ -541,19 +542,16 @@ func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *Authorizatio
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_authorizations
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_authorizations" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.UserID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_authorizations" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
-func (_q *UserQuery) loadApplications(ctx context.Context, query *ApplicationQuery, nodes []*User, init func(*User), assign func(*User, *Application)) error {
+func (_q *UserQuery) loadOwnedApps(ctx context.Context, query *OwnedAppQuery, nodes []*User, init func(*User), assign func(*User, *OwnedApp)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*User)
 	for i := range nodes {
@@ -563,22 +561,21 @@ func (_q *UserQuery) loadApplications(ctx context.Context, query *ApplicationQue
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
-	query.Where(predicate.Application(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.ApplicationsColumn), fks...))
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(ownedapp.FieldUserID)
+	}
+	query.Where(predicate.OwnedApp(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.OwnedAppsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_applications
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_applications" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.UserID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_applications" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

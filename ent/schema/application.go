@@ -12,7 +12,6 @@ type Application struct {
 	ent.Schema
 }
 
-// Fields of the Authorization.
 func (Application) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
@@ -22,23 +21,19 @@ func (Application) Fields() []ent.Field {
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		field.String("name").
 			NotEmpty().
-			Immutable(),
+			Unique(),
 		field.String("domain").
 			NotEmpty().
-			Immutable(),
-		field.String("client_id").
-			NotEmpty().
-			Immutable(),
+			Immutable().
+			Unique(),
 	}
 }
 
-// Edges of the Authorization.
 func (Application) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).
-			Ref("applications").
-			Required().
-			Unique(),
+		edge.From("owned", OwnedApp.Type).
+			Ref("application").
+			Immutable(),
 	}
 }
 

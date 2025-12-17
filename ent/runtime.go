@@ -6,6 +6,7 @@ import (
 	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
+	"moknito/ent/ownedapp"
 	"moknito/ent/schema"
 	"moknito/ent/user"
 	"time"
@@ -38,10 +39,6 @@ func init() {
 	applicationDescDomain := applicationFields[2].Descriptor()
 	// application.DomainValidator is a validator for the "domain" field. It is called by the builders before save.
 	application.DomainValidator = applicationDescDomain.Validators[0].(func(string) error)
-	// applicationDescClientID is the schema descriptor for client_id field.
-	applicationDescClientID := applicationFields[3].Descriptor()
-	// application.ClientIDValidator is a validator for the "client_id" field. It is called by the builders before save.
-	application.ClientIDValidator = applicationDescClientID.Validators[0].(func(string) error)
 	// applicationDescID is the schema descriptor for id field.
 	applicationDescID := applicationFields[0].Descriptor()
 	// application.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -69,6 +66,10 @@ func init() {
 	authenticationDescUserAgent := authenticationFields[2].Descriptor()
 	// authentication.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
 	authentication.UserAgentValidator = authenticationDescUserAgent.Validators[0].(func(string) error)
+	// authenticationDescUserID is the schema descriptor for user_id field.
+	authenticationDescUserID := authenticationFields[5].Descriptor()
+	// authentication.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	authentication.UserIDValidator = authenticationDescUserID.Validators[0].(func(string) error)
 	// authenticationDescID is the schema descriptor for id field.
 	authenticationDescID := authenticationFields[0].Descriptor()
 	// authentication.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -88,10 +89,61 @@ func init() {
 	authorization.DefaultUpdatedAt = authorizationDescUpdatedAt.Default.(func() time.Time)
 	// authorization.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	authorization.UpdateDefaultUpdatedAt = authorizationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// authorizationDescApplicationID is the schema descriptor for application_id field.
+	authorizationDescApplicationID := authorizationFields[1].Descriptor()
+	// authorization.ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
+	authorization.ApplicationIDValidator = authorizationDescApplicationID.Validators[0].(func(string) error)
+	// authorizationDescCode is the schema descriptor for code field.
+	authorizationDescCode := authorizationFields[2].Descriptor()
+	// authorization.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	authorization.CodeValidator = authorizationDescCode.Validators[0].(func([]byte) error)
+	// authorizationDescChallenge is the schema descriptor for challenge field.
+	authorizationDescChallenge := authorizationFields[3].Descriptor()
+	// authorization.ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
+	authorization.ChallengeValidator = authorizationDescChallenge.Validators[0].(func([]byte) error)
+	// authorizationDescUserID is the schema descriptor for user_id field.
+	authorizationDescUserID := authorizationFields[5].Descriptor()
+	// authorization.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	authorization.UserIDValidator = authorizationDescUserID.Validators[0].(func(string) error)
 	// authorizationDescID is the schema descriptor for id field.
 	authorizationDescID := authorizationFields[0].Descriptor()
 	// authorization.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	authorization.IDValidator = authorizationDescID.Validators[0].(func(string) error)
+	ownedappMixin := schema.OwnedApp{}.Mixin()
+	ownedappMixinFields0 := ownedappMixin[0].Fields()
+	_ = ownedappMixinFields0
+	ownedappFields := schema.OwnedApp{}.Fields()
+	_ = ownedappFields
+	// ownedappDescCreatedAt is the schema descriptor for created_at field.
+	ownedappDescCreatedAt := ownedappMixinFields0[0].Descriptor()
+	// ownedapp.DefaultCreatedAt holds the default value on creation for the created_at field.
+	ownedapp.DefaultCreatedAt = ownedappDescCreatedAt.Default.(func() time.Time)
+	// ownedappDescUpdatedAt is the schema descriptor for updated_at field.
+	ownedappDescUpdatedAt := ownedappMixinFields0[1].Descriptor()
+	// ownedapp.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	ownedapp.DefaultUpdatedAt = ownedappDescUpdatedAt.Default.(func() time.Time)
+	// ownedapp.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	ownedapp.UpdateDefaultUpdatedAt = ownedappDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// ownedappDescName is the schema descriptor for name field.
+	ownedappDescName := ownedappFields[1].Descriptor()
+	// ownedapp.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	ownedapp.NameValidator = ownedappDescName.Validators[0].(func(string) error)
+	// ownedappDescDomain is the schema descriptor for domain field.
+	ownedappDescDomain := ownedappFields[2].Descriptor()
+	// ownedapp.DomainValidator is a validator for the "domain" field. It is called by the builders before save.
+	ownedapp.DomainValidator = ownedappDescDomain.Validators[0].(func(string) error)
+	// ownedappDescApplicationID is the schema descriptor for application_id field.
+	ownedappDescApplicationID := ownedappFields[3].Descriptor()
+	// ownedapp.ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
+	ownedapp.ApplicationIDValidator = ownedappDescApplicationID.Validators[0].(func(string) error)
+	// ownedappDescUserID is the schema descriptor for user_id field.
+	ownedappDescUserID := ownedappFields[4].Descriptor()
+	// ownedapp.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	ownedapp.UserIDValidator = ownedappDescUserID.Validators[0].(func(string) error)
+	// ownedappDescID is the schema descriptor for id field.
+	ownedappDescID := ownedappFields[0].Descriptor()
+	// ownedapp.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	ownedapp.IDValidator = ownedappDescID.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

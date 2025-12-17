@@ -30,8 +30,8 @@ const (
 	EdgeAuthentications = "authentications"
 	// EdgeAuthorizations holds the string denoting the authorizations edge name in mutations.
 	EdgeAuthorizations = "authorizations"
-	// EdgeApplications holds the string denoting the applications edge name in mutations.
-	EdgeApplications = "applications"
+	// EdgeOwnedApps holds the string denoting the owned_apps edge name in mutations.
+	EdgeOwnedApps = "owned_apps"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// AuthenticationsTable is the table that holds the authentications relation/edge.
@@ -40,21 +40,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "authentication" package.
 	AuthenticationsInverseTable = "authentications"
 	// AuthenticationsColumn is the table column denoting the authentications relation/edge.
-	AuthenticationsColumn = "user_authentications"
+	AuthenticationsColumn = "user_id"
 	// AuthorizationsTable is the table that holds the authorizations relation/edge.
 	AuthorizationsTable = "authorizations"
 	// AuthorizationsInverseTable is the table name for the Authorization entity.
 	// It exists in this package in order to avoid circular dependency with the "authorization" package.
 	AuthorizationsInverseTable = "authorizations"
 	// AuthorizationsColumn is the table column denoting the authorizations relation/edge.
-	AuthorizationsColumn = "user_authorizations"
-	// ApplicationsTable is the table that holds the applications relation/edge.
-	ApplicationsTable = "applications"
-	// ApplicationsInverseTable is the table name for the Application entity.
-	// It exists in this package in order to avoid circular dependency with the "application" package.
-	ApplicationsInverseTable = "applications"
-	// ApplicationsColumn is the table column denoting the applications relation/edge.
-	ApplicationsColumn = "user_applications"
+	AuthorizationsColumn = "user_id"
+	// OwnedAppsTable is the table that holds the owned_apps relation/edge.
+	OwnedAppsTable = "owned_apps"
+	// OwnedAppsInverseTable is the table name for the OwnedApp entity.
+	// It exists in this package in order to avoid circular dependency with the "ownedapp" package.
+	OwnedAppsInverseTable = "owned_apps"
+	// OwnedAppsColumn is the table column denoting the owned_apps relation/edge.
+	OwnedAppsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -161,17 +161,17 @@ func ByAuthorizations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByApplicationsCount orders the results by applications count.
-func ByApplicationsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByOwnedAppsCount orders the results by owned_apps count.
+func ByOwnedAppsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newApplicationsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newOwnedAppsStep(), opts...)
 	}
 }
 
-// ByApplications orders the results by applications terms.
-func ByApplications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByOwnedApps orders the results by owned_apps terms.
+func ByOwnedApps(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newApplicationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newOwnedAppsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newAuthenticationsStep() *sqlgraph.Step {
@@ -188,10 +188,10 @@ func newAuthorizationsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, AuthorizationsTable, AuthorizationsColumn),
 	)
 }
-func newApplicationsStep() *sqlgraph.Step {
+func newOwnedAppsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(ApplicationsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, ApplicationsTable, ApplicationsColumn),
+		sqlgraph.To(OwnedAppsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, OwnedAppsTable, OwnedAppsColumn),
 	)
 }

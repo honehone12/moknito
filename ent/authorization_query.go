@@ -24,7 +24,6 @@ type AuthorizationQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Authorization
 	withUser   *UserQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -370,18 +369,11 @@ func (_q *AuthorizationQuery) prepareQuery(ctx context.Context) error {
 func (_q *AuthorizationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Authorization, error) {
 	var (
 		nodes       = []*Authorization{}
-		withFKs     = _q.withFKs
 		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
 			_q.withUser != nil,
 		}
 	)
-	if _q.withUser != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, authorization.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Authorization).scanValues(nil, columns)
 	}
@@ -413,10 +405,7 @@ func (_q *AuthorizationQuery) loadUser(ctx context.Context, query *UserQuery, no
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*Authorization)
 	for i := range nodes {
-		if nodes[i].user_authorizations == nil {
-			continue
-		}
-		fk := *nodes[i].user_authorizations
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -433,7 +422,7 @@ func (_q *AuthorizationQuery) loadUser(ctx context.Context, query *UserQuery, no
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_authorizations" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -466,6 +455,9 @@ func (_q *AuthorizationQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != authorization.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if _q.withUser != nil {
+			_spec.Node.AddColumnOnce(authorization.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

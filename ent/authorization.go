@@ -24,17 +24,20 @@ type Authorization struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// ApplicationID holds the value of the "application_id" field.
+	ApplicationID string `json:"application_id,omitempty"`
 	// Code holds the value of the "code" field.
 	Code []byte `json:"code,omitempty"`
 	// Challenge holds the value of the "challenge" field.
 	Challenge []byte `json:"challenge,omitempty"`
 	// ExpireAt holds the value of the "expire_at" field.
 	ExpireAt time.Time `json:"expire_at,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID string `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthorizationQuery when eager-loading is set.
-	Edges               AuthorizationEdges `json:"edges"`
-	user_authorizations *string
-	selectValues        sql.SelectValues
+	Edges        AuthorizationEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // AuthorizationEdges holds the relations/edges for other nodes in the graph.
@@ -64,12 +67,10 @@ func (*Authorization) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case authorization.FieldCode, authorization.FieldChallenge:
 			values[i] = new([]byte)
-		case authorization.FieldID:
+		case authorization.FieldID, authorization.FieldApplicationID, authorization.FieldUserID:
 			values[i] = new(sql.NullString)
 		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldExpireAt:
 			values[i] = new(sql.NullTime)
-		case authorization.ForeignKeys[0]: // user_authorizations
-			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -110,6 +111,12 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case authorization.FieldApplicationID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field application_id", values[i])
+			} else if value.Valid {
+				_m.ApplicationID = value.String
+			}
 		case authorization.FieldCode:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field code", values[i])
@@ -128,12 +135,11 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ExpireAt = value.Time
 			}
-		case authorization.ForeignKeys[0]:
+		case authorization.FieldUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user_authorizations", values[i])
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				_m.user_authorizations = new(string)
-				*_m.user_authorizations = value.String
+				_m.UserID = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -187,6 +193,9 @@ func (_m *Authorization) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	builder.WriteString("application_id=")
+	builder.WriteString(_m.ApplicationID)
+	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Code))
 	builder.WriteString(", ")
@@ -195,6 +204,9 @@ func (_m *Authorization) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("expire_at=")
 	builder.WriteString(_m.ExpireAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("user_id=")
+	builder.WriteString(_m.UserID)
 	builder.WriteByte(')')
 	return builder.String()
 }

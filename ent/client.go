@@ -14,6 +14,7 @@ import (
 	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
+	"moknito/ent/ownedapp"
 	"moknito/ent/user"
 
 	"entgo.io/ent"
@@ -33,6 +34,8 @@ type Client struct {
 	Authentication *AuthenticationClient
 	// Authorization is the client for interacting with the Authorization builders.
 	Authorization *AuthorizationClient
+	// OwnedApp is the client for interacting with the OwnedApp builders.
+	OwnedApp *OwnedAppClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -49,6 +52,7 @@ func (c *Client) init() {
 	c.Application = NewApplicationClient(c.config)
 	c.Authentication = NewAuthenticationClient(c.config)
 	c.Authorization = NewAuthorizationClient(c.config)
+	c.OwnedApp = NewOwnedAppClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -145,6 +149,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Application:    NewApplicationClient(cfg),
 		Authentication: NewAuthenticationClient(cfg),
 		Authorization:  NewAuthorizationClient(cfg),
+		OwnedApp:       NewOwnedAppClient(cfg),
 		User:           NewUserClient(cfg),
 	}, nil
 }
@@ -168,6 +173,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Application:    NewApplicationClient(cfg),
 		Authentication: NewAuthenticationClient(cfg),
 		Authorization:  NewAuthorizationClient(cfg),
+		OwnedApp:       NewOwnedAppClient(cfg),
 		User:           NewUserClient(cfg),
 	}, nil
 }
@@ -200,6 +206,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Application.Use(hooks...)
 	c.Authentication.Use(hooks...)
 	c.Authorization.Use(hooks...)
+	c.OwnedApp.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -209,6 +216,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Application.Intercept(interceptors...)
 	c.Authentication.Intercept(interceptors...)
 	c.Authorization.Intercept(interceptors...)
+	c.OwnedApp.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
 
@@ -221,6 +229,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Authentication.mutate(ctx, m)
 	case *AuthorizationMutation:
 		return c.Authorization.mutate(ctx, m)
+	case *OwnedAppMutation:
+		return c.OwnedApp.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -336,15 +346,15 @@ func (c *ApplicationClient) GetX(ctx context.Context, id string) *Application {
 	return obj
 }
 
-// QueryUser queries the user edge of a Application.
-func (c *ApplicationClient) QueryUser(_m *Application) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
+// QueryOwned queries the owned edge of a Application.
+func (c *ApplicationClient) QueryOwned(_m *Application) *OwnedAppQuery {
+	query := (&OwnedAppClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(application.Table, application.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, application.UserTable, application.UserColumn),
+			sqlgraph.To(ownedapp.Table, ownedapp.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, application.OwnedTable, application.OwnedColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -675,6 +685,171 @@ func (c *AuthorizationClient) mutate(ctx context.Context, m *AuthorizationMutati
 	}
 }
 
+// OwnedAppClient is a client for the OwnedApp schema.
+type OwnedAppClient struct {
+	config
+}
+
+// NewOwnedAppClient returns a client for the OwnedApp from the given config.
+func NewOwnedAppClient(c config) *OwnedAppClient {
+	return &OwnedAppClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `ownedapp.Hooks(f(g(h())))`.
+func (c *OwnedAppClient) Use(hooks ...Hook) {
+	c.hooks.OwnedApp = append(c.hooks.OwnedApp, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `ownedapp.Intercept(f(g(h())))`.
+func (c *OwnedAppClient) Intercept(interceptors ...Interceptor) {
+	c.inters.OwnedApp = append(c.inters.OwnedApp, interceptors...)
+}
+
+// Create returns a builder for creating a OwnedApp entity.
+func (c *OwnedAppClient) Create() *OwnedAppCreate {
+	mutation := newOwnedAppMutation(c.config, OpCreate)
+	return &OwnedAppCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OwnedApp entities.
+func (c *OwnedAppClient) CreateBulk(builders ...*OwnedAppCreate) *OwnedAppCreateBulk {
+	return &OwnedAppCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *OwnedAppClient) MapCreateBulk(slice any, setFunc func(*OwnedAppCreate, int)) *OwnedAppCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &OwnedAppCreateBulk{err: fmt.Errorf("calling to OwnedAppClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*OwnedAppCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &OwnedAppCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OwnedApp.
+func (c *OwnedAppClient) Update() *OwnedAppUpdate {
+	mutation := newOwnedAppMutation(c.config, OpUpdate)
+	return &OwnedAppUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OwnedAppClient) UpdateOne(_m *OwnedApp) *OwnedAppUpdateOne {
+	mutation := newOwnedAppMutation(c.config, OpUpdateOne, withOwnedApp(_m))
+	return &OwnedAppUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OwnedAppClient) UpdateOneID(id string) *OwnedAppUpdateOne {
+	mutation := newOwnedAppMutation(c.config, OpUpdateOne, withOwnedAppID(id))
+	return &OwnedAppUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OwnedApp.
+func (c *OwnedAppClient) Delete() *OwnedAppDelete {
+	mutation := newOwnedAppMutation(c.config, OpDelete)
+	return &OwnedAppDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OwnedAppClient) DeleteOne(_m *OwnedApp) *OwnedAppDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *OwnedAppClient) DeleteOneID(id string) *OwnedAppDeleteOne {
+	builder := c.Delete().Where(ownedapp.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OwnedAppDeleteOne{builder}
+}
+
+// Query returns a query builder for OwnedApp.
+func (c *OwnedAppClient) Query() *OwnedAppQuery {
+	return &OwnedAppQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeOwnedApp},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a OwnedApp entity by its id.
+func (c *OwnedAppClient) Get(ctx context.Context, id string) (*OwnedApp, error) {
+	return c.Query().Where(ownedapp.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OwnedAppClient) GetX(ctx context.Context, id string) *OwnedApp {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a OwnedApp.
+func (c *OwnedAppClient) QueryUser(_m *OwnedApp) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ownedapp.UserTable, ownedapp.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryApplication queries the application edge of a OwnedApp.
+func (c *OwnedAppClient) QueryApplication(_m *OwnedApp) *ApplicationQuery {
+	query := (&ApplicationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, id),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, ownedapp.ApplicationTable, ownedapp.ApplicationColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *OwnedAppClient) Hooks() []Hook {
+	return c.hooks.OwnedApp
+}
+
+// Interceptors returns the client interceptors.
+func (c *OwnedAppClient) Interceptors() []Interceptor {
+	return c.inters.OwnedApp
+}
+
+func (c *OwnedAppClient) mutate(ctx context.Context, m *OwnedAppMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&OwnedAppCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&OwnedAppUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&OwnedAppUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&OwnedAppDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown OwnedApp mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -815,15 +990,15 @@ func (c *UserClient) QueryAuthorizations(_m *User) *AuthorizationQuery {
 	return query
 }
 
-// QueryApplications queries the applications edge of a User.
-func (c *UserClient) QueryApplications(_m *User) *ApplicationQuery {
-	query := (&ApplicationClient{config: c.config}).Query()
+// QueryOwnedApps queries the owned_apps edge of a User.
+func (c *UserClient) QueryOwnedApps(_m *User) *OwnedAppQuery {
+	query := (&OwnedAppClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(application.Table, application.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.ApplicationsTable, user.ApplicationsColumn),
+			sqlgraph.To(ownedapp.Table, ownedapp.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.OwnedAppsTable, user.OwnedAppsColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
@@ -859,9 +1034,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Application, Authentication, Authorization, User []ent.Hook
+		Application, Authentication, Authorization, OwnedApp, User []ent.Hook
 	}
 	inters struct {
-		Application, Authentication, Authorization, User []ent.Interceptor
+		Application, Authentication, Authorization, OwnedApp, User []ent.Interceptor
 	}
 )

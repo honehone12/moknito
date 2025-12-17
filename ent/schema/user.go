@@ -37,9 +37,12 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("authentications", Authentication.Type),
-		edge.To("authorizations", Authorization.Type),
-		edge.To("applications", Application.Type),
+		edge.To("authentications", Authentication.Type).
+			Immutable(),
+		edge.To("authorizations", Authorization.Type).
+			Immutable(),
+		edge.To("owned_apps", OwnedApp.Type).
+			Immutable(),
 	}
 }
 

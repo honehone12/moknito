@@ -14,24 +14,14 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "domain", Type: field.TypeString},
-		{Name: "client_id", Type: field.TypeString},
-		{Name: "user_applications", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "domain", Type: field.TypeString, Unique: true},
 	}
 	// ApplicationsTable holds the schema information for the "applications" table.
 	ApplicationsTable = &schema.Table{
 		Name:       "applications",
 		Columns:    ApplicationsColumns,
 		PrimaryKey: []*schema.Column{ApplicationsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "applications_users_applications",
-				Columns:    []*schema.Column{ApplicationsColumns[7]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-		},
 	}
 	// AuthenticationsColumns holds the columns for the "authentications" table.
 	AuthenticationsColumns = []*schema.Column{
@@ -43,7 +33,7 @@ var (
 		{Name: "user_agent", Type: field.TypeString, Nullable: true, Size: 256},
 		{Name: "expire_at", Type: field.TypeTime},
 		{Name: "logout_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_authentications", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthenticationsTable holds the schema information for the "authentications" table.
 	AuthenticationsTable = &schema.Table{
@@ -65,10 +55,11 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "code", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
-		{Name: "challenge", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"mysql": "binary(32)"}},
+		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "code", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "challenge", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(32)"}},
 		{Name: "expire_at", Type: field.TypeTime},
-		{Name: "user_authorizations", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthorizationsTable holds the schema information for the "authorizations" table.
 	AuthorizationsTable = &schema.Table{
@@ -78,7 +69,38 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "authorizations_users_authorizations",
-				Columns:    []*schema.Column{AuthorizationsColumns[7]},
+				Columns:    []*schema.Column{AuthorizationsColumns[8]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// OwnedAppsColumns holds the columns for the "owned_apps" table.
+	OwnedAppsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "domain", Type: field.TypeString},
+		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+	}
+	// OwnedAppsTable holds the schema information for the "owned_apps" table.
+	OwnedAppsTable = &schema.Table{
+		Name:       "owned_apps",
+		Columns:    OwnedAppsColumns,
+		PrimaryKey: []*schema.Column{OwnedAppsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "owned_apps_applications_application",
+				Columns:    []*schema.Column{OwnedAppsColumns[6]},
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "owned_apps_users_owned_apps",
+				Columns:    []*schema.Column{OwnedAppsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -112,12 +134,14 @@ var (
 		ApplicationsTable,
 		AuthenticationsTable,
 		AuthorizationsTable,
+		OwnedAppsTable,
 		UsersTable,
 	}
 )
 
 func init() {
-	ApplicationsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthenticationsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthorizationsTable.ForeignKeys[0].RefTable = UsersTable
+	OwnedAppsTable.ForeignKeys[0].RefTable = ApplicationsTable
+	OwnedAppsTable.ForeignKeys[1].RefTable = UsersTable
 }

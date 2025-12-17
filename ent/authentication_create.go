@@ -111,15 +111,15 @@ func (_c *AuthenticationCreate) SetNillableLogoutAt(v *time.Time) *Authenticatio
 	return _c
 }
 
-// SetID sets the "id" field.
-func (_c *AuthenticationCreate) SetID(v string) *AuthenticationCreate {
-	_c.mutation.SetID(v)
+// SetUserID sets the "user_id" field.
+func (_c *AuthenticationCreate) SetUserID(v string) *AuthenticationCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *AuthenticationCreate) SetUserID(id string) *AuthenticationCreate {
-	_c.mutation.SetUserID(id)
+// SetID sets the "id" field.
+func (_c *AuthenticationCreate) SetID(v string) *AuthenticationCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -193,6 +193,14 @@ func (_c *AuthenticationCreate) check() error {
 	}
 	if _, ok := _c.mutation.ExpireAt(); !ok {
 		return &ValidationError{Name: "expire_at", err: errors.New(`ent: missing required field "Authentication.expire_at"`)}
+	}
+	if _, ok := _c.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Authentication.user_id"`)}
+	}
+	if v, ok := _c.mutation.UserID(); ok {
+		if err := authentication.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "Authentication.user_id": %w`, err)}
+		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := authentication.IDValidator(v); err != nil {
@@ -279,7 +287,7 @@ func (_c *AuthenticationCreate) createSpec() (*Authentication, *sqlgraph.CreateS
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_authentications = &nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

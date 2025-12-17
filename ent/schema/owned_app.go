@@ -7,29 +7,27 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Authentication holds the schema definition for the Authentication entity.
-type Authentication struct {
+// Application holds the schema definition for the Application entity.
+type OwnedApp struct {
 	ent.Schema
 }
 
-func (Authentication) Fields() []ent.Field {
+func (OwnedApp) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
 			NotEmpty().
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.String("ip").
-			Optional().
-			MaxLen(256),
-		field.String("user_agent").
-			Optional().
-			MaxLen(256),
-		field.Time("expire_at").
+		field.String("name").
+			NotEmpty(),
+		field.String("domain").
+			NotEmpty().
 			Immutable(),
-		field.Time("logout_at").
-			Optional().
-			Nillable(),
+		field.String("application_id").
+			NotEmpty().
+			Immutable().
+			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		field.String("user_id").
 			NotEmpty().
 			Immutable().
@@ -37,18 +35,23 @@ func (Authentication) Fields() []ent.Field {
 	}
 }
 
-func (Authentication) Edges() []ent.Edge {
+func (OwnedApp) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).
-			Ref("authentications").
+			Ref("owned_apps").
 			Field("user_id").
+			Required().
+			Immutable().
+			Unique(),
+		edge.To("application", Application.Type).
+			Field("application_id").
 			Required().
 			Immutable().
 			Unique(),
 	}
 }
 
-func (Authentication) Mixin() []ent.Mixin {
+func (OwnedApp) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		Time{},
 	}

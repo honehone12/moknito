@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"moknito/ent/application"
+	"moknito/ent/ownedapp"
 	"moknito/ent/predicate"
 	"time"
 
@@ -15,33 +15,33 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// ApplicationUpdate is the builder for updating Application entities.
-type ApplicationUpdate struct {
+// OwnedAppUpdate is the builder for updating OwnedApp entities.
+type OwnedAppUpdate struct {
 	config
 	hooks    []Hook
-	mutation *ApplicationMutation
+	mutation *OwnedAppMutation
 }
 
-// Where appends a list predicates to the ApplicationUpdate builder.
-func (_u *ApplicationUpdate) Where(ps ...predicate.Application) *ApplicationUpdate {
+// Where appends a list predicates to the OwnedAppUpdate builder.
+func (_u *OwnedAppUpdate) Where(ps ...predicate.OwnedApp) *OwnedAppUpdate {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *ApplicationUpdate) SetUpdatedAt(v time.Time) *ApplicationUpdate {
+func (_u *OwnedAppUpdate) SetUpdatedAt(v time.Time) *OwnedAppUpdate {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_u *ApplicationUpdate) SetDeletedAt(v time.Time) *ApplicationUpdate {
+func (_u *OwnedAppUpdate) SetDeletedAt(v time.Time) *OwnedAppUpdate {
 	_u.mutation.SetDeletedAt(v)
 	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *ApplicationUpdate) SetNillableDeletedAt(v *time.Time) *ApplicationUpdate {
+func (_u *OwnedAppUpdate) SetNillableDeletedAt(v *time.Time) *OwnedAppUpdate {
 	if v != nil {
 		_u.SetDeletedAt(*v)
 	}
@@ -49,38 +49,38 @@ func (_u *ApplicationUpdate) SetNillableDeletedAt(v *time.Time) *ApplicationUpda
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *ApplicationUpdate) ClearDeletedAt() *ApplicationUpdate {
+func (_u *OwnedAppUpdate) ClearDeletedAt() *OwnedAppUpdate {
 	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *ApplicationUpdate) SetName(v string) *ApplicationUpdate {
+func (_u *OwnedAppUpdate) SetName(v string) *OwnedAppUpdate {
 	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *ApplicationUpdate) SetNillableName(v *string) *ApplicationUpdate {
+func (_u *OwnedAppUpdate) SetNillableName(v *string) *OwnedAppUpdate {
 	if v != nil {
 		_u.SetName(*v)
 	}
 	return _u
 }
 
-// Mutation returns the ApplicationMutation object of the builder.
-func (_u *ApplicationUpdate) Mutation() *ApplicationMutation {
+// Mutation returns the OwnedAppMutation object of the builder.
+func (_u *OwnedAppUpdate) Mutation() *OwnedAppMutation {
 	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (_u *ApplicationUpdate) Save(ctx context.Context) (int, error) {
+func (_u *OwnedAppUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ApplicationUpdate) SaveX(ctx context.Context) int {
+func (_u *OwnedAppUpdate) SaveX(ctx context.Context) int {
 	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -89,41 +89,47 @@ func (_u *ApplicationUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (_u *ApplicationUpdate) Exec(ctx context.Context) error {
+func (_u *OwnedAppUpdate) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *ApplicationUpdate) ExecX(ctx context.Context) {
+func (_u *OwnedAppUpdate) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *ApplicationUpdate) defaults() {
+func (_u *OwnedAppUpdate) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := application.UpdateDefaultUpdatedAt()
+		v := ownedapp.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *ApplicationUpdate) check() error {
+func (_u *OwnedAppUpdate) check() error {
 	if v, ok := _u.mutation.Name(); ok {
-		if err := application.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Application.name": %w`, err)}
+		if err := ownedapp.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.name": %w`, err)}
 		}
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "OwnedApp.user"`)
+	}
+	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "OwnedApp.application"`)
 	}
 	return nil
 }
 
-func (_u *ApplicationUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+func (_u *OwnedAppUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(application.Table, application.Columns, sqlgraph.NewFieldSpec(application.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(ownedapp.Table, ownedapp.Columns, sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -132,20 +138,20 @@ func (_u *ApplicationUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(application.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(ownedapp.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(application.FieldDeletedAt, field.TypeTime, value)
+		_spec.SetField(ownedapp.FieldDeletedAt, field.TypeTime, value)
 	}
 	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(application.FieldDeletedAt, field.TypeTime)
+		_spec.ClearField(ownedapp.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(application.FieldName, field.TypeString, value)
+		_spec.SetField(ownedapp.FieldName, field.TypeString, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{application.Label}
+			err = &NotFoundError{ownedapp.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -155,28 +161,28 @@ func (_u *ApplicationUpdate) sqlSave(ctx context.Context) (_node int, err error)
 	return _node, nil
 }
 
-// ApplicationUpdateOne is the builder for updating a single Application entity.
-type ApplicationUpdateOne struct {
+// OwnedAppUpdateOne is the builder for updating a single OwnedApp entity.
+type OwnedAppUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *ApplicationMutation
+	mutation *OwnedAppMutation
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *ApplicationUpdateOne) SetUpdatedAt(v time.Time) *ApplicationUpdateOne {
+func (_u *OwnedAppUpdateOne) SetUpdatedAt(v time.Time) *OwnedAppUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_u *ApplicationUpdateOne) SetDeletedAt(v time.Time) *ApplicationUpdateOne {
+func (_u *OwnedAppUpdateOne) SetDeletedAt(v time.Time) *OwnedAppUpdateOne {
 	_u.mutation.SetDeletedAt(v)
 	return _u
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_u *ApplicationUpdateOne) SetNillableDeletedAt(v *time.Time) *ApplicationUpdateOne {
+func (_u *OwnedAppUpdateOne) SetNillableDeletedAt(v *time.Time) *OwnedAppUpdateOne {
 	if v != nil {
 		_u.SetDeletedAt(*v)
 	}
@@ -184,51 +190,51 @@ func (_u *ApplicationUpdateOne) SetNillableDeletedAt(v *time.Time) *ApplicationU
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *ApplicationUpdateOne) ClearDeletedAt() *ApplicationUpdateOne {
+func (_u *OwnedAppUpdateOne) ClearDeletedAt() *OwnedAppUpdateOne {
 	_u.mutation.ClearDeletedAt()
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *ApplicationUpdateOne) SetName(v string) *ApplicationUpdateOne {
+func (_u *OwnedAppUpdateOne) SetName(v string) *OwnedAppUpdateOne {
 	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *ApplicationUpdateOne) SetNillableName(v *string) *ApplicationUpdateOne {
+func (_u *OwnedAppUpdateOne) SetNillableName(v *string) *OwnedAppUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
 	}
 	return _u
 }
 
-// Mutation returns the ApplicationMutation object of the builder.
-func (_u *ApplicationUpdateOne) Mutation() *ApplicationMutation {
+// Mutation returns the OwnedAppMutation object of the builder.
+func (_u *OwnedAppUpdateOne) Mutation() *OwnedAppMutation {
 	return _u.mutation
 }
 
-// Where appends a list predicates to the ApplicationUpdate builder.
-func (_u *ApplicationUpdateOne) Where(ps ...predicate.Application) *ApplicationUpdateOne {
+// Where appends a list predicates to the OwnedAppUpdate builder.
+func (_u *OwnedAppUpdateOne) Where(ps ...predicate.OwnedApp) *OwnedAppUpdateOne {
 	_u.mutation.Where(ps...)
 	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (_u *ApplicationUpdateOne) Select(field string, fields ...string) *ApplicationUpdateOne {
+func (_u *OwnedAppUpdateOne) Select(field string, fields ...string) *OwnedAppUpdateOne {
 	_u.fields = append([]string{field}, fields...)
 	return _u
 }
 
-// Save executes the query and returns the updated Application entity.
-func (_u *ApplicationUpdateOne) Save(ctx context.Context) (*Application, error) {
+// Save executes the query and returns the updated OwnedApp entity.
+func (_u *OwnedAppUpdateOne) Save(ctx context.Context) (*OwnedApp, error) {
 	_u.defaults()
 	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ApplicationUpdateOne) SaveX(ctx context.Context) *Application {
+func (_u *OwnedAppUpdateOne) SaveX(ctx context.Context) *OwnedApp {
 	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -237,54 +243,60 @@ func (_u *ApplicationUpdateOne) SaveX(ctx context.Context) *Application {
 }
 
 // Exec executes the query on the entity.
-func (_u *ApplicationUpdateOne) Exec(ctx context.Context) error {
+func (_u *OwnedAppUpdateOne) Exec(ctx context.Context) error {
 	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_u *ApplicationUpdateOne) ExecX(ctx context.Context) {
+func (_u *OwnedAppUpdateOne) ExecX(ctx context.Context) {
 	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_u *ApplicationUpdateOne) defaults() {
+func (_u *OwnedAppUpdateOne) defaults() {
 	if _, ok := _u.mutation.UpdatedAt(); !ok {
-		v := application.UpdateDefaultUpdatedAt()
+		v := ownedapp.UpdateDefaultUpdatedAt()
 		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_u *ApplicationUpdateOne) check() error {
+func (_u *OwnedAppUpdateOne) check() error {
 	if v, ok := _u.mutation.Name(); ok {
-		if err := application.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Application.name": %w`, err)}
+		if err := ownedapp.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.name": %w`, err)}
 		}
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "OwnedApp.user"`)
+	}
+	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "OwnedApp.application"`)
 	}
 	return nil
 }
 
-func (_u *ApplicationUpdateOne) sqlSave(ctx context.Context) (_node *Application, err error) {
+func (_u *OwnedAppUpdateOne) sqlSave(ctx context.Context) (_node *OwnedApp, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(application.Table, application.Columns, sqlgraph.NewFieldSpec(application.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(ownedapp.Table, ownedapp.Columns, sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString))
 	id, ok := _u.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Application.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "OwnedApp.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, application.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, ownedapp.FieldID)
 		for _, f := range fields {
-			if !application.ValidColumn(f) {
+			if !ownedapp.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != application.FieldID {
+			if f != ownedapp.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -297,23 +309,23 @@ func (_u *ApplicationUpdateOne) sqlSave(ctx context.Context) (_node *Application
 		}
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(application.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(ownedapp.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(application.FieldDeletedAt, field.TypeTime, value)
+		_spec.SetField(ownedapp.FieldDeletedAt, field.TypeTime, value)
 	}
 	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(application.FieldDeletedAt, field.TypeTime)
+		_spec.ClearField(ownedapp.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(application.FieldName, field.TypeString, value)
+		_spec.SetField(ownedapp.FieldName, field.TypeString, value)
 	}
-	_node = &Application{config: _u.config}
+	_node = &OwnedApp{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{application.Label}
+			err = &NotFoundError{ownedapp.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

@@ -90,11 +90,6 @@ func Domain(v string) predicate.Application {
 	return predicate.Application(sql.FieldEQ(FieldDomain, v))
 }
 
-// ClientID applies equality check predicate on the "client_id" field. It's identical to ClientIDEQ.
-func ClientID(v string) predicate.Application {
-	return predicate.Application(sql.FieldEQ(FieldClientID, v))
-}
-
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Application {
 	return predicate.Application(sql.FieldEQ(FieldCreatedAt, v))
@@ -355,86 +350,21 @@ func DomainContainsFold(v string) predicate.Application {
 	return predicate.Application(sql.FieldContainsFold(FieldDomain, v))
 }
 
-// ClientIDEQ applies the EQ predicate on the "client_id" field.
-func ClientIDEQ(v string) predicate.Application {
-	return predicate.Application(sql.FieldEQ(FieldClientID, v))
-}
-
-// ClientIDNEQ applies the NEQ predicate on the "client_id" field.
-func ClientIDNEQ(v string) predicate.Application {
-	return predicate.Application(sql.FieldNEQ(FieldClientID, v))
-}
-
-// ClientIDIn applies the In predicate on the "client_id" field.
-func ClientIDIn(vs ...string) predicate.Application {
-	return predicate.Application(sql.FieldIn(FieldClientID, vs...))
-}
-
-// ClientIDNotIn applies the NotIn predicate on the "client_id" field.
-func ClientIDNotIn(vs ...string) predicate.Application {
-	return predicate.Application(sql.FieldNotIn(FieldClientID, vs...))
-}
-
-// ClientIDGT applies the GT predicate on the "client_id" field.
-func ClientIDGT(v string) predicate.Application {
-	return predicate.Application(sql.FieldGT(FieldClientID, v))
-}
-
-// ClientIDGTE applies the GTE predicate on the "client_id" field.
-func ClientIDGTE(v string) predicate.Application {
-	return predicate.Application(sql.FieldGTE(FieldClientID, v))
-}
-
-// ClientIDLT applies the LT predicate on the "client_id" field.
-func ClientIDLT(v string) predicate.Application {
-	return predicate.Application(sql.FieldLT(FieldClientID, v))
-}
-
-// ClientIDLTE applies the LTE predicate on the "client_id" field.
-func ClientIDLTE(v string) predicate.Application {
-	return predicate.Application(sql.FieldLTE(FieldClientID, v))
-}
-
-// ClientIDContains applies the Contains predicate on the "client_id" field.
-func ClientIDContains(v string) predicate.Application {
-	return predicate.Application(sql.FieldContains(FieldClientID, v))
-}
-
-// ClientIDHasPrefix applies the HasPrefix predicate on the "client_id" field.
-func ClientIDHasPrefix(v string) predicate.Application {
-	return predicate.Application(sql.FieldHasPrefix(FieldClientID, v))
-}
-
-// ClientIDHasSuffix applies the HasSuffix predicate on the "client_id" field.
-func ClientIDHasSuffix(v string) predicate.Application {
-	return predicate.Application(sql.FieldHasSuffix(FieldClientID, v))
-}
-
-// ClientIDEqualFold applies the EqualFold predicate on the "client_id" field.
-func ClientIDEqualFold(v string) predicate.Application {
-	return predicate.Application(sql.FieldEqualFold(FieldClientID, v))
-}
-
-// ClientIDContainsFold applies the ContainsFold predicate on the "client_id" field.
-func ClientIDContainsFold(v string) predicate.Application {
-	return predicate.Application(sql.FieldContainsFold(FieldClientID, v))
-}
-
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.Application {
+// HasOwned applies the HasEdge predicate on the "owned" edge.
+func HasOwned() predicate.Application {
 	return predicate.Application(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, OwnedTable, OwnedColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.Application {
+// HasOwnedWith applies the HasEdge predicate on the "owned" edge with a given conditions (other predicates).
+func HasOwnedWith(preds ...predicate.OwnedApp) predicate.Application {
 	return predicate.Application(func(s *sql.Selector) {
-		step := newUserStep()
+		step := newOwnedStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -24,19 +24,17 @@ const (
 	FieldName = "name"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
-	// FieldClientID holds the string denoting the client_id field in the database.
-	FieldClientID = "client_id"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
+	// EdgeOwned holds the string denoting the owned edge name in mutations.
+	EdgeOwned = "owned"
 	// Table holds the table name of the application in the database.
 	Table = "applications"
-	// UserTable is the table that holds the user relation/edge.
-	UserTable = "applications"
-	// UserInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_applications"
+	// OwnedTable is the table that holds the owned relation/edge.
+	OwnedTable = "owned_apps"
+	// OwnedInverseTable is the table name for the OwnedApp entity.
+	// It exists in this package in order to avoid circular dependency with the "ownedapp" package.
+	OwnedInverseTable = "owned_apps"
+	// OwnedColumn is the table column denoting the owned relation/edge.
+	OwnedColumn = "application_id"
 )
 
 // Columns holds all SQL columns for application fields.
@@ -47,24 +45,12 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldName,
 	FieldDomain,
-	FieldClientID,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "applications"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"user_applications",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -82,8 +68,6 @@ var (
 	NameValidator func(string) error
 	// DomainValidator is a validator for the "domain" field. It is called by the builders before save.
 	DomainValidator func(string) error
-	// ClientIDValidator is a validator for the "client_id" field. It is called by the builders before save.
-	ClientIDValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -121,21 +105,23 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
-// ByClientID orders the results by the client_id field.
-func ByClientID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldClientID, opts...).ToFunc()
-}
-
-// ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByOwnedCount orders the results by owned count.
+func ByOwnedCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newOwnedStep(), opts...)
 	}
 }
-func newUserStep() *sqlgraph.Step {
+
+// ByOwned orders the results by owned terms.
+func ByOwned(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOwnedStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newOwnedStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		sqlgraph.To(OwnedInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, OwnedTable, OwnedColumn),
 	)
 }

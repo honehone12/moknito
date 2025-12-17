@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"moknito/ent/authentication"
 	"moknito/ent/predicate"
-	"moknito/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -95,20 +94,6 @@ func (_u *AuthenticationUpdate) ClearUserAgent() *AuthenticationUpdate {
 	return _u
 }
 
-// SetExpireAt sets the "expire_at" field.
-func (_u *AuthenticationUpdate) SetExpireAt(v time.Time) *AuthenticationUpdate {
-	_u.mutation.SetExpireAt(v)
-	return _u
-}
-
-// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
-func (_u *AuthenticationUpdate) SetNillableExpireAt(v *time.Time) *AuthenticationUpdate {
-	if v != nil {
-		_u.SetExpireAt(*v)
-	}
-	return _u
-}
-
 // SetLogoutAt sets the "logout_at" field.
 func (_u *AuthenticationUpdate) SetLogoutAt(v time.Time) *AuthenticationUpdate {
 	_u.mutation.SetLogoutAt(v)
@@ -129,26 +114,9 @@ func (_u *AuthenticationUpdate) ClearLogoutAt() *AuthenticationUpdate {
 	return _u
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *AuthenticationUpdate) SetUserID(id string) *AuthenticationUpdate {
-	_u.mutation.SetUserID(id)
-	return _u
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (_u *AuthenticationUpdate) SetUser(v *User) *AuthenticationUpdate {
-	return _u.SetUserID(v.ID)
-}
-
 // Mutation returns the AuthenticationMutation object of the builder.
 func (_u *AuthenticationUpdate) Mutation() *AuthenticationMutation {
 	return _u.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (_u *AuthenticationUpdate) ClearUser() *AuthenticationUpdate {
-	_u.mutation.ClearUser()
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -238,43 +206,11 @@ func (_u *AuthenticationUpdate) sqlSave(ctx context.Context) (_node int, err err
 	if _u.mutation.UserAgentCleared() {
 		_spec.ClearField(authentication.FieldUserAgent, field.TypeString)
 	}
-	if value, ok := _u.mutation.ExpireAt(); ok {
-		_spec.SetField(authentication.FieldExpireAt, field.TypeTime, value)
-	}
 	if value, ok := _u.mutation.LogoutAt(); ok {
 		_spec.SetField(authentication.FieldLogoutAt, field.TypeTime, value)
 	}
 	if _u.mutation.LogoutAtCleared() {
 		_spec.ClearField(authentication.FieldLogoutAt, field.TypeTime)
-	}
-	if _u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   authentication.UserTable,
-			Columns: []string{authentication.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   authentication.UserTable,
-			Columns: []string{authentication.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -362,20 +298,6 @@ func (_u *AuthenticationUpdateOne) ClearUserAgent() *AuthenticationUpdateOne {
 	return _u
 }
 
-// SetExpireAt sets the "expire_at" field.
-func (_u *AuthenticationUpdateOne) SetExpireAt(v time.Time) *AuthenticationUpdateOne {
-	_u.mutation.SetExpireAt(v)
-	return _u
-}
-
-// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
-func (_u *AuthenticationUpdateOne) SetNillableExpireAt(v *time.Time) *AuthenticationUpdateOne {
-	if v != nil {
-		_u.SetExpireAt(*v)
-	}
-	return _u
-}
-
 // SetLogoutAt sets the "logout_at" field.
 func (_u *AuthenticationUpdateOne) SetLogoutAt(v time.Time) *AuthenticationUpdateOne {
 	_u.mutation.SetLogoutAt(v)
@@ -396,26 +318,9 @@ func (_u *AuthenticationUpdateOne) ClearLogoutAt() *AuthenticationUpdateOne {
 	return _u
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *AuthenticationUpdateOne) SetUserID(id string) *AuthenticationUpdateOne {
-	_u.mutation.SetUserID(id)
-	return _u
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (_u *AuthenticationUpdateOne) SetUser(v *User) *AuthenticationUpdateOne {
-	return _u.SetUserID(v.ID)
-}
-
 // Mutation returns the AuthenticationMutation object of the builder.
 func (_u *AuthenticationUpdateOne) Mutation() *AuthenticationMutation {
 	return _u.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (_u *AuthenticationUpdateOne) ClearUser() *AuthenticationUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
 }
 
 // Where appends a list predicates to the AuthenticationUpdate builder.
@@ -535,43 +440,11 @@ func (_u *AuthenticationUpdateOne) sqlSave(ctx context.Context) (_node *Authenti
 	if _u.mutation.UserAgentCleared() {
 		_spec.ClearField(authentication.FieldUserAgent, field.TypeString)
 	}
-	if value, ok := _u.mutation.ExpireAt(); ok {
-		_spec.SetField(authentication.FieldExpireAt, field.TypeTime, value)
-	}
 	if value, ok := _u.mutation.LogoutAt(); ok {
 		_spec.SetField(authentication.FieldLogoutAt, field.TypeTime, value)
 	}
 	if _u.mutation.LogoutAtCleared() {
 		_spec.ClearField(authentication.FieldLogoutAt, field.TypeTime)
-	}
-	if _u.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   authentication.UserTable,
-			Columns: []string{authentication.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   authentication.UserTable,
-			Columns: []string{authentication.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Authentication{config: _u.config}
 	_spec.Assign = _node.assignValues
