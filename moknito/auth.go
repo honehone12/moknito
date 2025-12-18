@@ -27,12 +27,12 @@ func (m *Moknito) verifyAuthentication(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		// at least encoded signature 43byte+1
-		if err := m.validator.Var(cookie.Value, "min=44,base64rawurl"); err != nil {
+		if err := m.validator.Var(cookie.Value, "min=44,jwt"); err != nil {
 			ctx.Logger().Warn(err)
 			return res.BadRequest(ctx)
 		}
 
-		invalid, err := m.system.VerifyAuthentication(
+		userId, invalid, err := m.system.VerifyAuthentication(
 			ctx.Request().Context(),
 			cookie,
 		)
@@ -43,6 +43,8 @@ func (m *Moknito) verifyAuthentication(next echo.HandlerFunc) echo.HandlerFunc {
 		if err != nil {
 			return err
 		}
+
+		ctx.Set(CONTEXT_KEY_AUTHED_USER_ID, userId)
 
 		return next(ctx)
 	}

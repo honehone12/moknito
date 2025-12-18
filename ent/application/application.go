@@ -26,26 +26,26 @@ const (
 	FieldDomain = "domain"
 	// FieldRedirect holds the string denoting the redirect field in the database.
 	FieldRedirect = "redirect"
-	// EdgeOwned holds the string denoting the owned edge name in mutations.
-	EdgeOwned = "owned"
-	// EdgeOuthed holds the string denoting the outhed edge name in mutations.
-	EdgeOuthed = "outhed"
+	// EdgeAuthorized holds the string denoting the authorized edge name in mutations.
+	EdgeAuthorized = "authorized"
+	// EdgeLogined holds the string denoting the logined edge name in mutations.
+	EdgeLogined = "logined"
 	// Table holds the table name of the application in the database.
 	Table = "applications"
-	// OwnedTable is the table that holds the owned relation/edge.
-	OwnedTable = "owned_apps"
-	// OwnedInverseTable is the table name for the OwnedApp entity.
-	// It exists in this package in order to avoid circular dependency with the "ownedapp" package.
-	OwnedInverseTable = "owned_apps"
-	// OwnedColumn is the table column denoting the owned relation/edge.
-	OwnedColumn = "application_id"
-	// OuthedTable is the table that holds the outhed relation/edge.
-	OuthedTable = "authorizations"
-	// OuthedInverseTable is the table name for the Authorization entity.
+	// AuthorizedTable is the table that holds the authorized relation/edge.
+	AuthorizedTable = "authorized_apps"
+	// AuthorizedInverseTable is the table name for the AuthorizedApp entity.
+	// It exists in this package in order to avoid circular dependency with the "authorizedapp" package.
+	AuthorizedInverseTable = "authorized_apps"
+	// AuthorizedColumn is the table column denoting the authorized relation/edge.
+	AuthorizedColumn = "application_id"
+	// LoginedTable is the table that holds the logined relation/edge.
+	LoginedTable = "authorizations"
+	// LoginedInverseTable is the table name for the Authorization entity.
 	// It exists in this package in order to avoid circular dependency with the "authorization" package.
-	OuthedInverseTable = "authorizations"
-	// OuthedColumn is the table column denoting the outhed relation/edge.
-	OuthedColumn = "application_id"
+	LoginedInverseTable = "authorizations"
+	// LoginedColumn is the table column denoting the logined relation/edge.
+	LoginedColumn = "application_id"
 )
 
 // Columns holds all SQL columns for application fields.
@@ -124,44 +124,44 @@ func ByRedirect(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRedirect, opts...).ToFunc()
 }
 
-// ByOwnedCount orders the results by owned count.
-func ByOwnedCount(opts ...sql.OrderTermOption) OrderOption {
+// ByAuthorizedCount orders the results by authorized count.
+func ByAuthorizedCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newOwnedStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newAuthorizedStep(), opts...)
 	}
 }
 
-// ByOwned orders the results by owned terms.
-func ByOwned(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByAuthorized orders the results by authorized terms.
+func ByAuthorized(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newOwnedStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newAuthorizedStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByOuthedCount orders the results by outhed count.
-func ByOuthedCount(opts ...sql.OrderTermOption) OrderOption {
+// ByLoginedCount orders the results by logined count.
+func ByLoginedCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newOuthedStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newLoginedStep(), opts...)
 	}
 }
 
-// ByOuthed orders the results by outhed terms.
-func ByOuthed(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByLogined orders the results by logined terms.
+func ByLogined(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newOuthedStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newLoginedStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newOwnedStep() *sqlgraph.Step {
+func newAuthorizedStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(OwnedInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, OwnedTable, OwnedColumn),
+		sqlgraph.To(AuthorizedInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, AuthorizedTable, AuthorizedColumn),
 	)
 }
-func newOuthedStep() *sqlgraph.Step {
+func newLoginedStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(OuthedInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, true, OuthedTable, OuthedColumn),
+		sqlgraph.To(LoginedInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, LoginedTable, LoginedColumn),
 	)
 }

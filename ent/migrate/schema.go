@@ -82,32 +82,30 @@ var (
 			},
 		},
 	}
-	// OwnedAppsColumns holds the columns for the "owned_apps" table.
-	OwnedAppsColumns = []*schema.Column{
+	// AuthorizedAppsColumns holds the columns for the "authorized_apps" table.
+	AuthorizedAppsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeString, Size: 256},
-		{Name: "domain", Type: field.TypeString, Size: 256},
 		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
-	// OwnedAppsTable holds the schema information for the "owned_apps" table.
-	OwnedAppsTable = &schema.Table{
-		Name:       "owned_apps",
-		Columns:    OwnedAppsColumns,
-		PrimaryKey: []*schema.Column{OwnedAppsColumns[0]},
+	// AuthorizedAppsTable holds the schema information for the "authorized_apps" table.
+	AuthorizedAppsTable = &schema.Table{
+		Name:       "authorized_apps",
+		Columns:    AuthorizedAppsColumns,
+		PrimaryKey: []*schema.Column{AuthorizedAppsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "owned_apps_applications_application",
-				Columns:    []*schema.Column{OwnedAppsColumns[6]},
+				Symbol:     "authorized_apps_applications_application",
+				Columns:    []*schema.Column{AuthorizedAppsColumns[4]},
 				RefColumns: []*schema.Column{ApplicationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "owned_apps_users_owned_apps",
-				Columns:    []*schema.Column{OwnedAppsColumns[7]},
+				Symbol:     "authorized_apps_users_authorized_apps",
+				Columns:    []*schema.Column{AuthorizedAppsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -141,7 +139,7 @@ var (
 		ApplicationsTable,
 		AuthenticationsTable,
 		AuthorizationsTable,
-		OwnedAppsTable,
+		AuthorizedAppsTable,
 		UsersTable,
 	}
 )
@@ -150,6 +148,6 @@ func init() {
 	AuthenticationsTable.ForeignKeys[0].RefTable = UsersTable
 	AuthorizationsTable.ForeignKeys[0].RefTable = ApplicationsTable
 	AuthorizationsTable.ForeignKeys[1].RefTable = UsersTable
-	OwnedAppsTable.ForeignKeys[0].RefTable = ApplicationsTable
-	OwnedAppsTable.ForeignKeys[1].RefTable = UsersTable
+	AuthorizedAppsTable.ForeignKeys[0].RefTable = ApplicationsTable
+	AuthorizedAppsTable.ForeignKeys[1].RefTable = UsersTable
 }

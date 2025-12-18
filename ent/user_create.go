@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
-	"moknito/ent/ownedapp"
+	"moknito/ent/authorizedapp"
 	"moknito/ent/user"
 	"time"
 
@@ -119,19 +119,19 @@ func (_c *UserCreate) AddAuthorizations(v ...*Authorization) *UserCreate {
 	return _c.AddAuthorizationIDs(ids...)
 }
 
-// AddOwnedAppIDs adds the "owned_apps" edge to the OwnedApp entity by IDs.
-func (_c *UserCreate) AddOwnedAppIDs(ids ...string) *UserCreate {
-	_c.mutation.AddOwnedAppIDs(ids...)
+// AddAuthorizedAppIDs adds the "authorized_apps" edge to the AuthorizedApp entity by IDs.
+func (_c *UserCreate) AddAuthorizedAppIDs(ids ...string) *UserCreate {
+	_c.mutation.AddAuthorizedAppIDs(ids...)
 	return _c
 }
 
-// AddOwnedApps adds the "owned_apps" edges to the OwnedApp entity.
-func (_c *UserCreate) AddOwnedApps(v ...*OwnedApp) *UserCreate {
+// AddAuthorizedApps adds the "authorized_apps" edges to the AuthorizedApp entity.
+func (_c *UserCreate) AddAuthorizedApps(v ...*AuthorizedApp) *UserCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddOwnedAppIDs(ids...)
+	return _c.AddAuthorizedAppIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -307,15 +307,15 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.OwnedAppsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AuthorizedAppsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.OwnedAppsTable,
-			Columns: []string{user.OwnedAppsColumn},
+			Table:   user.AuthorizedAppsTable,
+			Columns: []string{user.AuthorizedAppsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

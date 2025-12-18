@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"moknito/ent"
+	"moknito/id"
 	"moknito/token"
 	"net/http"
 	"os"
@@ -23,20 +24,21 @@ type SessionSigner interface {
 	VerifySession(
 		ctx context.Context,
 		cookie *http.Cookie,
-	) (*http.Cookie, error, error)
+	) ([]byte, error, error)
 }
 
 type AuthSigner interface {
 	VerifyAuthentication(
 		ctx context.Context,
 		cookie *http.Cookie,
-	) (error, error)
+	) (id.Id, error, error)
 }
 
 type Sys interface {
 	SessionSigner
 	AuthSigner
 	UserSys
+	InfoSys
 	AppSys
 	io.Closer
 }

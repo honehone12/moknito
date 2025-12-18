@@ -30,8 +30,8 @@ const (
 	EdgeAuthentications = "authentications"
 	// EdgeAuthorizations holds the string denoting the authorizations edge name in mutations.
 	EdgeAuthorizations = "authorizations"
-	// EdgeOwnedApps holds the string denoting the owned_apps edge name in mutations.
-	EdgeOwnedApps = "owned_apps"
+	// EdgeAuthorizedApps holds the string denoting the authorized_apps edge name in mutations.
+	EdgeAuthorizedApps = "authorized_apps"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// AuthenticationsTable is the table that holds the authentications relation/edge.
@@ -48,13 +48,13 @@ const (
 	AuthorizationsInverseTable = "authorizations"
 	// AuthorizationsColumn is the table column denoting the authorizations relation/edge.
 	AuthorizationsColumn = "user_id"
-	// OwnedAppsTable is the table that holds the owned_apps relation/edge.
-	OwnedAppsTable = "owned_apps"
-	// OwnedAppsInverseTable is the table name for the OwnedApp entity.
-	// It exists in this package in order to avoid circular dependency with the "ownedapp" package.
-	OwnedAppsInverseTable = "owned_apps"
-	// OwnedAppsColumn is the table column denoting the owned_apps relation/edge.
-	OwnedAppsColumn = "user_id"
+	// AuthorizedAppsTable is the table that holds the authorized_apps relation/edge.
+	AuthorizedAppsTable = "authorized_apps"
+	// AuthorizedAppsInverseTable is the table name for the AuthorizedApp entity.
+	// It exists in this package in order to avoid circular dependency with the "authorizedapp" package.
+	AuthorizedAppsInverseTable = "authorized_apps"
+	// AuthorizedAppsColumn is the table column denoting the authorized_apps relation/edge.
+	AuthorizedAppsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -161,17 +161,17 @@ func ByAuthorizations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByOwnedAppsCount orders the results by owned_apps count.
-func ByOwnedAppsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByAuthorizedAppsCount orders the results by authorized_apps count.
+func ByAuthorizedAppsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newOwnedAppsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newAuthorizedAppsStep(), opts...)
 	}
 }
 
-// ByOwnedApps orders the results by owned_apps terms.
-func ByOwnedApps(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByAuthorizedApps orders the results by authorized_apps terms.
+func ByAuthorizedApps(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newOwnedAppsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newAuthorizedAppsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newAuthenticationsStep() *sqlgraph.Step {
@@ -188,10 +188,10 @@ func newAuthorizationsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, AuthorizationsTable, AuthorizationsColumn),
 	)
 }
-func newOwnedAppsStep() *sqlgraph.Step {
+func newAuthorizedAppsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(OwnedAppsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, OwnedAppsTable, OwnedAppsColumn),
+		sqlgraph.To(AuthorizedAppsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AuthorizedAppsTable, AuthorizedAppsColumn),
 	)
 }

@@ -5,7 +5,7 @@ package ent
 import (
 	"fmt"
 	"moknito/ent/application"
-	"moknito/ent/ownedapp"
+	"moknito/ent/authorizedapp"
 	"moknito/ent/user"
 	"strings"
 	"time"
@@ -14,8 +14,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// OwnedApp is the model entity for the OwnedApp schema.
-type OwnedApp struct {
+// AuthorizedApp is the model entity for the AuthorizedApp schema.
+type AuthorizedApp struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
@@ -25,22 +25,18 @@ type OwnedApp struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
-	// Domain holds the value of the "domain" field.
-	Domain string `json:"domain,omitempty"`
 	// ApplicationID holds the value of the "application_id" field.
 	ApplicationID string `json:"application_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the OwnedAppQuery when eager-loading is set.
-	Edges        OwnedAppEdges `json:"edges"`
+	// The values are being populated by the AuthorizedAppQuery when eager-loading is set.
+	Edges        AuthorizedAppEdges `json:"edges"`
 	selectValues sql.SelectValues
 }
 
-// OwnedAppEdges holds the relations/edges for other nodes in the graph.
-type OwnedAppEdges struct {
+// AuthorizedAppEdges holds the relations/edges for other nodes in the graph.
+type AuthorizedAppEdges struct {
 	// Application holds the value of the application edge.
 	Application *Application `json:"application,omitempty"`
 	// User holds the value of the user edge.
@@ -52,7 +48,7 @@ type OwnedAppEdges struct {
 
 // ApplicationOrErr returns the Application value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e OwnedAppEdges) ApplicationOrErr() (*Application, error) {
+func (e AuthorizedAppEdges) ApplicationOrErr() (*Application, error) {
 	if e.Application != nil {
 		return e.Application, nil
 	} else if e.loadedTypes[0] {
@@ -63,7 +59,7 @@ func (e OwnedAppEdges) ApplicationOrErr() (*Application, error) {
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e OwnedAppEdges) UserOrErr() (*User, error) {
+func (e AuthorizedAppEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
 	} else if e.loadedTypes[1] {
@@ -73,13 +69,13 @@ func (e OwnedAppEdges) UserOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*OwnedApp) scanValues(columns []string) ([]any, error) {
+func (*AuthorizedApp) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case ownedapp.FieldID, ownedapp.FieldName, ownedapp.FieldDomain, ownedapp.FieldApplicationID, ownedapp.FieldUserID:
+		case authorizedapp.FieldID, authorizedapp.FieldApplicationID, authorizedapp.FieldUserID:
 			values[i] = new(sql.NullString)
-		case ownedapp.FieldCreatedAt, ownedapp.FieldUpdatedAt, ownedapp.FieldDeletedAt:
+		case authorizedapp.FieldCreatedAt, authorizedapp.FieldUpdatedAt, authorizedapp.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -89,57 +85,45 @@ func (*OwnedApp) scanValues(columns []string) ([]any, error) {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the OwnedApp fields.
-func (_m *OwnedApp) assignValues(columns []string, values []any) error {
+// to the AuthorizedApp fields.
+func (_m *AuthorizedApp) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case ownedapp.FieldID:
+		case authorizedapp.FieldID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
 				_m.ID = value.String
 			}
-		case ownedapp.FieldCreatedAt:
+		case authorizedapp.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				_m.CreatedAt = value.Time
 			}
-		case ownedapp.FieldUpdatedAt:
+		case authorizedapp.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				_m.UpdatedAt = value.Time
 			}
-		case ownedapp.FieldDeletedAt:
+		case authorizedapp.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case ownedapp.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		case ownedapp.FieldDomain:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field domain", values[i])
-			} else if value.Valid {
-				_m.Domain = value.String
-			}
-		case ownedapp.FieldApplicationID:
+		case authorizedapp.FieldApplicationID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field application_id", values[i])
 			} else if value.Valid {
 				_m.ApplicationID = value.String
 			}
-		case ownedapp.FieldUserID:
+		case authorizedapp.FieldUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
@@ -152,44 +136,44 @@ func (_m *OwnedApp) assignValues(columns []string, values []any) error {
 	return nil
 }
 
-// Value returns the ent.Value that was dynamically selected and assigned to the OwnedApp.
+// Value returns the ent.Value that was dynamically selected and assigned to the AuthorizedApp.
 // This includes values selected through modifiers, order, etc.
-func (_m *OwnedApp) Value(name string) (ent.Value, error) {
+func (_m *AuthorizedApp) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryApplication queries the "application" edge of the OwnedApp entity.
-func (_m *OwnedApp) QueryApplication() *ApplicationQuery {
-	return NewOwnedAppClient(_m.config).QueryApplication(_m)
+// QueryApplication queries the "application" edge of the AuthorizedApp entity.
+func (_m *AuthorizedApp) QueryApplication() *ApplicationQuery {
+	return NewAuthorizedAppClient(_m.config).QueryApplication(_m)
 }
 
-// QueryUser queries the "user" edge of the OwnedApp entity.
-func (_m *OwnedApp) QueryUser() *UserQuery {
-	return NewOwnedAppClient(_m.config).QueryUser(_m)
+// QueryUser queries the "user" edge of the AuthorizedApp entity.
+func (_m *AuthorizedApp) QueryUser() *UserQuery {
+	return NewAuthorizedAppClient(_m.config).QueryUser(_m)
 }
 
-// Update returns a builder for updating this OwnedApp.
-// Note that you need to call OwnedApp.Unwrap() before calling this method if this OwnedApp
+// Update returns a builder for updating this AuthorizedApp.
+// Note that you need to call AuthorizedApp.Unwrap() before calling this method if this AuthorizedApp
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *OwnedApp) Update() *OwnedAppUpdateOne {
-	return NewOwnedAppClient(_m.config).UpdateOne(_m)
+func (_m *AuthorizedApp) Update() *AuthorizedAppUpdateOne {
+	return NewAuthorizedAppClient(_m.config).UpdateOne(_m)
 }
 
-// Unwrap unwraps the OwnedApp entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the AuthorizedApp entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_m *OwnedApp) Unwrap() *OwnedApp {
+func (_m *AuthorizedApp) Unwrap() *AuthorizedApp {
 	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: OwnedApp is not a transactional entity")
+		panic("ent: AuthorizedApp is not a transactional entity")
 	}
 	_m.config.driver = _tx.drv
 	return _m
 }
 
 // String implements the fmt.Stringer.
-func (_m *OwnedApp) String() string {
+func (_m *AuthorizedApp) String() string {
 	var builder strings.Builder
-	builder.WriteString("OwnedApp(")
+	builder.WriteString("AuthorizedApp(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
@@ -202,12 +186,6 @@ func (_m *OwnedApp) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("domain=")
-	builder.WriteString(_m.Domain)
-	builder.WriteString(", ")
 	builder.WriteString("application_id=")
 	builder.WriteString(_m.ApplicationID)
 	builder.WriteString(", ")
@@ -217,5 +195,5 @@ func (_m *OwnedApp) String() string {
 	return builder.String()
 }
 
-// OwnedApps is a parsable slice of OwnedApp.
-type OwnedApps []*OwnedApp
+// AuthorizedApps is a parsable slice of AuthorizedApp.
+type AuthorizedApps []*AuthorizedApp

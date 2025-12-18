@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"moknito/ent/application"
 	"moknito/ent/authorization"
-	"moknito/ent/ownedapp"
+	"moknito/ent/authorizedapp"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -88,34 +88,34 @@ func (_c *ApplicationCreate) SetID(v string) *ApplicationCreate {
 	return _c
 }
 
-// AddOwnedIDs adds the "owned" edge to the OwnedApp entity by IDs.
-func (_c *ApplicationCreate) AddOwnedIDs(ids ...string) *ApplicationCreate {
-	_c.mutation.AddOwnedIDs(ids...)
+// AddAuthorizedIDs adds the "authorized" edge to the AuthorizedApp entity by IDs.
+func (_c *ApplicationCreate) AddAuthorizedIDs(ids ...string) *ApplicationCreate {
+	_c.mutation.AddAuthorizedIDs(ids...)
 	return _c
 }
 
-// AddOwned adds the "owned" edges to the OwnedApp entity.
-func (_c *ApplicationCreate) AddOwned(v ...*OwnedApp) *ApplicationCreate {
+// AddAuthorized adds the "authorized" edges to the AuthorizedApp entity.
+func (_c *ApplicationCreate) AddAuthorized(v ...*AuthorizedApp) *ApplicationCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddOwnedIDs(ids...)
+	return _c.AddAuthorizedIDs(ids...)
 }
 
-// AddOuthedIDs adds the "outhed" edge to the Authorization entity by IDs.
-func (_c *ApplicationCreate) AddOuthedIDs(ids ...string) *ApplicationCreate {
-	_c.mutation.AddOuthedIDs(ids...)
+// AddLoginedIDs adds the "logined" edge to the Authorization entity by IDs.
+func (_c *ApplicationCreate) AddLoginedIDs(ids ...string) *ApplicationCreate {
+	_c.mutation.AddLoginedIDs(ids...)
 	return _c
 }
 
-// AddOuthed adds the "outhed" edges to the Authorization entity.
-func (_c *ApplicationCreate) AddOuthed(v ...*Authorization) *ApplicationCreate {
+// AddLogined adds the "logined" edges to the Authorization entity.
+func (_c *ApplicationCreate) AddLogined(v ...*Authorization) *ApplicationCreate {
 	ids := make([]string, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
-	return _c.AddOuthedIDs(ids...)
+	return _c.AddLoginedIDs(ids...)
 }
 
 // Mutation returns the ApplicationMutation object of the builder.
@@ -259,15 +259,15 @@ func (_c *ApplicationCreate) createSpec() (*Application, *sqlgraph.CreateSpec) {
 		_spec.SetField(application.FieldRedirect, field.TypeString, value)
 		_node.Redirect = value
 	}
-	if nodes := _c.mutation.OwnedIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AuthorizedIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   application.OwnedTable,
-			Columns: []string{application.OwnedColumn},
+			Table:   application.AuthorizedTable,
+			Columns: []string{application.AuthorizedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -275,12 +275,12 @@ func (_c *ApplicationCreate) createSpec() (*Application, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.OuthedIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LoginedIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
-			Table:   application.OuthedTable,
-			Columns: []string{application.OuthedColumn},
+			Table:   application.LoginedTable,
+			Columns: []string{application.LoginedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),

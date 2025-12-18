@@ -11,6 +11,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const CONTEXT_KEY_AUTHED_USER_ID = "AUTHED_USER_ID"
+
 type Moknito struct {
 	system    sys.Sys
 	validator *validator.Validate

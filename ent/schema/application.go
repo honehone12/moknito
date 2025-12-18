@@ -38,10 +38,10 @@ func (Application) Fields() []ent.Field {
 
 func (Application) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("owned", OwnedApp.Type).
+		edge.From("authorized", AuthorizedApp.Type).
 			Ref("application").
 			Immutable(),
-		edge.From("outhed", Authorization.Type).
+		edge.From("logined", Authorization.Type).
 			Ref("application").
 			Immutable(),
 	}

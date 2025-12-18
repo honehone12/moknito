@@ -9,7 +9,7 @@ import (
 	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
-	"moknito/ent/ownedapp"
+	"moknito/ent/authorizedapp"
 	"moknito/ent/predicate"
 	"moknito/ent/user"
 	"sync"
@@ -31,32 +31,32 @@ const (
 	TypeApplication    = "Application"
 	TypeAuthentication = "Authentication"
 	TypeAuthorization  = "Authorization"
-	TypeOwnedApp       = "OwnedApp"
+	TypeAuthorizedApp  = "AuthorizedApp"
 	TypeUser           = "User"
 )
 
 // ApplicationMutation represents an operation that mutates the Application nodes in the graph.
 type ApplicationMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *string
-	created_at    *time.Time
-	updated_at    *time.Time
-	deleted_at    *time.Time
-	name          *string
-	domain        *string
-	redirect      *string
-	clearedFields map[string]struct{}
-	owned         map[string]struct{}
-	removedowned  map[string]struct{}
-	clearedowned  bool
-	outhed        map[string]struct{}
-	removedouthed map[string]struct{}
-	clearedouthed bool
-	done          bool
-	oldValue      func(context.Context) (*Application, error)
-	predicates    []predicate.Application
+	op                Op
+	typ               string
+	id                *string
+	created_at        *time.Time
+	updated_at        *time.Time
+	deleted_at        *time.Time
+	name              *string
+	domain            *string
+	redirect          *string
+	clearedFields     map[string]struct{}
+	authorized        map[string]struct{}
+	removedauthorized map[string]struct{}
+	clearedauthorized bool
+	logined           map[string]struct{}
+	removedlogined    map[string]struct{}
+	clearedlogined    bool
+	done              bool
+	oldValue          func(context.Context) (*Application, error)
+	predicates        []predicate.Application
 }
 
 var _ ent.Mutation = (*ApplicationMutation)(nil)
@@ -392,112 +392,112 @@ func (m *ApplicationMutation) ResetRedirect() {
 	m.redirect = nil
 }
 
-// AddOwnedIDs adds the "owned" edge to the OwnedApp entity by ids.
-func (m *ApplicationMutation) AddOwnedIDs(ids ...string) {
-	if m.owned == nil {
-		m.owned = make(map[string]struct{})
+// AddAuthorizedIDs adds the "authorized" edge to the AuthorizedApp entity by ids.
+func (m *ApplicationMutation) AddAuthorizedIDs(ids ...string) {
+	if m.authorized == nil {
+		m.authorized = make(map[string]struct{})
 	}
 	for i := range ids {
-		m.owned[ids[i]] = struct{}{}
+		m.authorized[ids[i]] = struct{}{}
 	}
 }
 
-// ClearOwned clears the "owned" edge to the OwnedApp entity.
-func (m *ApplicationMutation) ClearOwned() {
-	m.clearedowned = true
+// ClearAuthorized clears the "authorized" edge to the AuthorizedApp entity.
+func (m *ApplicationMutation) ClearAuthorized() {
+	m.clearedauthorized = true
 }
 
-// OwnedCleared reports if the "owned" edge to the OwnedApp entity was cleared.
-func (m *ApplicationMutation) OwnedCleared() bool {
-	return m.clearedowned
+// AuthorizedCleared reports if the "authorized" edge to the AuthorizedApp entity was cleared.
+func (m *ApplicationMutation) AuthorizedCleared() bool {
+	return m.clearedauthorized
 }
 
-// RemoveOwnedIDs removes the "owned" edge to the OwnedApp entity by IDs.
-func (m *ApplicationMutation) RemoveOwnedIDs(ids ...string) {
-	if m.removedowned == nil {
-		m.removedowned = make(map[string]struct{})
+// RemoveAuthorizedIDs removes the "authorized" edge to the AuthorizedApp entity by IDs.
+func (m *ApplicationMutation) RemoveAuthorizedIDs(ids ...string) {
+	if m.removedauthorized == nil {
+		m.removedauthorized = make(map[string]struct{})
 	}
 	for i := range ids {
-		delete(m.owned, ids[i])
-		m.removedowned[ids[i]] = struct{}{}
+		delete(m.authorized, ids[i])
+		m.removedauthorized[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedOwned returns the removed IDs of the "owned" edge to the OwnedApp entity.
-func (m *ApplicationMutation) RemovedOwnedIDs() (ids []string) {
-	for id := range m.removedowned {
+// RemovedAuthorized returns the removed IDs of the "authorized" edge to the AuthorizedApp entity.
+func (m *ApplicationMutation) RemovedAuthorizedIDs() (ids []string) {
+	for id := range m.removedauthorized {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// OwnedIDs returns the "owned" edge IDs in the mutation.
-func (m *ApplicationMutation) OwnedIDs() (ids []string) {
-	for id := range m.owned {
+// AuthorizedIDs returns the "authorized" edge IDs in the mutation.
+func (m *ApplicationMutation) AuthorizedIDs() (ids []string) {
+	for id := range m.authorized {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetOwned resets all changes to the "owned" edge.
-func (m *ApplicationMutation) ResetOwned() {
-	m.owned = nil
-	m.clearedowned = false
-	m.removedowned = nil
+// ResetAuthorized resets all changes to the "authorized" edge.
+func (m *ApplicationMutation) ResetAuthorized() {
+	m.authorized = nil
+	m.clearedauthorized = false
+	m.removedauthorized = nil
 }
 
-// AddOuthedIDs adds the "outhed" edge to the Authorization entity by ids.
-func (m *ApplicationMutation) AddOuthedIDs(ids ...string) {
-	if m.outhed == nil {
-		m.outhed = make(map[string]struct{})
+// AddLoginedIDs adds the "logined" edge to the Authorization entity by ids.
+func (m *ApplicationMutation) AddLoginedIDs(ids ...string) {
+	if m.logined == nil {
+		m.logined = make(map[string]struct{})
 	}
 	for i := range ids {
-		m.outhed[ids[i]] = struct{}{}
+		m.logined[ids[i]] = struct{}{}
 	}
 }
 
-// ClearOuthed clears the "outhed" edge to the Authorization entity.
-func (m *ApplicationMutation) ClearOuthed() {
-	m.clearedouthed = true
+// ClearLogined clears the "logined" edge to the Authorization entity.
+func (m *ApplicationMutation) ClearLogined() {
+	m.clearedlogined = true
 }
 
-// OuthedCleared reports if the "outhed" edge to the Authorization entity was cleared.
-func (m *ApplicationMutation) OuthedCleared() bool {
-	return m.clearedouthed
+// LoginedCleared reports if the "logined" edge to the Authorization entity was cleared.
+func (m *ApplicationMutation) LoginedCleared() bool {
+	return m.clearedlogined
 }
 
-// RemoveOuthedIDs removes the "outhed" edge to the Authorization entity by IDs.
-func (m *ApplicationMutation) RemoveOuthedIDs(ids ...string) {
-	if m.removedouthed == nil {
-		m.removedouthed = make(map[string]struct{})
+// RemoveLoginedIDs removes the "logined" edge to the Authorization entity by IDs.
+func (m *ApplicationMutation) RemoveLoginedIDs(ids ...string) {
+	if m.removedlogined == nil {
+		m.removedlogined = make(map[string]struct{})
 	}
 	for i := range ids {
-		delete(m.outhed, ids[i])
-		m.removedouthed[ids[i]] = struct{}{}
+		delete(m.logined, ids[i])
+		m.removedlogined[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedOuthed returns the removed IDs of the "outhed" edge to the Authorization entity.
-func (m *ApplicationMutation) RemovedOuthedIDs() (ids []string) {
-	for id := range m.removedouthed {
+// RemovedLogined returns the removed IDs of the "logined" edge to the Authorization entity.
+func (m *ApplicationMutation) RemovedLoginedIDs() (ids []string) {
+	for id := range m.removedlogined {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// OuthedIDs returns the "outhed" edge IDs in the mutation.
-func (m *ApplicationMutation) OuthedIDs() (ids []string) {
-	for id := range m.outhed {
+// LoginedIDs returns the "logined" edge IDs in the mutation.
+func (m *ApplicationMutation) LoginedIDs() (ids []string) {
+	for id := range m.logined {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetOuthed resets all changes to the "outhed" edge.
-func (m *ApplicationMutation) ResetOuthed() {
-	m.outhed = nil
-	m.clearedouthed = false
-	m.removedouthed = nil
+// ResetLogined resets all changes to the "logined" edge.
+func (m *ApplicationMutation) ResetLogined() {
+	m.logined = nil
+	m.clearedlogined = false
+	m.removedlogined = nil
 }
 
 // Where appends a list predicates to the ApplicationMutation builder.
@@ -728,11 +728,11 @@ func (m *ApplicationMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ApplicationMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.owned != nil {
-		edges = append(edges, application.EdgeOwned)
+	if m.authorized != nil {
+		edges = append(edges, application.EdgeAuthorized)
 	}
-	if m.outhed != nil {
-		edges = append(edges, application.EdgeOuthed)
+	if m.logined != nil {
+		edges = append(edges, application.EdgeLogined)
 	}
 	return edges
 }
@@ -741,15 +741,15 @@ func (m *ApplicationMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ApplicationMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case application.EdgeOwned:
-		ids := make([]ent.Value, 0, len(m.owned))
-		for id := range m.owned {
+	case application.EdgeAuthorized:
+		ids := make([]ent.Value, 0, len(m.authorized))
+		for id := range m.authorized {
 			ids = append(ids, id)
 		}
 		return ids
-	case application.EdgeOuthed:
-		ids := make([]ent.Value, 0, len(m.outhed))
-		for id := range m.outhed {
+	case application.EdgeLogined:
+		ids := make([]ent.Value, 0, len(m.logined))
+		for id := range m.logined {
 			ids = append(ids, id)
 		}
 		return ids
@@ -760,11 +760,11 @@ func (m *ApplicationMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ApplicationMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedowned != nil {
-		edges = append(edges, application.EdgeOwned)
+	if m.removedauthorized != nil {
+		edges = append(edges, application.EdgeAuthorized)
 	}
-	if m.removedouthed != nil {
-		edges = append(edges, application.EdgeOuthed)
+	if m.removedlogined != nil {
+		edges = append(edges, application.EdgeLogined)
 	}
 	return edges
 }
@@ -773,15 +773,15 @@ func (m *ApplicationMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ApplicationMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case application.EdgeOwned:
-		ids := make([]ent.Value, 0, len(m.removedowned))
-		for id := range m.removedowned {
+	case application.EdgeAuthorized:
+		ids := make([]ent.Value, 0, len(m.removedauthorized))
+		for id := range m.removedauthorized {
 			ids = append(ids, id)
 		}
 		return ids
-	case application.EdgeOuthed:
-		ids := make([]ent.Value, 0, len(m.removedouthed))
-		for id := range m.removedouthed {
+	case application.EdgeLogined:
+		ids := make([]ent.Value, 0, len(m.removedlogined))
+		for id := range m.removedlogined {
 			ids = append(ids, id)
 		}
 		return ids
@@ -792,11 +792,11 @@ func (m *ApplicationMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ApplicationMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.clearedowned {
-		edges = append(edges, application.EdgeOwned)
+	if m.clearedauthorized {
+		edges = append(edges, application.EdgeAuthorized)
 	}
-	if m.clearedouthed {
-		edges = append(edges, application.EdgeOuthed)
+	if m.clearedlogined {
+		edges = append(edges, application.EdgeLogined)
 	}
 	return edges
 }
@@ -805,10 +805,10 @@ func (m *ApplicationMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ApplicationMutation) EdgeCleared(name string) bool {
 	switch name {
-	case application.EdgeOwned:
-		return m.clearedowned
-	case application.EdgeOuthed:
-		return m.clearedouthed
+	case application.EdgeAuthorized:
+		return m.clearedauthorized
+	case application.EdgeLogined:
+		return m.clearedlogined
 	}
 	return false
 }
@@ -825,11 +825,11 @@ func (m *ApplicationMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ApplicationMutation) ResetEdge(name string) error {
 	switch name {
-	case application.EdgeOwned:
-		m.ResetOwned()
+	case application.EdgeAuthorized:
+		m.ResetAuthorized()
 		return nil
-	case application.EdgeOuthed:
-		m.ResetOuthed()
+	case application.EdgeLogined:
+		m.ResetLogined()
 		return nil
 	}
 	return fmt.Errorf("unknown Application edge %s", name)
@@ -2510,8 +2510,8 @@ func (m *AuthorizationMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Authorization edge %s", name)
 }
 
-// OwnedAppMutation represents an operation that mutates the OwnedApp nodes in the graph.
-type OwnedAppMutation struct {
+// AuthorizedAppMutation represents an operation that mutates the AuthorizedApp nodes in the graph.
+type AuthorizedAppMutation struct {
 	config
 	op                 Op
 	typ                string
@@ -2519,29 +2519,27 @@ type OwnedAppMutation struct {
 	created_at         *time.Time
 	updated_at         *time.Time
 	deleted_at         *time.Time
-	name               *string
-	domain             *string
 	clearedFields      map[string]struct{}
 	application        *string
 	clearedapplication bool
 	user               *string
 	cleareduser        bool
 	done               bool
-	oldValue           func(context.Context) (*OwnedApp, error)
-	predicates         []predicate.OwnedApp
+	oldValue           func(context.Context) (*AuthorizedApp, error)
+	predicates         []predicate.AuthorizedApp
 }
 
-var _ ent.Mutation = (*OwnedAppMutation)(nil)
+var _ ent.Mutation = (*AuthorizedAppMutation)(nil)
 
-// ownedappOption allows management of the mutation configuration using functional options.
-type ownedappOption func(*OwnedAppMutation)
+// authorizedappOption allows management of the mutation configuration using functional options.
+type authorizedappOption func(*AuthorizedAppMutation)
 
-// newOwnedAppMutation creates new mutation for the OwnedApp entity.
-func newOwnedAppMutation(c config, op Op, opts ...ownedappOption) *OwnedAppMutation {
-	m := &OwnedAppMutation{
+// newAuthorizedAppMutation creates new mutation for the AuthorizedApp entity.
+func newAuthorizedAppMutation(c config, op Op, opts ...authorizedappOption) *AuthorizedAppMutation {
+	m := &AuthorizedAppMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeOwnedApp,
+		typ:           TypeAuthorizedApp,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -2550,20 +2548,20 @@ func newOwnedAppMutation(c config, op Op, opts ...ownedappOption) *OwnedAppMutat
 	return m
 }
 
-// withOwnedAppID sets the ID field of the mutation.
-func withOwnedAppID(id string) ownedappOption {
-	return func(m *OwnedAppMutation) {
+// withAuthorizedAppID sets the ID field of the mutation.
+func withAuthorizedAppID(id string) authorizedappOption {
+	return func(m *AuthorizedAppMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *OwnedApp
+			value *AuthorizedApp
 		)
-		m.oldValue = func(ctx context.Context) (*OwnedApp, error) {
+		m.oldValue = func(ctx context.Context) (*AuthorizedApp, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().OwnedApp.Get(ctx, id)
+					value, err = m.Client().AuthorizedApp.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -2572,10 +2570,10 @@ func withOwnedAppID(id string) ownedappOption {
 	}
 }
 
-// withOwnedApp sets the old OwnedApp of the mutation.
-func withOwnedApp(node *OwnedApp) ownedappOption {
-	return func(m *OwnedAppMutation) {
-		m.oldValue = func(context.Context) (*OwnedApp, error) {
+// withAuthorizedApp sets the old AuthorizedApp of the mutation.
+func withAuthorizedApp(node *AuthorizedApp) authorizedappOption {
+	return func(m *AuthorizedAppMutation) {
+		m.oldValue = func(context.Context) (*AuthorizedApp, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -2584,7 +2582,7 @@ func withOwnedApp(node *OwnedApp) ownedappOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m OwnedAppMutation) Client() *Client {
+func (m AuthorizedAppMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -2592,7 +2590,7 @@ func (m OwnedAppMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m OwnedAppMutation) Tx() (*Tx, error) {
+func (m AuthorizedAppMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -2602,14 +2600,14 @@ func (m OwnedAppMutation) Tx() (*Tx, error) {
 }
 
 // SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of OwnedApp entities.
-func (m *OwnedAppMutation) SetID(id string) {
+// operation is only accepted on creation of AuthorizedApp entities.
+func (m *AuthorizedAppMutation) SetID(id string) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *OwnedAppMutation) ID() (id string, exists bool) {
+func (m *AuthorizedAppMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -2620,7 +2618,7 @@ func (m *OwnedAppMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *OwnedAppMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *AuthorizedAppMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -2629,19 +2627,19 @@ func (m *OwnedAppMutation) IDs(ctx context.Context) ([]string, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().OwnedApp.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().AuthorizedApp.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (m *OwnedAppMutation) SetCreatedAt(t time.Time) {
+func (m *AuthorizedAppMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *OwnedAppMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *AuthorizedAppMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -2649,10 +2647,10 @@ func (m *OwnedAppMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old "created_at" field's value of the OwnedApp entity.
-// If the OwnedApp object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedAt returns the old "created_at" field's value of the AuthorizedApp entity.
+// If the AuthorizedApp object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OwnedAppMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *AuthorizedAppMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
 	}
@@ -2667,17 +2665,17 @@ func (m *OwnedAppMutation) OldCreatedAt(ctx context.Context) (v time.Time, err e
 }
 
 // ResetCreatedAt resets all changes to the "created_at" field.
-func (m *OwnedAppMutation) ResetCreatedAt() {
+func (m *AuthorizedAppMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (m *OwnedAppMutation) SetUpdatedAt(t time.Time) {
+func (m *AuthorizedAppMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *OwnedAppMutation) UpdatedAt() (r time.Time, exists bool) {
+func (m *AuthorizedAppMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -2685,10 +2683,10 @@ func (m *OwnedAppMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old "updated_at" field's value of the OwnedApp entity.
-// If the OwnedApp object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedAt returns the old "updated_at" field's value of the AuthorizedApp entity.
+// If the AuthorizedApp object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OwnedAppMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *AuthorizedAppMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
 	}
@@ -2703,17 +2701,17 @@ func (m *OwnedAppMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err e
 }
 
 // ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *OwnedAppMutation) ResetUpdatedAt() {
+func (m *AuthorizedAppMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (m *OwnedAppMutation) SetDeletedAt(t time.Time) {
+func (m *AuthorizedAppMutation) SetDeletedAt(t time.Time) {
 	m.deleted_at = &t
 }
 
 // DeletedAt returns the value of the "deleted_at" field in the mutation.
-func (m *OwnedAppMutation) DeletedAt() (r time.Time, exists bool) {
+func (m *AuthorizedAppMutation) DeletedAt() (r time.Time, exists bool) {
 	v := m.deleted_at
 	if v == nil {
 		return
@@ -2721,10 +2719,10 @@ func (m *OwnedAppMutation) DeletedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldDeletedAt returns the old "deleted_at" field's value of the OwnedApp entity.
-// If the OwnedApp object wasn't provided to the builder, the object is fetched from the database.
+// OldDeletedAt returns the old "deleted_at" field's value of the AuthorizedApp entity.
+// If the AuthorizedApp object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OwnedAppMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
+func (m *AuthorizedAppMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
 	}
@@ -2739,102 +2737,30 @@ func (m *OwnedAppMutation) OldDeletedAt(ctx context.Context) (v *time.Time, err 
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (m *OwnedAppMutation) ClearDeletedAt() {
+func (m *AuthorizedAppMutation) ClearDeletedAt() {
 	m.deleted_at = nil
-	m.clearedFields[ownedapp.FieldDeletedAt] = struct{}{}
+	m.clearedFields[authorizedapp.FieldDeletedAt] = struct{}{}
 }
 
 // DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
-func (m *OwnedAppMutation) DeletedAtCleared() bool {
-	_, ok := m.clearedFields[ownedapp.FieldDeletedAt]
+func (m *AuthorizedAppMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[authorizedapp.FieldDeletedAt]
 	return ok
 }
 
 // ResetDeletedAt resets all changes to the "deleted_at" field.
-func (m *OwnedAppMutation) ResetDeletedAt() {
+func (m *AuthorizedAppMutation) ResetDeletedAt() {
 	m.deleted_at = nil
-	delete(m.clearedFields, ownedapp.FieldDeletedAt)
-}
-
-// SetName sets the "name" field.
-func (m *OwnedAppMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *OwnedAppMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old "name" field's value of the OwnedApp entity.
-// If the OwnedApp object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OwnedAppMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *OwnedAppMutation) ResetName() {
-	m.name = nil
-}
-
-// SetDomain sets the "domain" field.
-func (m *OwnedAppMutation) SetDomain(s string) {
-	m.domain = &s
-}
-
-// Domain returns the value of the "domain" field in the mutation.
-func (m *OwnedAppMutation) Domain() (r string, exists bool) {
-	v := m.domain
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDomain returns the old "domain" field's value of the OwnedApp entity.
-// If the OwnedApp object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OwnedAppMutation) OldDomain(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDomain is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDomain requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDomain: %w", err)
-	}
-	return oldValue.Domain, nil
-}
-
-// ResetDomain resets all changes to the "domain" field.
-func (m *OwnedAppMutation) ResetDomain() {
-	m.domain = nil
+	delete(m.clearedFields, authorizedapp.FieldDeletedAt)
 }
 
 // SetApplicationID sets the "application_id" field.
-func (m *OwnedAppMutation) SetApplicationID(s string) {
+func (m *AuthorizedAppMutation) SetApplicationID(s string) {
 	m.application = &s
 }
 
 // ApplicationID returns the value of the "application_id" field in the mutation.
-func (m *OwnedAppMutation) ApplicationID() (r string, exists bool) {
+func (m *AuthorizedAppMutation) ApplicationID() (r string, exists bool) {
 	v := m.application
 	if v == nil {
 		return
@@ -2842,10 +2768,10 @@ func (m *OwnedAppMutation) ApplicationID() (r string, exists bool) {
 	return *v, true
 }
 
-// OldApplicationID returns the old "application_id" field's value of the OwnedApp entity.
-// If the OwnedApp object wasn't provided to the builder, the object is fetched from the database.
+// OldApplicationID returns the old "application_id" field's value of the AuthorizedApp entity.
+// If the AuthorizedApp object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OwnedAppMutation) OldApplicationID(ctx context.Context) (v string, err error) {
+func (m *AuthorizedAppMutation) OldApplicationID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldApplicationID is only allowed on UpdateOne operations")
 	}
@@ -2860,17 +2786,17 @@ func (m *OwnedAppMutation) OldApplicationID(ctx context.Context) (v string, err 
 }
 
 // ResetApplicationID resets all changes to the "application_id" field.
-func (m *OwnedAppMutation) ResetApplicationID() {
+func (m *AuthorizedAppMutation) ResetApplicationID() {
 	m.application = nil
 }
 
 // SetUserID sets the "user_id" field.
-func (m *OwnedAppMutation) SetUserID(s string) {
+func (m *AuthorizedAppMutation) SetUserID(s string) {
 	m.user = &s
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
-func (m *OwnedAppMutation) UserID() (r string, exists bool) {
+func (m *AuthorizedAppMutation) UserID() (r string, exists bool) {
 	v := m.user
 	if v == nil {
 		return
@@ -2878,10 +2804,10 @@ func (m *OwnedAppMutation) UserID() (r string, exists bool) {
 	return *v, true
 }
 
-// OldUserID returns the old "user_id" field's value of the OwnedApp entity.
-// If the OwnedApp object wasn't provided to the builder, the object is fetched from the database.
+// OldUserID returns the old "user_id" field's value of the AuthorizedApp entity.
+// If the AuthorizedApp object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OwnedAppMutation) OldUserID(ctx context.Context) (v string, err error) {
+func (m *AuthorizedAppMutation) OldUserID(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -2896,25 +2822,25 @@ func (m *OwnedAppMutation) OldUserID(ctx context.Context) (v string, err error) 
 }
 
 // ResetUserID resets all changes to the "user_id" field.
-func (m *OwnedAppMutation) ResetUserID() {
+func (m *AuthorizedAppMutation) ResetUserID() {
 	m.user = nil
 }
 
 // ClearApplication clears the "application" edge to the Application entity.
-func (m *OwnedAppMutation) ClearApplication() {
+func (m *AuthorizedAppMutation) ClearApplication() {
 	m.clearedapplication = true
-	m.clearedFields[ownedapp.FieldApplicationID] = struct{}{}
+	m.clearedFields[authorizedapp.FieldApplicationID] = struct{}{}
 }
 
 // ApplicationCleared reports if the "application" edge to the Application entity was cleared.
-func (m *OwnedAppMutation) ApplicationCleared() bool {
+func (m *AuthorizedAppMutation) ApplicationCleared() bool {
 	return m.clearedapplication
 }
 
 // ApplicationIDs returns the "application" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ApplicationID instead. It exists only for internal usage by the builders.
-func (m *OwnedAppMutation) ApplicationIDs() (ids []string) {
+func (m *AuthorizedAppMutation) ApplicationIDs() (ids []string) {
 	if id := m.application; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2922,26 +2848,26 @@ func (m *OwnedAppMutation) ApplicationIDs() (ids []string) {
 }
 
 // ResetApplication resets all changes to the "application" edge.
-func (m *OwnedAppMutation) ResetApplication() {
+func (m *AuthorizedAppMutation) ResetApplication() {
 	m.application = nil
 	m.clearedapplication = false
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (m *OwnedAppMutation) ClearUser() {
+func (m *AuthorizedAppMutation) ClearUser() {
 	m.cleareduser = true
-	m.clearedFields[ownedapp.FieldUserID] = struct{}{}
+	m.clearedFields[authorizedapp.FieldUserID] = struct{}{}
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *OwnedAppMutation) UserCleared() bool {
+func (m *AuthorizedAppMutation) UserCleared() bool {
 	return m.cleareduser
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *OwnedAppMutation) UserIDs() (ids []string) {
+func (m *AuthorizedAppMutation) UserIDs() (ids []string) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2949,20 +2875,20 @@ func (m *OwnedAppMutation) UserIDs() (ids []string) {
 }
 
 // ResetUser resets all changes to the "user" edge.
-func (m *OwnedAppMutation) ResetUser() {
+func (m *AuthorizedAppMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
 }
 
-// Where appends a list predicates to the OwnedAppMutation builder.
-func (m *OwnedAppMutation) Where(ps ...predicate.OwnedApp) {
+// Where appends a list predicates to the AuthorizedAppMutation builder.
+func (m *AuthorizedAppMutation) Where(ps ...predicate.AuthorizedApp) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// WhereP appends storage-level predicates to the OwnedAppMutation builder. Using this method,
+// WhereP appends storage-level predicates to the AuthorizedAppMutation builder. Using this method,
 // users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *OwnedAppMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.OwnedApp, len(ps))
+func (m *AuthorizedAppMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AuthorizedApp, len(ps))
 	for i := range ps {
 		p[i] = ps[i]
 	}
@@ -2970,45 +2896,39 @@ func (m *OwnedAppMutation) WhereP(ps ...func(*sql.Selector)) {
 }
 
 // Op returns the operation name.
-func (m *OwnedAppMutation) Op() Op {
+func (m *AuthorizedAppMutation) Op() Op {
 	return m.op
 }
 
 // SetOp allows setting the mutation operation.
-func (m *OwnedAppMutation) SetOp(op Op) {
+func (m *AuthorizedAppMutation) SetOp(op Op) {
 	m.op = op
 }
 
-// Type returns the node type of this mutation (OwnedApp).
-func (m *OwnedAppMutation) Type() string {
+// Type returns the node type of this mutation (AuthorizedApp).
+func (m *AuthorizedAppMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *OwnedAppMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+func (m *AuthorizedAppMutation) Fields() []string {
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
-		fields = append(fields, ownedapp.FieldCreatedAt)
+		fields = append(fields, authorizedapp.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, ownedapp.FieldUpdatedAt)
+		fields = append(fields, authorizedapp.FieldUpdatedAt)
 	}
 	if m.deleted_at != nil {
-		fields = append(fields, ownedapp.FieldDeletedAt)
-	}
-	if m.name != nil {
-		fields = append(fields, ownedapp.FieldName)
-	}
-	if m.domain != nil {
-		fields = append(fields, ownedapp.FieldDomain)
+		fields = append(fields, authorizedapp.FieldDeletedAt)
 	}
 	if m.application != nil {
-		fields = append(fields, ownedapp.FieldApplicationID)
+		fields = append(fields, authorizedapp.FieldApplicationID)
 	}
 	if m.user != nil {
-		fields = append(fields, ownedapp.FieldUserID)
+		fields = append(fields, authorizedapp.FieldUserID)
 	}
 	return fields
 }
@@ -3016,21 +2936,17 @@ func (m *OwnedAppMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *OwnedAppMutation) Field(name string) (ent.Value, bool) {
+func (m *AuthorizedAppMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case ownedapp.FieldCreatedAt:
+	case authorizedapp.FieldCreatedAt:
 		return m.CreatedAt()
-	case ownedapp.FieldUpdatedAt:
+	case authorizedapp.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case ownedapp.FieldDeletedAt:
+	case authorizedapp.FieldDeletedAt:
 		return m.DeletedAt()
-	case ownedapp.FieldName:
-		return m.Name()
-	case ownedapp.FieldDomain:
-		return m.Domain()
-	case ownedapp.FieldApplicationID:
+	case authorizedapp.FieldApplicationID:
 		return m.ApplicationID()
-	case ownedapp.FieldUserID:
+	case authorizedapp.FieldUserID:
 		return m.UserID()
 	}
 	return nil, false
@@ -3039,74 +2955,56 @@ func (m *OwnedAppMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *OwnedAppMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *AuthorizedAppMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case ownedapp.FieldCreatedAt:
+	case authorizedapp.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case ownedapp.FieldUpdatedAt:
+	case authorizedapp.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case ownedapp.FieldDeletedAt:
+	case authorizedapp.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case ownedapp.FieldName:
-		return m.OldName(ctx)
-	case ownedapp.FieldDomain:
-		return m.OldDomain(ctx)
-	case ownedapp.FieldApplicationID:
+	case authorizedapp.FieldApplicationID:
 		return m.OldApplicationID(ctx)
-	case ownedapp.FieldUserID:
+	case authorizedapp.FieldUserID:
 		return m.OldUserID(ctx)
 	}
-	return nil, fmt.Errorf("unknown OwnedApp field %s", name)
+	return nil, fmt.Errorf("unknown AuthorizedApp field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *OwnedAppMutation) SetField(name string, value ent.Value) error {
+func (m *AuthorizedAppMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case ownedapp.FieldCreatedAt:
+	case authorizedapp.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case ownedapp.FieldUpdatedAt:
+	case authorizedapp.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case ownedapp.FieldDeletedAt:
+	case authorizedapp.FieldDeletedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
 		return nil
-	case ownedapp.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	case ownedapp.FieldDomain:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDomain(v)
-		return nil
-	case ownedapp.FieldApplicationID:
+	case authorizedapp.FieldApplicationID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetApplicationID(v)
 		return nil
-	case ownedapp.FieldUserID:
+	case authorizedapp.FieldUserID:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -3114,109 +3012,103 @@ func (m *OwnedAppMutation) SetField(name string, value ent.Value) error {
 		m.SetUserID(v)
 		return nil
 	}
-	return fmt.Errorf("unknown OwnedApp field %s", name)
+	return fmt.Errorf("unknown AuthorizedApp field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *OwnedAppMutation) AddedFields() []string {
+func (m *AuthorizedAppMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *OwnedAppMutation) AddedField(name string) (ent.Value, bool) {
+func (m *AuthorizedAppMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *OwnedAppMutation) AddField(name string, value ent.Value) error {
+func (m *AuthorizedAppMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown OwnedApp numeric field %s", name)
+	return fmt.Errorf("unknown AuthorizedApp numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *OwnedAppMutation) ClearedFields() []string {
+func (m *AuthorizedAppMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(ownedapp.FieldDeletedAt) {
-		fields = append(fields, ownedapp.FieldDeletedAt)
+	if m.FieldCleared(authorizedapp.FieldDeletedAt) {
+		fields = append(fields, authorizedapp.FieldDeletedAt)
 	}
 	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *OwnedAppMutation) FieldCleared(name string) bool {
+func (m *AuthorizedAppMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *OwnedAppMutation) ClearField(name string) error {
+func (m *AuthorizedAppMutation) ClearField(name string) error {
 	switch name {
-	case ownedapp.FieldDeletedAt:
+	case authorizedapp.FieldDeletedAt:
 		m.ClearDeletedAt()
 		return nil
 	}
-	return fmt.Errorf("unknown OwnedApp nullable field %s", name)
+	return fmt.Errorf("unknown AuthorizedApp nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *OwnedAppMutation) ResetField(name string) error {
+func (m *AuthorizedAppMutation) ResetField(name string) error {
 	switch name {
-	case ownedapp.FieldCreatedAt:
+	case authorizedapp.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case ownedapp.FieldUpdatedAt:
+	case authorizedapp.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case ownedapp.FieldDeletedAt:
+	case authorizedapp.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
-	case ownedapp.FieldName:
-		m.ResetName()
-		return nil
-	case ownedapp.FieldDomain:
-		m.ResetDomain()
-		return nil
-	case ownedapp.FieldApplicationID:
+	case authorizedapp.FieldApplicationID:
 		m.ResetApplicationID()
 		return nil
-	case ownedapp.FieldUserID:
+	case authorizedapp.FieldUserID:
 		m.ResetUserID()
 		return nil
 	}
-	return fmt.Errorf("unknown OwnedApp field %s", name)
+	return fmt.Errorf("unknown AuthorizedApp field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *OwnedAppMutation) AddedEdges() []string {
+func (m *AuthorizedAppMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.application != nil {
-		edges = append(edges, ownedapp.EdgeApplication)
+		edges = append(edges, authorizedapp.EdgeApplication)
 	}
 	if m.user != nil {
-		edges = append(edges, ownedapp.EdgeUser)
+		edges = append(edges, authorizedapp.EdgeUser)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *OwnedAppMutation) AddedIDs(name string) []ent.Value {
+func (m *AuthorizedAppMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case ownedapp.EdgeApplication:
+	case authorizedapp.EdgeApplication:
 		if id := m.application; id != nil {
 			return []ent.Value{*id}
 		}
-	case ownedapp.EdgeUser:
+	case authorizedapp.EdgeUser:
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
@@ -3225,36 +3117,36 @@ func (m *OwnedAppMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *OwnedAppMutation) RemovedEdges() []string {
+func (m *AuthorizedAppMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *OwnedAppMutation) RemovedIDs(name string) []ent.Value {
+func (m *AuthorizedAppMutation) RemovedIDs(name string) []ent.Value {
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *OwnedAppMutation) ClearedEdges() []string {
+func (m *AuthorizedAppMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.clearedapplication {
-		edges = append(edges, ownedapp.EdgeApplication)
+		edges = append(edges, authorizedapp.EdgeApplication)
 	}
 	if m.cleareduser {
-		edges = append(edges, ownedapp.EdgeUser)
+		edges = append(edges, authorizedapp.EdgeUser)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *OwnedAppMutation) EdgeCleared(name string) bool {
+func (m *AuthorizedAppMutation) EdgeCleared(name string) bool {
 	switch name {
-	case ownedapp.EdgeApplication:
+	case authorizedapp.EdgeApplication:
 		return m.clearedapplication
-	case ownedapp.EdgeUser:
+	case authorizedapp.EdgeUser:
 		return m.cleareduser
 	}
 	return false
@@ -3262,30 +3154,30 @@ func (m *OwnedAppMutation) EdgeCleared(name string) bool {
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *OwnedAppMutation) ClearEdge(name string) error {
+func (m *AuthorizedAppMutation) ClearEdge(name string) error {
 	switch name {
-	case ownedapp.EdgeApplication:
+	case authorizedapp.EdgeApplication:
 		m.ClearApplication()
 		return nil
-	case ownedapp.EdgeUser:
+	case authorizedapp.EdgeUser:
 		m.ClearUser()
 		return nil
 	}
-	return fmt.Errorf("unknown OwnedApp unique edge %s", name)
+	return fmt.Errorf("unknown AuthorizedApp unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *OwnedAppMutation) ResetEdge(name string) error {
+func (m *AuthorizedAppMutation) ResetEdge(name string) error {
 	switch name {
-	case ownedapp.EdgeApplication:
+	case authorizedapp.EdgeApplication:
 		m.ResetApplication()
 		return nil
-	case ownedapp.EdgeUser:
+	case authorizedapp.EdgeUser:
 		m.ResetUser()
 		return nil
 	}
-	return fmt.Errorf("unknown OwnedApp edge %s", name)
+	return fmt.Errorf("unknown AuthorizedApp edge %s", name)
 }
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
@@ -3307,9 +3199,9 @@ type UserMutation struct {
 	authorizations         map[string]struct{}
 	removedauthorizations  map[string]struct{}
 	clearedauthorizations  bool
-	owned_apps             map[string]struct{}
-	removedowned_apps      map[string]struct{}
-	clearedowned_apps      bool
+	authorized_apps        map[string]struct{}
+	removedauthorized_apps map[string]struct{}
+	clearedauthorized_apps bool
 	done                   bool
 	oldValue               func(context.Context) (*User, error)
 	predicates             []predicate.User
@@ -3756,58 +3648,58 @@ func (m *UserMutation) ResetAuthorizations() {
 	m.removedauthorizations = nil
 }
 
-// AddOwnedAppIDs adds the "owned_apps" edge to the OwnedApp entity by ids.
-func (m *UserMutation) AddOwnedAppIDs(ids ...string) {
-	if m.owned_apps == nil {
-		m.owned_apps = make(map[string]struct{})
+// AddAuthorizedAppIDs adds the "authorized_apps" edge to the AuthorizedApp entity by ids.
+func (m *UserMutation) AddAuthorizedAppIDs(ids ...string) {
+	if m.authorized_apps == nil {
+		m.authorized_apps = make(map[string]struct{})
 	}
 	for i := range ids {
-		m.owned_apps[ids[i]] = struct{}{}
+		m.authorized_apps[ids[i]] = struct{}{}
 	}
 }
 
-// ClearOwnedApps clears the "owned_apps" edge to the OwnedApp entity.
-func (m *UserMutation) ClearOwnedApps() {
-	m.clearedowned_apps = true
+// ClearAuthorizedApps clears the "authorized_apps" edge to the AuthorizedApp entity.
+func (m *UserMutation) ClearAuthorizedApps() {
+	m.clearedauthorized_apps = true
 }
 
-// OwnedAppsCleared reports if the "owned_apps" edge to the OwnedApp entity was cleared.
-func (m *UserMutation) OwnedAppsCleared() bool {
-	return m.clearedowned_apps
+// AuthorizedAppsCleared reports if the "authorized_apps" edge to the AuthorizedApp entity was cleared.
+func (m *UserMutation) AuthorizedAppsCleared() bool {
+	return m.clearedauthorized_apps
 }
 
-// RemoveOwnedAppIDs removes the "owned_apps" edge to the OwnedApp entity by IDs.
-func (m *UserMutation) RemoveOwnedAppIDs(ids ...string) {
-	if m.removedowned_apps == nil {
-		m.removedowned_apps = make(map[string]struct{})
+// RemoveAuthorizedAppIDs removes the "authorized_apps" edge to the AuthorizedApp entity by IDs.
+func (m *UserMutation) RemoveAuthorizedAppIDs(ids ...string) {
+	if m.removedauthorized_apps == nil {
+		m.removedauthorized_apps = make(map[string]struct{})
 	}
 	for i := range ids {
-		delete(m.owned_apps, ids[i])
-		m.removedowned_apps[ids[i]] = struct{}{}
+		delete(m.authorized_apps, ids[i])
+		m.removedauthorized_apps[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedOwnedApps returns the removed IDs of the "owned_apps" edge to the OwnedApp entity.
-func (m *UserMutation) RemovedOwnedAppsIDs() (ids []string) {
-	for id := range m.removedowned_apps {
+// RemovedAuthorizedApps returns the removed IDs of the "authorized_apps" edge to the AuthorizedApp entity.
+func (m *UserMutation) RemovedAuthorizedAppsIDs() (ids []string) {
+	for id := range m.removedauthorized_apps {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// OwnedAppsIDs returns the "owned_apps" edge IDs in the mutation.
-func (m *UserMutation) OwnedAppsIDs() (ids []string) {
-	for id := range m.owned_apps {
+// AuthorizedAppsIDs returns the "authorized_apps" edge IDs in the mutation.
+func (m *UserMutation) AuthorizedAppsIDs() (ids []string) {
+	for id := range m.authorized_apps {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetOwnedApps resets all changes to the "owned_apps" edge.
-func (m *UserMutation) ResetOwnedApps() {
-	m.owned_apps = nil
-	m.clearedowned_apps = false
-	m.removedowned_apps = nil
+// ResetAuthorizedApps resets all changes to the "authorized_apps" edge.
+func (m *UserMutation) ResetAuthorizedApps() {
+	m.authorized_apps = nil
+	m.clearedauthorized_apps = false
+	m.removedauthorized_apps = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -4044,8 +3936,8 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.authorizations != nil {
 		edges = append(edges, user.EdgeAuthorizations)
 	}
-	if m.owned_apps != nil {
-		edges = append(edges, user.EdgeOwnedApps)
+	if m.authorized_apps != nil {
+		edges = append(edges, user.EdgeAuthorizedApps)
 	}
 	return edges
 }
@@ -4066,9 +3958,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeOwnedApps:
-		ids := make([]ent.Value, 0, len(m.owned_apps))
-		for id := range m.owned_apps {
+	case user.EdgeAuthorizedApps:
+		ids := make([]ent.Value, 0, len(m.authorized_apps))
+		for id := range m.authorized_apps {
 			ids = append(ids, id)
 		}
 		return ids
@@ -4085,8 +3977,8 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedauthorizations != nil {
 		edges = append(edges, user.EdgeAuthorizations)
 	}
-	if m.removedowned_apps != nil {
-		edges = append(edges, user.EdgeOwnedApps)
+	if m.removedauthorized_apps != nil {
+		edges = append(edges, user.EdgeAuthorizedApps)
 	}
 	return edges
 }
@@ -4107,9 +3999,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeOwnedApps:
-		ids := make([]ent.Value, 0, len(m.removedowned_apps))
-		for id := range m.removedowned_apps {
+	case user.EdgeAuthorizedApps:
+		ids := make([]ent.Value, 0, len(m.removedauthorized_apps))
+		for id := range m.removedauthorized_apps {
 			ids = append(ids, id)
 		}
 		return ids
@@ -4126,8 +4018,8 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedauthorizations {
 		edges = append(edges, user.EdgeAuthorizations)
 	}
-	if m.clearedowned_apps {
-		edges = append(edges, user.EdgeOwnedApps)
+	if m.clearedauthorized_apps {
+		edges = append(edges, user.EdgeAuthorizedApps)
 	}
 	return edges
 }
@@ -4140,8 +4032,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedauthentications
 	case user.EdgeAuthorizations:
 		return m.clearedauthorizations
-	case user.EdgeOwnedApps:
-		return m.clearedowned_apps
+	case user.EdgeAuthorizedApps:
+		return m.clearedauthorized_apps
 	}
 	return false
 }
@@ -4164,8 +4056,8 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeAuthorizations:
 		m.ResetAuthorizations()
 		return nil
-	case user.EdgeOwnedApps:
-		m.ResetOwnedApps()
+	case user.EdgeAuthorizedApps:
+		m.ResetAuthorizedApps()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

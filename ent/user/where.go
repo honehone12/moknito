@@ -466,21 +466,21 @@ func HasAuthorizationsWith(preds ...predicate.Authorization) predicate.User {
 	})
 }
 
-// HasOwnedApps applies the HasEdge predicate on the "owned_apps" edge.
-func HasOwnedApps() predicate.User {
+// HasAuthorizedApps applies the HasEdge predicate on the "authorized_apps" edge.
+func HasAuthorizedApps() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, OwnedAppsTable, OwnedAppsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, AuthorizedAppsTable, AuthorizedAppsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasOwnedAppsWith applies the HasEdge predicate on the "owned_apps" edge with a given conditions (other predicates).
-func HasOwnedAppsWith(preds ...predicate.OwnedApp) predicate.User {
+// HasAuthorizedAppsWith applies the HasEdge predicate on the "authorized_apps" edge with a given conditions (other predicates).
+func HasAuthorizedAppsWith(preds ...predicate.AuthorizedApp) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
-		step := newOwnedAppsStep()
+		step := newAuthorizedAppsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

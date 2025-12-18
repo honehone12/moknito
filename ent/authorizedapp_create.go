@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"moknito/ent/application"
-	"moknito/ent/ownedapp"
+	"moknito/ent/authorizedapp"
 	"moknito/ent/user"
 	"time"
 
@@ -15,21 +15,21 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// OwnedAppCreate is the builder for creating a OwnedApp entity.
-type OwnedAppCreate struct {
+// AuthorizedAppCreate is the builder for creating a AuthorizedApp entity.
+type AuthorizedAppCreate struct {
 	config
-	mutation *OwnedAppMutation
+	mutation *AuthorizedAppMutation
 	hooks    []Hook
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *OwnedAppCreate) SetCreatedAt(v time.Time) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetCreatedAt(v time.Time) *AuthorizedAppCreate {
 	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *OwnedAppCreate) SetNillableCreatedAt(v *time.Time) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetNillableCreatedAt(v *time.Time) *AuthorizedAppCreate {
 	if v != nil {
 		_c.SetCreatedAt(*v)
 	}
@@ -37,13 +37,13 @@ func (_c *OwnedAppCreate) SetNillableCreatedAt(v *time.Time) *OwnedAppCreate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *OwnedAppCreate) SetUpdatedAt(v time.Time) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetUpdatedAt(v time.Time) *AuthorizedAppCreate {
 	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *OwnedAppCreate) SetNillableUpdatedAt(v *time.Time) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetNillableUpdatedAt(v *time.Time) *AuthorizedAppCreate {
 	if v != nil {
 		_c.SetUpdatedAt(*v)
 	}
@@ -51,72 +51,60 @@ func (_c *OwnedAppCreate) SetNillableUpdatedAt(v *time.Time) *OwnedAppCreate {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_c *OwnedAppCreate) SetDeletedAt(v time.Time) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetDeletedAt(v time.Time) *AuthorizedAppCreate {
 	_c.mutation.SetDeletedAt(v)
 	return _c
 }
 
 // SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
-func (_c *OwnedAppCreate) SetNillableDeletedAt(v *time.Time) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetNillableDeletedAt(v *time.Time) *AuthorizedAppCreate {
 	if v != nil {
 		_c.SetDeletedAt(*v)
 	}
 	return _c
 }
 
-// SetName sets the "name" field.
-func (_c *OwnedAppCreate) SetName(v string) *OwnedAppCreate {
-	_c.mutation.SetName(v)
-	return _c
-}
-
-// SetDomain sets the "domain" field.
-func (_c *OwnedAppCreate) SetDomain(v string) *OwnedAppCreate {
-	_c.mutation.SetDomain(v)
-	return _c
-}
-
 // SetApplicationID sets the "application_id" field.
-func (_c *OwnedAppCreate) SetApplicationID(v string) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetApplicationID(v string) *AuthorizedAppCreate {
 	_c.mutation.SetApplicationID(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *OwnedAppCreate) SetUserID(v string) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetUserID(v string) *AuthorizedAppCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *OwnedAppCreate) SetID(v string) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetID(v string) *AuthorizedAppCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetApplication sets the "application" edge to the Application entity.
-func (_c *OwnedAppCreate) SetApplication(v *Application) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetApplication(v *Application) *AuthorizedAppCreate {
 	return _c.SetApplicationID(v.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *OwnedAppCreate) SetUser(v *User) *OwnedAppCreate {
+func (_c *AuthorizedAppCreate) SetUser(v *User) *AuthorizedAppCreate {
 	return _c.SetUserID(v.ID)
 }
 
-// Mutation returns the OwnedAppMutation object of the builder.
-func (_c *OwnedAppCreate) Mutation() *OwnedAppMutation {
+// Mutation returns the AuthorizedAppMutation object of the builder.
+func (_c *AuthorizedAppCreate) Mutation() *AuthorizedAppMutation {
 	return _c.mutation
 }
 
-// Save creates the OwnedApp in the database.
-func (_c *OwnedAppCreate) Save(ctx context.Context) (*OwnedApp, error) {
+// Save creates the AuthorizedApp in the database.
+func (_c *AuthorizedAppCreate) Save(ctx context.Context) (*AuthorizedApp, error) {
 	_c.defaults()
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *OwnedAppCreate) SaveX(ctx context.Context) *OwnedApp {
+func (_c *AuthorizedAppCreate) SaveX(ctx context.Context) *AuthorizedApp {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -125,85 +113,69 @@ func (_c *OwnedAppCreate) SaveX(ctx context.Context) *OwnedApp {
 }
 
 // Exec executes the query.
-func (_c *OwnedAppCreate) Exec(ctx context.Context) error {
+func (_c *AuthorizedAppCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *OwnedAppCreate) ExecX(ctx context.Context) {
+func (_c *AuthorizedAppCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (_c *OwnedAppCreate) defaults() {
+func (_c *AuthorizedAppCreate) defaults() {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := ownedapp.DefaultCreatedAt()
+		v := authorizedapp.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		v := ownedapp.DefaultUpdatedAt()
+		v := authorizedapp.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *OwnedAppCreate) check() error {
+func (_c *AuthorizedAppCreate) check() error {
 	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "OwnedApp.created_at"`)}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "AuthorizedApp.created_at"`)}
 	}
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
-		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "OwnedApp.updated_at"`)}
-	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "OwnedApp.name"`)}
-	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := ownedapp.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.name": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Domain(); !ok {
-		return &ValidationError{Name: "domain", err: errors.New(`ent: missing required field "OwnedApp.domain"`)}
-	}
-	if v, ok := _c.mutation.Domain(); ok {
-		if err := ownedapp.DomainValidator(v); err != nil {
-			return &ValidationError{Name: "domain", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.domain": %w`, err)}
-		}
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "AuthorizedApp.updated_at"`)}
 	}
 	if _, ok := _c.mutation.ApplicationID(); !ok {
-		return &ValidationError{Name: "application_id", err: errors.New(`ent: missing required field "OwnedApp.application_id"`)}
+		return &ValidationError{Name: "application_id", err: errors.New(`ent: missing required field "AuthorizedApp.application_id"`)}
 	}
 	if v, ok := _c.mutation.ApplicationID(); ok {
-		if err := ownedapp.ApplicationIDValidator(v); err != nil {
-			return &ValidationError{Name: "application_id", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.application_id": %w`, err)}
+		if err := authorizedapp.ApplicationIDValidator(v); err != nil {
+			return &ValidationError{Name: "application_id", err: fmt.Errorf(`ent: validator failed for field "AuthorizedApp.application_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "OwnedApp.user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "AuthorizedApp.user_id"`)}
 	}
 	if v, ok := _c.mutation.UserID(); ok {
-		if err := ownedapp.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.user_id": %w`, err)}
+		if err := authorizedapp.UserIDValidator(v); err != nil {
+			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "AuthorizedApp.user_id": %w`, err)}
 		}
 	}
 	if v, ok := _c.mutation.ID(); ok {
-		if err := ownedapp.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.id": %w`, err)}
+		if err := authorizedapp.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "AuthorizedApp.id": %w`, err)}
 		}
 	}
 	if len(_c.mutation.ApplicationIDs()) == 0 {
-		return &ValidationError{Name: "application", err: errors.New(`ent: missing required edge "OwnedApp.application"`)}
+		return &ValidationError{Name: "application", err: errors.New(`ent: missing required edge "AuthorizedApp.application"`)}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "OwnedApp.user"`)}
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "AuthorizedApp.user"`)}
 	}
 	return nil
 }
 
-func (_c *OwnedAppCreate) sqlSave(ctx context.Context) (*OwnedApp, error) {
+func (_c *AuthorizedAppCreate) sqlSave(ctx context.Context) (*AuthorizedApp, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -218,7 +190,7 @@ func (_c *OwnedAppCreate) sqlSave(ctx context.Context) (*OwnedApp, error) {
 		if id, ok := _spec.ID.Value.(string); ok {
 			_node.ID = id
 		} else {
-			return nil, fmt.Errorf("unexpected OwnedApp.ID type: %T", _spec.ID.Value)
+			return nil, fmt.Errorf("unexpected AuthorizedApp.ID type: %T", _spec.ID.Value)
 		}
 	}
 	_c.mutation.id = &_node.ID
@@ -226,41 +198,33 @@ func (_c *OwnedAppCreate) sqlSave(ctx context.Context) (*OwnedApp, error) {
 	return _node, nil
 }
 
-func (_c *OwnedAppCreate) createSpec() (*OwnedApp, *sqlgraph.CreateSpec) {
+func (_c *AuthorizedAppCreate) createSpec() (*AuthorizedApp, *sqlgraph.CreateSpec) {
 	var (
-		_node = &OwnedApp{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(ownedapp.Table, sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString))
+		_node = &AuthorizedApp{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(authorizedapp.Table, sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(ownedapp.FieldCreatedAt, field.TypeTime, value)
+		_spec.SetField(authorizedapp.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
 	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(ownedapp.FieldUpdatedAt, field.TypeTime, value)
+		_spec.SetField(authorizedapp.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
 	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(ownedapp.FieldDeletedAt, field.TypeTime, value)
+		_spec.SetField(authorizedapp.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
-	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(ownedapp.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := _c.mutation.Domain(); ok {
-		_spec.SetField(ownedapp.FieldDomain, field.TypeString, value)
-		_node.Domain = value
 	}
 	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   ownedapp.ApplicationTable,
-			Columns: []string{ownedapp.ApplicationColumn},
+			Table:   authorizedapp.ApplicationTable,
+			Columns: []string{authorizedapp.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
@@ -276,8 +240,8 @@ func (_c *OwnedAppCreate) createSpec() (*OwnedApp, *sqlgraph.CreateSpec) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   ownedapp.UserTable,
-			Columns: []string{ownedapp.UserColumn},
+			Table:   authorizedapp.UserTable,
+			Columns: []string{authorizedapp.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
@@ -292,27 +256,27 @@ func (_c *OwnedAppCreate) createSpec() (*OwnedApp, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// OwnedAppCreateBulk is the builder for creating many OwnedApp entities in bulk.
-type OwnedAppCreateBulk struct {
+// AuthorizedAppCreateBulk is the builder for creating many AuthorizedApp entities in bulk.
+type AuthorizedAppCreateBulk struct {
 	config
 	err      error
-	builders []*OwnedAppCreate
+	builders []*AuthorizedAppCreate
 }
 
-// Save creates the OwnedApp entities in the database.
-func (_c *OwnedAppCreateBulk) Save(ctx context.Context) ([]*OwnedApp, error) {
+// Save creates the AuthorizedApp entities in the database.
+func (_c *AuthorizedAppCreateBulk) Save(ctx context.Context) ([]*AuthorizedApp, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*OwnedApp, len(_c.builders))
+	nodes := make([]*AuthorizedApp, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*OwnedAppMutation)
+				mutation, ok := m.(*AuthorizedAppMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -355,7 +319,7 @@ func (_c *OwnedAppCreateBulk) Save(ctx context.Context) ([]*OwnedApp, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *OwnedAppCreateBulk) SaveX(ctx context.Context) []*OwnedApp {
+func (_c *AuthorizedAppCreateBulk) SaveX(ctx context.Context) []*AuthorizedApp {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -364,13 +328,13 @@ func (_c *OwnedAppCreateBulk) SaveX(ctx context.Context) []*OwnedApp {
 }
 
 // Exec executes the query.
-func (_c *OwnedAppCreateBulk) Exec(ctx context.Context) error {
+func (_c *AuthorizedAppCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *OwnedAppCreateBulk) ExecX(ctx context.Context) {
+func (_c *AuthorizedAppCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

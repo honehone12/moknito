@@ -18,8 +18,8 @@ type Tx struct {
 	Authentication *AuthenticationClient
 	// Authorization is the client for interacting with the Authorization builders.
 	Authorization *AuthorizationClient
-	// OwnedApp is the client for interacting with the OwnedApp builders.
-	OwnedApp *OwnedAppClient
+	// AuthorizedApp is the client for interacting with the AuthorizedApp builders.
+	AuthorizedApp *AuthorizedAppClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -156,7 +156,7 @@ func (tx *Tx) init() {
 	tx.Application = NewApplicationClient(tx.config)
 	tx.Authentication = NewAuthenticationClient(tx.config)
 	tx.Authorization = NewAuthorizationClient(tx.config)
-	tx.OwnedApp = NewOwnedAppClient(tx.config)
+	tx.AuthorizedApp = NewAuthorizedAppClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

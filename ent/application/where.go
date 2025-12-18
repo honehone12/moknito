@@ -420,21 +420,21 @@ func RedirectContainsFold(v string) predicate.Application {
 	return predicate.Application(sql.FieldContainsFold(FieldRedirect, v))
 }
 
-// HasOwned applies the HasEdge predicate on the "owned" edge.
-func HasOwned() predicate.Application {
+// HasAuthorized applies the HasEdge predicate on the "authorized" edge.
+func HasAuthorized() predicate.Application {
 	return predicate.Application(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, OwnedTable, OwnedColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, AuthorizedTable, AuthorizedColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasOwnedWith applies the HasEdge predicate on the "owned" edge with a given conditions (other predicates).
-func HasOwnedWith(preds ...predicate.OwnedApp) predicate.Application {
+// HasAuthorizedWith applies the HasEdge predicate on the "authorized" edge with a given conditions (other predicates).
+func HasAuthorizedWith(preds ...predicate.AuthorizedApp) predicate.Application {
 	return predicate.Application(func(s *sql.Selector) {
-		step := newOwnedStep()
+		step := newAuthorizedStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -443,21 +443,21 @@ func HasOwnedWith(preds ...predicate.OwnedApp) predicate.Application {
 	})
 }
 
-// HasOuthed applies the HasEdge predicate on the "outhed" edge.
-func HasOuthed() predicate.Application {
+// HasLogined applies the HasEdge predicate on the "logined" edge.
+func HasLogined() predicate.Application {
 	return predicate.Application(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, OuthedTable, OuthedColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, LoginedTable, LoginedColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasOuthedWith applies the HasEdge predicate on the "outhed" edge with a given conditions (other predicates).
-func HasOuthedWith(preds ...predicate.Authorization) predicate.Application {
+// HasLoginedWith applies the HasEdge predicate on the "logined" edge with a given conditions (other predicates).
+func HasLoginedWith(preds ...predicate.Authorization) predicate.Application {
 	return predicate.Application(func(s *sql.Selector) {
-		step := newOuthedStep()
+		step := newLoginedStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

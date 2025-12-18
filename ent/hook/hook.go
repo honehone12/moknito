@@ -44,16 +44,16 @@ func (f AuthorizationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuthorizationMutation", m)
 }
 
-// The OwnedAppFunc type is an adapter to allow the use of ordinary
-// function as OwnedApp mutator.
-type OwnedAppFunc func(context.Context, *ent.OwnedAppMutation) (ent.Value, error)
+// The AuthorizedAppFunc type is an adapter to allow the use of ordinary
+// function as AuthorizedApp mutator.
+type AuthorizedAppFunc func(context.Context, *ent.AuthorizedAppMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f OwnedAppFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.OwnedAppMutation); ok {
+func (f AuthorizedAppFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AuthorizedAppMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OwnedAppMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AuthorizedAppMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

@@ -8,24 +8,17 @@ import (
 )
 
 // Application holds the schema definition for the Application entity.
-type OwnedApp struct {
+type AuthorizedApp struct {
 	ent.Schema
 }
 
-func (OwnedApp) Fields() []ent.Field {
+func (AuthorizedApp) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
 			NotEmpty().
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.String("name").
-			MaxLen(256).
-			NotEmpty(),
-		field.String("domain").
-			MaxLen(256).
-			NotEmpty().
-			Immutable(),
 		field.String("application_id").
 			NotEmpty().
 			Immutable().
@@ -37,7 +30,7 @@ func (OwnedApp) Fields() []ent.Field {
 	}
 }
 
-func (OwnedApp) Edges() []ent.Edge {
+func (AuthorizedApp) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("application", Application.Type).
 			Field("application_id").
@@ -45,7 +38,7 @@ func (OwnedApp) Edges() []ent.Edge {
 			Immutable().
 			Unique(),
 		edge.From("user", User.Type).
-			Ref("owned_apps").
+			Ref("authorized_apps").
 			Field("user_id").
 			Required().
 			Immutable().
@@ -53,7 +46,7 @@ func (OwnedApp) Edges() []ent.Edge {
 	}
 }
 
-func (OwnedApp) Mixin() []ent.Mixin {
+func (AuthorizedApp) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		Time{},
 	}

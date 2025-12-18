@@ -13,23 +13,23 @@ import (
 
 const AUTHENTICATED_COOKIE_KEY = "ae"
 
-// (!) return verification error, system error (!)
+// (!) return user id, verification error, system error (!)
 func (s *EntRdsSys) VerifyAuthentication(
 	ctx context.Context,
 	cookie *http.Cookie,
-) (error, error) {
+) (id.Id, error, error) {
 	claim, err := s.authSigner.Parse(cookie.Value)
 	if err != nil {
-		return err, nil
+		return "", err, nil
 	}
 
 	authId, err := id.FromUUIDString(claim.ID)
 	if err != nil {
-		return err, nil
+		return "", err, nil
 	}
 	userId, err := id.FromUUIDString(claim.Subject)
 	if err != nil {
-		return err, nil
+		return "", err, nil
 	}
 
 	a, err := s.ent.Authentication.Query().
@@ -46,13 +46,14 @@ func (s *EntRdsSys) VerifyAuthentication(
 		).
 		Only(ctx)
 	if ent.IsNotFound(err) {
-		return err, nil
+		return "", err, nil
 	} else if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	if a.UserID != string(userId) {
-		return errors.New("wrong subject"), nil
+	id := id.Id(a.UserID)
+	if id != userId {
+		return "", errors.New("wrong subject"), nil
 	}
 
 	// we should check a.Ip and a.UserAgent
@@ -61,7 +62,7 @@ func (s *EntRdsSys) VerifyAuthentication(
 	//   same browser ?
 	// but they are currentry out of scope
 
-	return nil, nil
+	return id, nil, nil
 }
 
 func (s *EntRdsSys) createAuthentication(

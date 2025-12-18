@@ -9,7 +9,7 @@ import (
 	"math"
 	"moknito/ent/application"
 	"moknito/ent/authorization"
-	"moknito/ent/ownedapp"
+	"moknito/ent/authorizedapp"
 	"moknito/ent/predicate"
 
 	"entgo.io/ent"
@@ -21,12 +21,12 @@ import (
 // ApplicationQuery is the builder for querying Application entities.
 type ApplicationQuery struct {
 	config
-	ctx        *QueryContext
-	order      []application.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Application
-	withOwned  *OwnedAppQuery
-	withOuthed *AuthorizationQuery
+	ctx            *QueryContext
+	order          []application.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.Application
+	withAuthorized *AuthorizedAppQuery
+	withLogined    *AuthorizationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,9 +63,9 @@ func (_q *ApplicationQuery) Order(o ...application.OrderOption) *ApplicationQuer
 	return _q
 }
 
-// QueryOwned chains the current query on the "owned" edge.
-func (_q *ApplicationQuery) QueryOwned() *OwnedAppQuery {
-	query := (&OwnedAppClient{config: _q.config}).Query()
+// QueryAuthorized chains the current query on the "authorized" edge.
+func (_q *ApplicationQuery) QueryAuthorized() *AuthorizedAppQuery {
+	query := (&AuthorizedAppClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,8 +76,8 @@ func (_q *ApplicationQuery) QueryOwned() *OwnedAppQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(application.Table, application.FieldID, selector),
-			sqlgraph.To(ownedapp.Table, ownedapp.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, application.OwnedTable, application.OwnedColumn),
+			sqlgraph.To(authorizedapp.Table, authorizedapp.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, application.AuthorizedTable, application.AuthorizedColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -85,8 +85,8 @@ func (_q *ApplicationQuery) QueryOwned() *OwnedAppQuery {
 	return query
 }
 
-// QueryOuthed chains the current query on the "outhed" edge.
-func (_q *ApplicationQuery) QueryOuthed() *AuthorizationQuery {
+// QueryLogined chains the current query on the "logined" edge.
+func (_q *ApplicationQuery) QueryLogined() *AuthorizationQuery {
 	query := (&AuthorizationClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
@@ -99,7 +99,7 @@ func (_q *ApplicationQuery) QueryOuthed() *AuthorizationQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(application.Table, application.FieldID, selector),
 			sqlgraph.To(authorization.Table, authorization.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, application.OuthedTable, application.OuthedColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, application.LoginedTable, application.LoginedColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -294,38 +294,38 @@ func (_q *ApplicationQuery) Clone() *ApplicationQuery {
 		return nil
 	}
 	return &ApplicationQuery{
-		config:     _q.config,
-		ctx:        _q.ctx.Clone(),
-		order:      append([]application.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Application{}, _q.predicates...),
-		withOwned:  _q.withOwned.Clone(),
-		withOuthed: _q.withOuthed.Clone(),
+		config:         _q.config,
+		ctx:            _q.ctx.Clone(),
+		order:          append([]application.OrderOption{}, _q.order...),
+		inters:         append([]Interceptor{}, _q.inters...),
+		predicates:     append([]predicate.Application{}, _q.predicates...),
+		withAuthorized: _q.withAuthorized.Clone(),
+		withLogined:    _q.withLogined.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithOwned tells the query-builder to eager-load the nodes that are connected to
-// the "owned" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ApplicationQuery) WithOwned(opts ...func(*OwnedAppQuery)) *ApplicationQuery {
-	query := (&OwnedAppClient{config: _q.config}).Query()
+// WithAuthorized tells the query-builder to eager-load the nodes that are connected to
+// the "authorized" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ApplicationQuery) WithAuthorized(opts ...func(*AuthorizedAppQuery)) *ApplicationQuery {
+	query := (&AuthorizedAppClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withOwned = query
+	_q.withAuthorized = query
 	return _q
 }
 
-// WithOuthed tells the query-builder to eager-load the nodes that are connected to
-// the "outhed" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *ApplicationQuery) WithOuthed(opts ...func(*AuthorizationQuery)) *ApplicationQuery {
+// WithLogined tells the query-builder to eager-load the nodes that are connected to
+// the "logined" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *ApplicationQuery) WithLogined(opts ...func(*AuthorizationQuery)) *ApplicationQuery {
 	query := (&AuthorizationClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withOuthed = query
+	_q.withLogined = query
 	return _q
 }
 
@@ -408,8 +408,8 @@ func (_q *ApplicationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes       = []*Application{}
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			_q.withOwned != nil,
-			_q.withOuthed != nil,
+			_q.withAuthorized != nil,
+			_q.withLogined != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -430,24 +430,24 @@ func (_q *ApplicationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withOwned; query != nil {
-		if err := _q.loadOwned(ctx, query, nodes,
-			func(n *Application) { n.Edges.Owned = []*OwnedApp{} },
-			func(n *Application, e *OwnedApp) { n.Edges.Owned = append(n.Edges.Owned, e) }); err != nil {
+	if query := _q.withAuthorized; query != nil {
+		if err := _q.loadAuthorized(ctx, query, nodes,
+			func(n *Application) { n.Edges.Authorized = []*AuthorizedApp{} },
+			func(n *Application, e *AuthorizedApp) { n.Edges.Authorized = append(n.Edges.Authorized, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := _q.withOuthed; query != nil {
-		if err := _q.loadOuthed(ctx, query, nodes,
-			func(n *Application) { n.Edges.Outhed = []*Authorization{} },
-			func(n *Application, e *Authorization) { n.Edges.Outhed = append(n.Edges.Outhed, e) }); err != nil {
+	if query := _q.withLogined; query != nil {
+		if err := _q.loadLogined(ctx, query, nodes,
+			func(n *Application) { n.Edges.Logined = []*Authorization{} },
+			func(n *Application, e *Authorization) { n.Edges.Logined = append(n.Edges.Logined, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *ApplicationQuery) loadOwned(ctx context.Context, query *OwnedAppQuery, nodes []*Application, init func(*Application), assign func(*Application, *OwnedApp)) error {
+func (_q *ApplicationQuery) loadAuthorized(ctx context.Context, query *AuthorizedAppQuery, nodes []*Application, init func(*Application), assign func(*Application, *AuthorizedApp)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*Application)
 	for i := range nodes {
@@ -458,10 +458,10 @@ func (_q *ApplicationQuery) loadOwned(ctx context.Context, query *OwnedAppQuery,
 		}
 	}
 	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(ownedapp.FieldApplicationID)
+		query.ctx.AppendFieldOnce(authorizedapp.FieldApplicationID)
 	}
-	query.Where(predicate.OwnedApp(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(application.OwnedColumn), fks...))
+	query.Where(predicate.AuthorizedApp(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(application.AuthorizedColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -477,7 +477,7 @@ func (_q *ApplicationQuery) loadOwned(ctx context.Context, query *OwnedAppQuery,
 	}
 	return nil
 }
-func (_q *ApplicationQuery) loadOuthed(ctx context.Context, query *AuthorizationQuery, nodes []*Application, init func(*Application), assign func(*Application, *Authorization)) error {
+func (_q *ApplicationQuery) loadLogined(ctx context.Context, query *AuthorizationQuery, nodes []*Application, init func(*Application), assign func(*Application, *Authorization)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*Application)
 	for i := range nodes {
@@ -491,7 +491,7 @@ func (_q *ApplicationQuery) loadOuthed(ctx context.Context, query *Authorization
 		query.ctx.AppendFieldOnce(authorization.FieldApplicationID)
 	}
 	query.Where(predicate.Authorization(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(application.OuthedColumn), fks...))
+		s.Where(sql.InValues(s.C(application.LoginedColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

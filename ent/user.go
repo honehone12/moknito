@@ -41,8 +41,8 @@ type UserEdges struct {
 	Authentications []*Authentication `json:"authentications,omitempty"`
 	// Authorizations holds the value of the authorizations edge.
 	Authorizations []*Authorization `json:"authorizations,omitempty"`
-	// OwnedApps holds the value of the owned_apps edge.
-	OwnedApps []*OwnedApp `json:"owned_apps,omitempty"`
+	// AuthorizedApps holds the value of the authorized_apps edge.
+	AuthorizedApps []*AuthorizedApp `json:"authorized_apps,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -66,13 +66,13 @@ func (e UserEdges) AuthorizationsOrErr() ([]*Authorization, error) {
 	return nil, &NotLoadedError{edge: "authorizations"}
 }
 
-// OwnedAppsOrErr returns the OwnedApps value or an error if the edge
+// AuthorizedAppsOrErr returns the AuthorizedApps value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) OwnedAppsOrErr() ([]*OwnedApp, error) {
+func (e UserEdges) AuthorizedAppsOrErr() ([]*AuthorizedApp, error) {
 	if e.loadedTypes[2] {
-		return e.OwnedApps, nil
+		return e.AuthorizedApps, nil
 	}
-	return nil, &NotLoadedError{edge: "owned_apps"}
+	return nil, &NotLoadedError{edge: "authorized_apps"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -165,9 +165,9 @@ func (_m *User) QueryAuthorizations() *AuthorizationQuery {
 	return NewUserClient(_m.config).QueryAuthorizations(_m)
 }
 
-// QueryOwnedApps queries the "owned_apps" edge of the User entity.
-func (_m *User) QueryOwnedApps() *OwnedAppQuery {
-	return NewUserClient(_m.config).QueryOwnedApps(_m)
+// QueryAuthorizedApps queries the "authorized_apps" edge of the User entity.
+func (_m *User) QueryAuthorizedApps() *AuthorizedAppQuery {
+	return NewUserClient(_m.config).QueryAuthorizedApps(_m)
 }
 
 // Update returns a builder for updating this User.

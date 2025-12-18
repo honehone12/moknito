@@ -4,7 +4,7 @@ package ent
 
 import (
 	"context"
-	"moknito/ent/ownedapp"
+	"moknito/ent/authorizedapp"
 	"moknito/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
@@ -12,26 +12,26 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// OwnedAppDelete is the builder for deleting a OwnedApp entity.
-type OwnedAppDelete struct {
+// AuthorizedAppDelete is the builder for deleting a AuthorizedApp entity.
+type AuthorizedAppDelete struct {
 	config
 	hooks    []Hook
-	mutation *OwnedAppMutation
+	mutation *AuthorizedAppMutation
 }
 
-// Where appends a list predicates to the OwnedAppDelete builder.
-func (_d *OwnedAppDelete) Where(ps ...predicate.OwnedApp) *OwnedAppDelete {
+// Where appends a list predicates to the AuthorizedAppDelete builder.
+func (_d *AuthorizedAppDelete) Where(ps ...predicate.AuthorizedApp) *AuthorizedAppDelete {
 	_d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *OwnedAppDelete) Exec(ctx context.Context) (int, error) {
+func (_d *AuthorizedAppDelete) Exec(ctx context.Context) (int, error) {
 	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *OwnedAppDelete) ExecX(ctx context.Context) int {
+func (_d *AuthorizedAppDelete) ExecX(ctx context.Context) int {
 	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -39,8 +39,8 @@ func (_d *OwnedAppDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *OwnedAppDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(ownedapp.Table, sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString))
+func (_d *AuthorizedAppDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec := sqlgraph.NewDeleteSpec(authorizedapp.Table, sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString))
 	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -56,32 +56,32 @@ func (_d *OwnedAppDelete) sqlExec(ctx context.Context) (int, error) {
 	return affected, err
 }
 
-// OwnedAppDeleteOne is the builder for deleting a single OwnedApp entity.
-type OwnedAppDeleteOne struct {
-	_d *OwnedAppDelete
+// AuthorizedAppDeleteOne is the builder for deleting a single AuthorizedApp entity.
+type AuthorizedAppDeleteOne struct {
+	_d *AuthorizedAppDelete
 }
 
-// Where appends a list predicates to the OwnedAppDelete builder.
-func (_d *OwnedAppDeleteOne) Where(ps ...predicate.OwnedApp) *OwnedAppDeleteOne {
+// Where appends a list predicates to the AuthorizedAppDelete builder.
+func (_d *AuthorizedAppDeleteOne) Where(ps ...predicate.AuthorizedApp) *AuthorizedAppDeleteOne {
 	_d._d.mutation.Where(ps...)
 	return _d
 }
 
 // Exec executes the deletion query.
-func (_d *OwnedAppDeleteOne) Exec(ctx context.Context) error {
+func (_d *AuthorizedAppDeleteOne) Exec(ctx context.Context) error {
 	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{ownedapp.Label}
+		return &NotFoundError{authorizedapp.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *OwnedAppDeleteOne) ExecX(ctx context.Context) {
+func (_d *AuthorizedAppDeleteOne) ExecX(ctx context.Context) {
 	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}

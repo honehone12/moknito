@@ -9,54 +9,58 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// set new session when session is not valid
 func (m *Moknito) SetSession() echo.MiddlewareFunc {
 	return m.setSession
+}
+
+func (m *Moknito) setNewSession(ctx echo.Context) error {
+	newCookie, err := m.system.CreateSession(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	ctx.SetCookie(newCookie)
+	return nil
 }
 
 func (m *Moknito) setSession(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		cookie, err := ctx.Cookie(sys.SESSION_COOKIE_KEY)
 		if errors.Is(err, http.ErrNoCookie) {
-			newCookie, err := m.system.CreateSession(ctx.Request().Context())
-			if err != nil {
-				return err
-			}
-
-			ctx.SetCookie(newCookie)
+			m.setNewSession(ctx)
 			return next(ctx)
 		} else if err != nil {
 			return err
 		}
 
 		if err := m.validator.Var(cookie.Value, "min=44,base64rawurl"); err != nil {
-			ctx.Logger().Warn(err)
-			return res.BadRequest(ctx)
+			ctx.Logger().Debug(err)
+			m.setNewSession(ctx)
+			return next(ctx)
 		}
 
-		incrCookie, invalid, err := m.system.VerifySession(
-			ctx.Request().Context(),
-			cookie,
-		)
+		c := ctx.Request().Context()
+		sessKey, invalid, err := m.system.VerifySession(c, cookie)
 		if invalid != nil {
 			ctx.Logger().Debug(err)
-
-			newCookie, err := m.system.CreateSession(ctx.Request().Context())
-			if err != nil {
-				return err
-			}
-
-			ctx.SetCookie(newCookie)
+			m.setNewSession(ctx)
 			return next(ctx)
 		}
 		if err != nil {
 			return err
 		}
 
+		incrCookie, err := m.system.IncrSession(c, sessKey)
+		if err != nil {
+			return err
+		}
 		ctx.SetCookie(incrCookie)
 		return next(ctx)
 	}
 }
 
+// fail when session is not valid
 func (m *Moknito) VerifySession() echo.MiddlewareFunc {
 	return m.verifySession
 }
@@ -80,19 +84,21 @@ func (m *Moknito) verifySession(next echo.HandlerFunc) echo.HandlerFunc {
 			return res.BadRequest(ctx)
 		}
 
-		newCookie, invalid, err := m.system.VerifySession(
-			ctx.Request().Context(),
-			cookie,
-		)
+		c := ctx.Request().Context()
+		sessKey, invalid, err := m.system.VerifySession(c, cookie)
 		if invalid != nil {
-			ctx.Logger().Warn(err)
+			ctx.Logger().Warn(invalid)
 			return res.BadRequest(ctx)
 		}
 		if err != nil {
 			return err
 		}
 
-		ctx.SetCookie(newCookie)
+		incrCookie, err := m.system.IncrSession(c, sessKey)
+		if err != nil {
+			return err
+		}
+		ctx.SetCookie(incrCookie)
 
 		return next(ctx)
 	}

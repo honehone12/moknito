@@ -37,31 +37,31 @@ type Application struct {
 
 // ApplicationEdges holds the relations/edges for other nodes in the graph.
 type ApplicationEdges struct {
-	// Owned holds the value of the owned edge.
-	Owned []*OwnedApp `json:"owned,omitempty"`
-	// Outhed holds the value of the outhed edge.
-	Outhed []*Authorization `json:"outhed,omitempty"`
+	// Authorized holds the value of the authorized edge.
+	Authorized []*AuthorizedApp `json:"authorized,omitempty"`
+	// Logined holds the value of the logined edge.
+	Logined []*Authorization `json:"logined,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
-// OwnedOrErr returns the Owned value or an error if the edge
+// AuthorizedOrErr returns the Authorized value or an error if the edge
 // was not loaded in eager-loading.
-func (e ApplicationEdges) OwnedOrErr() ([]*OwnedApp, error) {
+func (e ApplicationEdges) AuthorizedOrErr() ([]*AuthorizedApp, error) {
 	if e.loadedTypes[0] {
-		return e.Owned, nil
+		return e.Authorized, nil
 	}
-	return nil, &NotLoadedError{edge: "owned"}
+	return nil, &NotLoadedError{edge: "authorized"}
 }
 
-// OuthedOrErr returns the Outhed value or an error if the edge
+// LoginedOrErr returns the Logined value or an error if the edge
 // was not loaded in eager-loading.
-func (e ApplicationEdges) OuthedOrErr() ([]*Authorization, error) {
+func (e ApplicationEdges) LoginedOrErr() ([]*Authorization, error) {
 	if e.loadedTypes[1] {
-		return e.Outhed, nil
+		return e.Logined, nil
 	}
-	return nil, &NotLoadedError{edge: "outhed"}
+	return nil, &NotLoadedError{edge: "logined"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -144,14 +144,14 @@ func (_m *Application) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryOwned queries the "owned" edge of the Application entity.
-func (_m *Application) QueryOwned() *OwnedAppQuery {
-	return NewApplicationClient(_m.config).QueryOwned(_m)
+// QueryAuthorized queries the "authorized" edge of the Application entity.
+func (_m *Application) QueryAuthorized() *AuthorizedAppQuery {
+	return NewApplicationClient(_m.config).QueryAuthorized(_m)
 }
 
-// QueryOuthed queries the "outhed" edge of the Application entity.
-func (_m *Application) QueryOuthed() *AuthorizationQuery {
-	return NewApplicationClient(_m.config).QueryOuthed(_m)
+// QueryLogined queries the "logined" edge of the Application entity.
+func (_m *Application) QueryLogined() *AuthorizationQuery {
+	return NewApplicationClient(_m.config).QueryLogined(_m)
 }
 
 // Update returns a builder for updating this Application.

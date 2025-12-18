@@ -16,8 +16,12 @@ import (
 func main() {
 	echo := echo4.New()
 	echo.Use(echo4middleware.Logger())
-	echo.Logger.SetLevel(log.INFO)
+	echo.Logger.SetLevel(log.DEBUG)
 	echo.Logger.SetPrefix("MOKNITO")
+	echo.HTTPErrorHandler = func(err error, ctx echo4.Context) {
+		ctx.Logger().Error(err)
+		echo.DefaultHTTPErrorHandler(err, ctx)
+	}
 
 	if err := godotenv.Load(); err != nil {
 		echo.Logger.Fatal(err)
@@ -50,25 +54,39 @@ func main() {
 		}},
 	))
 
+	// route for public POSTs
+	echo.Group("/auth")
+
+	// routes for POSTs
 	api := echo.Group(
 		"/api",
-		moknito.OriginGuard(),
-		moknito.VerifySession(),
 	)
-	userApi := api.Group("/user")
+	userApi := api.Group(
+		"/user",
+		moknito.OriginGuard(), moknito.VerifySession(),
+	)
 	userApi.POST("/register", moknito.UserRegister)
 	userApi.POST("/join", moknito.UserJoin)
 	userApi.POST("/authenticate", moknito.UserAuthenticate)
-	appApi := api.Group("/application", moknito.VerifyAuthentication())
-	appApi.GET("/infomation", moknito.ApplicationInfomation)
+	appApi := api.Group("/app", moknito.VerifyAuthentication())
+	appApi.POST("/authorize", moknito.AppAuthorize)
 
+	// routes for GETs
+	info := echo.Group(
+		"/info",
+		moknito.VerifySession(),
+		moknito.VerifyAuthentication(),
+	)
+	info.GET("/app", moknito.InfoApp)
+
+	// routes fo UIs
 	echo.Group(
 		"/user",
 		moknito.SetSession(),
 		uiProxy,
 	)
 	echo.Group(
-		"/application",
+		"/app",
 		moknito.VerifySession(),
 		moknito.VerifyAuthentication(),
 		uiProxy,

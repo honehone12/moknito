@@ -41,7 +41,7 @@ func (User) Edges() []ent.Edge {
 			Immutable(),
 		edge.To("authorizations", Authorization.Type).
 			Immutable(),
-		edge.To("owned_apps", OwnedApp.Type).
+		edge.To("authorized_apps", AuthorizedApp.Type).
 			Immutable(),
 	}
 }
