@@ -19,10 +19,6 @@ func (Authorization) Fields() []ent.Field {
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.String("application_id").
-			NotEmpty().
-			Immutable().
-			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		// this should be unique, yes
 		// but i'm not sure we should return error as constraint
 		field.Bytes("code").
@@ -37,6 +33,10 @@ func (Authorization) Fields() []ent.Field {
 			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
 		field.Time("expire_at").
 			Immutable(),
+		field.String("application_id").
+			NotEmpty().
+			Immutable().
+			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		field.String("user_id").
 			NotEmpty().
 			Immutable().
@@ -46,6 +46,11 @@ func (Authorization) Fields() []ent.Field {
 
 func (Authorization) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.To("application", Application.Type).
+			Field("application_id").
+			Required().
+			Immutable().
+			Unique(),
 		edge.From("user", User.Type).
 			Ref("authorizations").
 			Field("user_id").

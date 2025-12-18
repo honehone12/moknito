@@ -20,9 +20,16 @@ func (Application) Fields() []ent.Field {
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		field.String("name").
+			MaxLen(256).
 			NotEmpty().
 			Unique(),
 		field.String("domain").
+			MaxLen(256).
+			NotEmpty().
+			Immutable().
+			Unique(),
+		field.String("redirect").
+			MaxLen(512).
 			NotEmpty().
 			Immutable().
 			Unique(),
@@ -32,6 +39,9 @@ func (Application) Fields() []ent.Field {
 func (Application) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owned", OwnedApp.Type).
+			Ref("application").
+			Immutable(),
+		edge.From("outhed", Authorization.Type).
 			Ref("application").
 			Immutable(),
 	}

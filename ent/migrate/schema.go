@@ -14,8 +14,9 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "domain", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Size: 256},
+		{Name: "domain", Type: field.TypeString, Unique: true, Size: 256},
+		{Name: "redirect", Type: field.TypeString, Unique: true, Size: 512},
 	}
 	// ApplicationsTable holds the schema information for the "applications" table.
 	ApplicationsTable = &schema.Table{
@@ -55,10 +56,10 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "code", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "challenge", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(32)"}},
 		{Name: "expire_at", Type: field.TypeTime},
+		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthorizationsTable holds the schema information for the "authorizations" table.
@@ -67,6 +68,12 @@ var (
 		Columns:    AuthorizationsColumns,
 		PrimaryKey: []*schema.Column{AuthorizationsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "authorizations_applications_application",
+				Columns:    []*schema.Column{AuthorizationsColumns[7]},
+				RefColumns: []*schema.Column{ApplicationsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
 			{
 				Symbol:     "authorizations_users_authorizations",
 				Columns:    []*schema.Column{AuthorizationsColumns[8]},
@@ -81,8 +88,8 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "domain", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Size: 256},
+		{Name: "domain", Type: field.TypeString, Size: 256},
 		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
@@ -141,7 +148,8 @@ var (
 
 func init() {
 	AuthenticationsTable.ForeignKeys[0].RefTable = UsersTable
-	AuthorizationsTable.ForeignKeys[0].RefTable = UsersTable
+	AuthorizationsTable.ForeignKeys[0].RefTable = ApplicationsTable
+	AuthorizationsTable.ForeignKeys[1].RefTable = UsersTable
 	OwnedAppsTable.ForeignKeys[0].RefTable = ApplicationsTable
 	OwnedAppsTable.ForeignKeys[1].RefTable = UsersTable
 }

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"moknito/ent/application"
 	"moknito/ent/authorization"
 	"moknito/ent/user"
 	"strings"
@@ -24,14 +25,14 @@ type Authorization struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// ApplicationID holds the value of the "application_id" field.
-	ApplicationID string `json:"application_id,omitempty"`
 	// Code holds the value of the "code" field.
 	Code []byte `json:"code,omitempty"`
 	// Challenge holds the value of the "challenge" field.
 	Challenge []byte `json:"challenge,omitempty"`
 	// ExpireAt holds the value of the "expire_at" field.
 	ExpireAt time.Time `json:"expire_at,omitempty"`
+	// ApplicationID holds the value of the "application_id" field.
+	ApplicationID string `json:"application_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID string `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -42,11 +43,24 @@ type Authorization struct {
 
 // AuthorizationEdges holds the relations/edges for other nodes in the graph.
 type AuthorizationEdges struct {
+	// Application holds the value of the application edge.
+	Application *Application `json:"application,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
+}
+
+// ApplicationOrErr returns the Application value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AuthorizationEdges) ApplicationOrErr() (*Application, error) {
+	if e.Application != nil {
+		return e.Application, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: application.Label}
+	}
+	return nil, &NotLoadedError{edge: "application"}
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -54,7 +68,7 @@ type AuthorizationEdges struct {
 func (e AuthorizationEdges) UserOrErr() (*User, error) {
 	if e.User != nil {
 		return e.User, nil
-	} else if e.loadedTypes[0] {
+	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
@@ -111,12 +125,6 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
-		case authorization.FieldApplicationID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field application_id", values[i])
-			} else if value.Valid {
-				_m.ApplicationID = value.String
-			}
 		case authorization.FieldCode:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field code", values[i])
@@ -135,6 +143,12 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ExpireAt = value.Time
 			}
+		case authorization.FieldApplicationID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field application_id", values[i])
+			} else if value.Valid {
+				_m.ApplicationID = value.String
+			}
 		case authorization.FieldUserID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
@@ -152,6 +166,11 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Authorization) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryApplication queries the "application" edge of the Authorization entity.
+func (_m *Authorization) QueryApplication() *ApplicationQuery {
+	return NewAuthorizationClient(_m.config).QueryApplication(_m)
 }
 
 // QueryUser queries the "user" edge of the Authorization entity.
@@ -193,9 +212,6 @@ func (_m *Authorization) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("application_id=")
-	builder.WriteString(_m.ApplicationID)
-	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Code))
 	builder.WriteString(", ")
@@ -204,6 +220,9 @@ func (_m *Authorization) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("expire_at=")
 	builder.WriteString(_m.ExpireAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("application_id=")
+	builder.WriteString(_m.ApplicationID)
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
 	builder.WriteString(_m.UserID)

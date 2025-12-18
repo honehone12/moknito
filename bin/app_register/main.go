@@ -9,19 +9,32 @@ import (
 	"moknito/id"
 	"os"
 
+	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
 
+type Args struct {
+	Name string `validate:"min=1,max=256"`
+	// using hostname_port for local, use fqdn instead
+	Domain   string `validate:"hostname_port,max=256"`
+	Redirect string `validate:"url,max=512"`
+}
+
 func main() {
 	appName := flag.String("name", "", "application name")
 	domain := flag.String("domain", "", "application domain")
+	redirect := flag.String("redirect", "", "application redirect")
 	flag.Parse()
-	if len(*appName) == 0 {
-		log.Fatalln("name is required")
+
+	v := validator.New()
+	args := Args{
+		Name:     *appName,
+		Domain:   *domain,
+		Redirect: *redirect,
 	}
-	if len(*domain) == 0 {
-		log.Fatalln("domain is required")
+	if err := v.Struct(&args); err != nil {
+		log.Fatalln(err)
 	}
 
 	if err := godotenv.Load("../../.env"); err != nil {

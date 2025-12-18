@@ -116,11 +116,11 @@ func (_u *OwnedAppUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.name": %w`, err)}
 		}
 	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "OwnedApp.user"`)
-	}
 	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "OwnedApp.application"`)
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "OwnedApp.user"`)
 	}
 	return nil
 }
@@ -270,11 +270,11 @@ func (_u *OwnedAppUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.name": %w`, err)}
 		}
 	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "OwnedApp.user"`)
-	}
 	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "OwnedApp.application"`)
+	}
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "OwnedApp.user"`)
 	}
 	return nil
 }

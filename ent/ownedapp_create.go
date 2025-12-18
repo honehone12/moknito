@@ -94,14 +94,14 @@ func (_c *OwnedAppCreate) SetID(v string) *OwnedAppCreate {
 	return _c
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (_c *OwnedAppCreate) SetUser(v *User) *OwnedAppCreate {
-	return _c.SetUserID(v.ID)
-}
-
 // SetApplication sets the "application" edge to the Application entity.
 func (_c *OwnedAppCreate) SetApplication(v *Application) *OwnedAppCreate {
 	return _c.SetApplicationID(v.ID)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (_c *OwnedAppCreate) SetUser(v *User) *OwnedAppCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the OwnedAppMutation object of the builder.
@@ -194,11 +194,11 @@ func (_c *OwnedAppCreate) check() error {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "OwnedApp.id": %w`, err)}
 		}
 	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "OwnedApp.user"`)}
-	}
 	if len(_c.mutation.ApplicationIDs()) == 0 {
 		return &ValidationError{Name: "application", err: errors.New(`ent: missing required edge "OwnedApp.application"`)}
+	}
+	if len(_c.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "OwnedApp.user"`)}
 	}
 	return nil
 }
@@ -255,23 +255,6 @@ func (_c *OwnedAppCreate) createSpec() (*OwnedApp, *sqlgraph.CreateSpec) {
 		_spec.SetField(ownedapp.FieldDomain, field.TypeString, value)
 		_node.Domain = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   ownedapp.UserTable,
-			Columns: []string{ownedapp.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -287,6 +270,23 @@ func (_c *OwnedAppCreate) createSpec() (*OwnedApp, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.ApplicationID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   ownedapp.UserTable,
+			Columns: []string{ownedapp.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

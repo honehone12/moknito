@@ -24,8 +24,8 @@ type OwnedAppQuery struct {
 	order           []ownedapp.OrderOption
 	inters          []Interceptor
 	predicates      []predicate.OwnedApp
-	withUser        *UserQuery
 	withApplication *ApplicationQuery
+	withUser        *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,28 +62,6 @@ func (_q *OwnedAppQuery) Order(o ...ownedapp.OrderOption) *OwnedAppQuery {
 	return _q
 }
 
-// QueryUser chains the current query on the "user" edge.
-func (_q *OwnedAppQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ownedapp.UserTable, ownedapp.UserColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryApplication chains the current query on the "application" edge.
 func (_q *OwnedAppQuery) QueryApplication() *ApplicationQuery {
 	query := (&ApplicationClient{config: _q.config}).Query()
@@ -99,6 +77,28 @@ func (_q *OwnedAppQuery) QueryApplication() *ApplicationQuery {
 			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, selector),
 			sqlgraph.To(application.Table, application.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, ownedapp.ApplicationTable, ownedapp.ApplicationColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (_q *OwnedAppQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := _q.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := _q.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ownedapp.UserTable, ownedapp.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -298,23 +298,12 @@ func (_q *OwnedAppQuery) Clone() *OwnedAppQuery {
 		order:           append([]ownedapp.OrderOption{}, _q.order...),
 		inters:          append([]Interceptor{}, _q.inters...),
 		predicates:      append([]predicate.OwnedApp{}, _q.predicates...),
-		withUser:        _q.withUser.Clone(),
 		withApplication: _q.withApplication.Clone(),
+		withUser:        _q.withUser.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
-}
-
-// WithUser tells the query-builder to eager-load the nodes that are connected to
-// the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *OwnedAppQuery) WithUser(opts ...func(*UserQuery)) *OwnedAppQuery {
-	query := (&UserClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withUser = query
-	return _q
 }
 
 // WithApplication tells the query-builder to eager-load the nodes that are connected to
@@ -325,6 +314,17 @@ func (_q *OwnedAppQuery) WithApplication(opts ...func(*ApplicationQuery)) *Owned
 		opt(query)
 	}
 	_q.withApplication = query
+	return _q
+}
+
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *OwnedAppQuery) WithUser(opts ...func(*UserQuery)) *OwnedAppQuery {
+	query := (&UserClient{config: _q.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	_q.withUser = query
 	return _q
 }
 
@@ -407,8 +407,8 @@ func (_q *OwnedAppQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Own
 		nodes       = []*OwnedApp{}
 		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			_q.withUser != nil,
 			_q.withApplication != nil,
+			_q.withUser != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -429,50 +429,21 @@ func (_q *OwnedAppQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Own
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withUser; query != nil {
-		if err := _q.loadUser(ctx, query, nodes, nil,
-			func(n *OwnedApp, e *User) { n.Edges.User = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := _q.withApplication; query != nil {
 		if err := _q.loadApplication(ctx, query, nodes, nil,
 			func(n *OwnedApp, e *Application) { n.Edges.Application = e }); err != nil {
 			return nil, err
 		}
 	}
+	if query := _q.withUser; query != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
+			func(n *OwnedApp, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
-func (_q *OwnedAppQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*OwnedApp, init func(*OwnedApp), assign func(*OwnedApp, *User)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*OwnedApp)
-	for i := range nodes {
-		fk := nodes[i].UserID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (_q *OwnedAppQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*OwnedApp, init func(*OwnedApp), assign func(*OwnedApp, *Application)) error {
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*OwnedApp)
@@ -495,6 +466,35 @@ func (_q *OwnedAppQuery) loadApplication(ctx context.Context, query *Application
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "application_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (_q *OwnedAppQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*OwnedApp, init func(*OwnedApp), assign func(*OwnedApp, *User)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*OwnedApp)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -528,11 +528,11 @@ func (_q *OwnedAppQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if _q.withUser != nil {
-			_spec.Node.AddColumnOnce(ownedapp.FieldUserID)
-		}
 		if _q.withApplication != nil {
 			_spec.Node.AddColumnOnce(ownedapp.FieldApplicationID)
+		}
+		if _q.withUser != nil {
+			_spec.Node.AddColumnOnce(ownedapp.FieldUserID)
 		}
 	}
 	if ps := _q.predicates; len(ps) > 0 {

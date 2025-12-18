@@ -90,6 +90,11 @@ func Domain(v string) predicate.Application {
 	return predicate.Application(sql.FieldEQ(FieldDomain, v))
 }
 
+// Redirect applies equality check predicate on the "redirect" field. It's identical to RedirectEQ.
+func Redirect(v string) predicate.Application {
+	return predicate.Application(sql.FieldEQ(FieldRedirect, v))
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Application {
 	return predicate.Application(sql.FieldEQ(FieldCreatedAt, v))
@@ -350,6 +355,71 @@ func DomainContainsFold(v string) predicate.Application {
 	return predicate.Application(sql.FieldContainsFold(FieldDomain, v))
 }
 
+// RedirectEQ applies the EQ predicate on the "redirect" field.
+func RedirectEQ(v string) predicate.Application {
+	return predicate.Application(sql.FieldEQ(FieldRedirect, v))
+}
+
+// RedirectNEQ applies the NEQ predicate on the "redirect" field.
+func RedirectNEQ(v string) predicate.Application {
+	return predicate.Application(sql.FieldNEQ(FieldRedirect, v))
+}
+
+// RedirectIn applies the In predicate on the "redirect" field.
+func RedirectIn(vs ...string) predicate.Application {
+	return predicate.Application(sql.FieldIn(FieldRedirect, vs...))
+}
+
+// RedirectNotIn applies the NotIn predicate on the "redirect" field.
+func RedirectNotIn(vs ...string) predicate.Application {
+	return predicate.Application(sql.FieldNotIn(FieldRedirect, vs...))
+}
+
+// RedirectGT applies the GT predicate on the "redirect" field.
+func RedirectGT(v string) predicate.Application {
+	return predicate.Application(sql.FieldGT(FieldRedirect, v))
+}
+
+// RedirectGTE applies the GTE predicate on the "redirect" field.
+func RedirectGTE(v string) predicate.Application {
+	return predicate.Application(sql.FieldGTE(FieldRedirect, v))
+}
+
+// RedirectLT applies the LT predicate on the "redirect" field.
+func RedirectLT(v string) predicate.Application {
+	return predicate.Application(sql.FieldLT(FieldRedirect, v))
+}
+
+// RedirectLTE applies the LTE predicate on the "redirect" field.
+func RedirectLTE(v string) predicate.Application {
+	return predicate.Application(sql.FieldLTE(FieldRedirect, v))
+}
+
+// RedirectContains applies the Contains predicate on the "redirect" field.
+func RedirectContains(v string) predicate.Application {
+	return predicate.Application(sql.FieldContains(FieldRedirect, v))
+}
+
+// RedirectHasPrefix applies the HasPrefix predicate on the "redirect" field.
+func RedirectHasPrefix(v string) predicate.Application {
+	return predicate.Application(sql.FieldHasPrefix(FieldRedirect, v))
+}
+
+// RedirectHasSuffix applies the HasSuffix predicate on the "redirect" field.
+func RedirectHasSuffix(v string) predicate.Application {
+	return predicate.Application(sql.FieldHasSuffix(FieldRedirect, v))
+}
+
+// RedirectEqualFold applies the EqualFold predicate on the "redirect" field.
+func RedirectEqualFold(v string) predicate.Application {
+	return predicate.Application(sql.FieldEqualFold(FieldRedirect, v))
+}
+
+// RedirectContainsFold applies the ContainsFold predicate on the "redirect" field.
+func RedirectContainsFold(v string) predicate.Application {
+	return predicate.Application(sql.FieldContainsFold(FieldRedirect, v))
+}
+
 // HasOwned applies the HasEdge predicate on the "owned" edge.
 func HasOwned() predicate.Application {
 	return predicate.Application(func(s *sql.Selector) {
@@ -365,6 +435,29 @@ func HasOwned() predicate.Application {
 func HasOwnedWith(preds ...predicate.OwnedApp) predicate.Application {
 	return predicate.Application(func(s *sql.Selector) {
 		step := newOwnedStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasOuthed applies the HasEdge predicate on the "outhed" edge.
+func HasOuthed() predicate.Application {
+	return predicate.Application(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, OuthedTable, OuthedColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOuthedWith applies the HasEdge predicate on the "outhed" edge with a given conditions (other predicates).
+func HasOuthedWith(preds ...predicate.Authorization) predicate.Application {
+	return predicate.Application(func(s *sql.Selector) {
+		step := newOuthedStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

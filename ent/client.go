@@ -362,6 +362,22 @@ func (c *ApplicationClient) QueryOwned(_m *Application) *OwnedAppQuery {
 	return query
 }
 
+// QueryOuthed queries the outhed edge of a Application.
+func (c *ApplicationClient) QueryOuthed(_m *Application) *AuthorizationQuery {
+	query := (&AuthorizationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(application.Table, application.FieldID, id),
+			sqlgraph.To(authorization.Table, authorization.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, application.OuthedTable, application.OuthedColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ApplicationClient) Hooks() []Hook {
 	return c.hooks.Application
@@ -644,6 +660,22 @@ func (c *AuthorizationClient) GetX(ctx context.Context, id string) *Authorizatio
 	return obj
 }
 
+// QueryApplication queries the application edge of a Authorization.
+func (c *AuthorizationClient) QueryApplication(_m *Authorization) *ApplicationQuery {
+	query := (&ApplicationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(authorization.Table, authorization.FieldID, id),
+			sqlgraph.To(application.Table, application.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, authorization.ApplicationTable, authorization.ApplicationColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryUser queries the user edge of a Authorization.
 func (c *AuthorizationClient) QueryUser(_m *Authorization) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
@@ -793,22 +825,6 @@ func (c *OwnedAppClient) GetX(ctx context.Context, id string) *OwnedApp {
 	return obj
 }
 
-// QueryUser queries the user edge of a OwnedApp.
-func (c *OwnedAppClient) QueryUser(_m *OwnedApp) *UserQuery {
-	query := (&UserClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ownedapp.UserTable, ownedapp.UserColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryApplication queries the application edge of a OwnedApp.
 func (c *OwnedAppClient) QueryApplication(_m *OwnedApp) *ApplicationQuery {
 	query := (&ApplicationClient{config: c.config}).Query()
@@ -818,6 +834,22 @@ func (c *OwnedAppClient) QueryApplication(_m *OwnedApp) *ApplicationQuery {
 			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, id),
 			sqlgraph.To(application.Table, application.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, ownedapp.ApplicationTable, ownedapp.ApplicationColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a OwnedApp.
+func (c *OwnedAppClient) QueryUser(_m *OwnedApp) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ownedapp.Table, ownedapp.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ownedapp.UserTable, ownedapp.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil

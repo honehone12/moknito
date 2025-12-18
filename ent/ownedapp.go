@@ -41,24 +41,13 @@ type OwnedApp struct {
 
 // OwnedAppEdges holds the relations/edges for other nodes in the graph.
 type OwnedAppEdges struct {
-	// User holds the value of the user edge.
-	User *User `json:"user,omitempty"`
 	// Application holds the value of the application edge.
 	Application *Application `json:"application,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
-}
-
-// UserOrErr returns the User value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e OwnedAppEdges) UserOrErr() (*User, error) {
-	if e.User != nil {
-		return e.User, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: user.Label}
-	}
-	return nil, &NotLoadedError{edge: "user"}
 }
 
 // ApplicationOrErr returns the Application value or an error if the edge
@@ -66,10 +55,21 @@ func (e OwnedAppEdges) UserOrErr() (*User, error) {
 func (e OwnedAppEdges) ApplicationOrErr() (*Application, error) {
 	if e.Application != nil {
 		return e.Application, nil
-	} else if e.loadedTypes[1] {
+	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: application.Label}
 	}
 	return nil, &NotLoadedError{edge: "application"}
+}
+
+// UserOrErr returns the User value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e OwnedAppEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
+		return e.User, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: user.Label}
+	}
+	return nil, &NotLoadedError{edge: "user"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -158,14 +158,14 @@ func (_m *OwnedApp) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
 }
 
-// QueryUser queries the "user" edge of the OwnedApp entity.
-func (_m *OwnedApp) QueryUser() *UserQuery {
-	return NewOwnedAppClient(_m.config).QueryUser(_m)
-}
-
 // QueryApplication queries the "application" edge of the OwnedApp entity.
 func (_m *OwnedApp) QueryApplication() *ApplicationQuery {
 	return NewOwnedAppClient(_m.config).QueryApplication(_m)
+}
+
+// QueryUser queries the "user" edge of the OwnedApp entity.
+func (_m *OwnedApp) QueryUser() *UserQuery {
+	return NewOwnedAppClient(_m.config).QueryUser(_m)
 }
 
 // Update returns a builder for updating this OwnedApp.

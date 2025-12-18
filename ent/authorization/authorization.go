@@ -20,20 +20,29 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldApplicationID holds the string denoting the application_id field in the database.
-	FieldApplicationID = "application_id"
 	// FieldCode holds the string denoting the code field in the database.
 	FieldCode = "code"
 	// FieldChallenge holds the string denoting the challenge field in the database.
 	FieldChallenge = "challenge"
 	// FieldExpireAt holds the string denoting the expire_at field in the database.
 	FieldExpireAt = "expire_at"
+	// FieldApplicationID holds the string denoting the application_id field in the database.
+	FieldApplicationID = "application_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// EdgeApplication holds the string denoting the application edge name in mutations.
+	EdgeApplication = "application"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// Table holds the table name of the authorization in the database.
 	Table = "authorizations"
+	// ApplicationTable is the table that holds the application relation/edge.
+	ApplicationTable = "authorizations"
+	// ApplicationInverseTable is the table name for the Application entity.
+	// It exists in this package in order to avoid circular dependency with the "application" package.
+	ApplicationInverseTable = "applications"
+	// ApplicationColumn is the table column denoting the application relation/edge.
+	ApplicationColumn = "application_id"
 	// UserTable is the table that holds the user relation/edge.
 	UserTable = "authorizations"
 	// UserInverseTable is the table name for the User entity.
@@ -49,10 +58,10 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
-	FieldApplicationID,
 	FieldCode,
 	FieldChallenge,
 	FieldExpireAt,
+	FieldApplicationID,
 	FieldUserID,
 }
 
@@ -73,12 +82,12 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
-	ApplicationIDValidator func(string) error
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	CodeValidator func([]byte) error
 	// ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
 	ChallengeValidator func([]byte) error
+	// ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
+	ApplicationIDValidator func(string) error
 	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	UserIDValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -108,14 +117,14 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
-// ByApplicationID orders the results by the application_id field.
-func ByApplicationID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldApplicationID, opts...).ToFunc()
-}
-
 // ByExpireAt orders the results by the expire_at field.
 func ByExpireAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpireAt, opts...).ToFunc()
+}
+
+// ByApplicationID orders the results by the application_id field.
+func ByApplicationID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldApplicationID, opts...).ToFunc()
 }
 
 // ByUserID orders the results by the user_id field.
@@ -123,11 +132,25 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
+// ByApplicationField orders the results by application field.
+func ByApplicationField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newApplicationStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByUserField orders the results by user field.
 func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
+}
+func newApplicationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ApplicationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, false, ApplicationTable, ApplicationColumn),
+	)
 }
 func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

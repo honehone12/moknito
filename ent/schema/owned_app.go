@@ -20,8 +20,10 @@ func (OwnedApp) Fields() []ent.Field {
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		field.String("name").
+			MaxLen(256).
 			NotEmpty(),
 		field.String("domain").
+			MaxLen(256).
 			NotEmpty().
 			Immutable(),
 		field.String("application_id").
@@ -37,14 +39,14 @@ func (OwnedApp) Fields() []ent.Field {
 
 func (OwnedApp) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).
-			Ref("owned_apps").
-			Field("user_id").
+		edge.To("application", Application.Type).
+			Field("application_id").
 			Required().
 			Immutable().
 			Unique(),
-		edge.To("application", Application.Type).
-			Field("application_id").
+		edge.From("user", User.Type).
+			Ref("owned_apps").
+			Field("user_id").
 			Required().
 			Immutable().
 			Unique(),

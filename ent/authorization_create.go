@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/ent/application"
 	"moknito/ent/authorization"
 	"moknito/ent/user"
 	"time"
@@ -63,12 +64,6 @@ func (_c *AuthorizationCreate) SetNillableDeletedAt(v *time.Time) *Authorization
 	return _c
 }
 
-// SetApplicationID sets the "application_id" field.
-func (_c *AuthorizationCreate) SetApplicationID(v string) *AuthorizationCreate {
-	_c.mutation.SetApplicationID(v)
-	return _c
-}
-
 // SetCode sets the "code" field.
 func (_c *AuthorizationCreate) SetCode(v []byte) *AuthorizationCreate {
 	_c.mutation.SetCode(v)
@@ -87,6 +82,12 @@ func (_c *AuthorizationCreate) SetExpireAt(v time.Time) *AuthorizationCreate {
 	return _c
 }
 
+// SetApplicationID sets the "application_id" field.
+func (_c *AuthorizationCreate) SetApplicationID(v string) *AuthorizationCreate {
+	_c.mutation.SetApplicationID(v)
+	return _c
+}
+
 // SetUserID sets the "user_id" field.
 func (_c *AuthorizationCreate) SetUserID(v string) *AuthorizationCreate {
 	_c.mutation.SetUserID(v)
@@ -97,6 +98,11 @@ func (_c *AuthorizationCreate) SetUserID(v string) *AuthorizationCreate {
 func (_c *AuthorizationCreate) SetID(v string) *AuthorizationCreate {
 	_c.mutation.SetID(v)
 	return _c
+}
+
+// SetApplication sets the "application" edge to the Application entity.
+func (_c *AuthorizationCreate) SetApplication(v *Application) *AuthorizationCreate {
+	return _c.SetApplicationID(v.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
@@ -157,14 +163,6 @@ func (_c *AuthorizationCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Authorization.updated_at"`)}
 	}
-	if _, ok := _c.mutation.ApplicationID(); !ok {
-		return &ValidationError{Name: "application_id", err: errors.New(`ent: missing required field "Authorization.application_id"`)}
-	}
-	if v, ok := _c.mutation.ApplicationID(); ok {
-		if err := authorization.ApplicationIDValidator(v); err != nil {
-			return &ValidationError{Name: "application_id", err: fmt.Errorf(`ent: validator failed for field "Authorization.application_id": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "Authorization.code"`)}
 	}
@@ -184,6 +182,14 @@ func (_c *AuthorizationCreate) check() error {
 	if _, ok := _c.mutation.ExpireAt(); !ok {
 		return &ValidationError{Name: "expire_at", err: errors.New(`ent: missing required field "Authorization.expire_at"`)}
 	}
+	if _, ok := _c.mutation.ApplicationID(); !ok {
+		return &ValidationError{Name: "application_id", err: errors.New(`ent: missing required field "Authorization.application_id"`)}
+	}
+	if v, ok := _c.mutation.ApplicationID(); ok {
+		if err := authorization.ApplicationIDValidator(v); err != nil {
+			return &ValidationError{Name: "application_id", err: fmt.Errorf(`ent: validator failed for field "Authorization.application_id": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Authorization.user_id"`)}
 	}
@@ -196,6 +202,9 @@ func (_c *AuthorizationCreate) check() error {
 		if err := authorization.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Authorization.id": %w`, err)}
 		}
+	}
+	if len(_c.mutation.ApplicationIDs()) == 0 {
+		return &ValidationError{Name: "application", err: errors.New(`ent: missing required edge "Authorization.application"`)}
 	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Authorization.user"`)}
@@ -247,10 +256,6 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 		_spec.SetField(authorization.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
-	if value, ok := _c.mutation.ApplicationID(); ok {
-		_spec.SetField(authorization.FieldApplicationID, field.TypeString, value)
-		_node.ApplicationID = value
-	}
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(authorization.FieldCode, field.TypeBytes, value)
 		_node.Code = value
@@ -262,6 +267,23 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.ExpireAt(); ok {
 		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
 		_node.ExpireAt = value
+	}
+	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   authorization.ApplicationTable,
+			Columns: []string{authorization.ApplicationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ApplicationID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

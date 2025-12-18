@@ -28,19 +28,12 @@ const (
 	FieldApplicationID = "application_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
 	// EdgeApplication holds the string denoting the application edge name in mutations.
 	EdgeApplication = "application"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the ownedapp in the database.
 	Table = "owned_apps"
-	// UserTable is the table that holds the user relation/edge.
-	UserTable = "owned_apps"
-	// UserInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_id"
 	// ApplicationTable is the table that holds the application relation/edge.
 	ApplicationTable = "owned_apps"
 	// ApplicationInverseTable is the table name for the Application entity.
@@ -48,6 +41,13 @@ const (
 	ApplicationInverseTable = "applications"
 	// ApplicationColumn is the table column denoting the application relation/edge.
 	ApplicationColumn = "application_id"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "owned_apps"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for ownedapp fields.
@@ -134,30 +134,30 @@ func ByUserID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUserID, opts...).ToFunc()
 }
 
-// ByUserField orders the results by user field.
-func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByApplicationField orders the results by application field.
 func ByApplicationField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newApplicationStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newUserStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-	)
+
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
+	}
 }
 func newApplicationStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ApplicationInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, false, ApplicationTable, ApplicationColumn),
+	)
+}
+func newUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }

@@ -490,29 +490,6 @@ func UserIDContainsFold(v string) predicate.OwnedApp {
 	return predicate.OwnedApp(sql.FieldContainsFold(FieldUserID, v))
 }
 
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.OwnedApp {
-	return predicate.OwnedApp(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.OwnedApp {
-	return predicate.OwnedApp(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasApplication applies the HasEdge predicate on the "application" edge.
 func HasApplication() predicate.OwnedApp {
 	return predicate.OwnedApp(func(s *sql.Selector) {
@@ -528,6 +505,29 @@ func HasApplication() predicate.OwnedApp {
 func HasApplicationWith(preds ...predicate.Application) predicate.OwnedApp {
 	return predicate.OwnedApp(func(s *sql.Selector) {
 		step := newApplicationStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.OwnedApp {
+	return predicate.OwnedApp(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.OwnedApp {
+	return predicate.OwnedApp(func(s *sql.Selector) {
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

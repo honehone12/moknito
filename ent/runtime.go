@@ -34,11 +34,57 @@ func init() {
 	// applicationDescName is the schema descriptor for name field.
 	applicationDescName := applicationFields[1].Descriptor()
 	// application.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	application.NameValidator = applicationDescName.Validators[0].(func(string) error)
+	application.NameValidator = func() func(string) error {
+		validators := applicationDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// applicationDescDomain is the schema descriptor for domain field.
 	applicationDescDomain := applicationFields[2].Descriptor()
 	// application.DomainValidator is a validator for the "domain" field. It is called by the builders before save.
-	application.DomainValidator = applicationDescDomain.Validators[0].(func(string) error)
+	application.DomainValidator = func() func(string) error {
+		validators := applicationDescDomain.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(domain string) error {
+			for _, fn := range fns {
+				if err := fn(domain); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// applicationDescRedirect is the schema descriptor for redirect field.
+	applicationDescRedirect := applicationFields[3].Descriptor()
+	// application.RedirectValidator is a validator for the "redirect" field. It is called by the builders before save.
+	application.RedirectValidator = func() func(string) error {
+		validators := applicationDescRedirect.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(redirect string) error {
+			for _, fn := range fns {
+				if err := fn(redirect); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// applicationDescID is the schema descriptor for id field.
 	applicationDescID := applicationFields[0].Descriptor()
 	// application.IDValidator is a validator for the "id" field. It is called by the builders before save.
@@ -89,18 +135,18 @@ func init() {
 	authorization.DefaultUpdatedAt = authorizationDescUpdatedAt.Default.(func() time.Time)
 	// authorization.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	authorization.UpdateDefaultUpdatedAt = authorizationDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// authorizationDescApplicationID is the schema descriptor for application_id field.
-	authorizationDescApplicationID := authorizationFields[1].Descriptor()
-	// authorization.ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
-	authorization.ApplicationIDValidator = authorizationDescApplicationID.Validators[0].(func(string) error)
 	// authorizationDescCode is the schema descriptor for code field.
-	authorizationDescCode := authorizationFields[2].Descriptor()
+	authorizationDescCode := authorizationFields[1].Descriptor()
 	// authorization.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	authorization.CodeValidator = authorizationDescCode.Validators[0].(func([]byte) error)
 	// authorizationDescChallenge is the schema descriptor for challenge field.
-	authorizationDescChallenge := authorizationFields[3].Descriptor()
+	authorizationDescChallenge := authorizationFields[2].Descriptor()
 	// authorization.ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
 	authorization.ChallengeValidator = authorizationDescChallenge.Validators[0].(func([]byte) error)
+	// authorizationDescApplicationID is the schema descriptor for application_id field.
+	authorizationDescApplicationID := authorizationFields[4].Descriptor()
+	// authorization.ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
+	authorization.ApplicationIDValidator = authorizationDescApplicationID.Validators[0].(func(string) error)
 	// authorizationDescUserID is the schema descriptor for user_id field.
 	authorizationDescUserID := authorizationFields[5].Descriptor()
 	// authorization.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
@@ -127,11 +173,39 @@ func init() {
 	// ownedappDescName is the schema descriptor for name field.
 	ownedappDescName := ownedappFields[1].Descriptor()
 	// ownedapp.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	ownedapp.NameValidator = ownedappDescName.Validators[0].(func(string) error)
+	ownedapp.NameValidator = func() func(string) error {
+		validators := ownedappDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// ownedappDescDomain is the schema descriptor for domain field.
 	ownedappDescDomain := ownedappFields[2].Descriptor()
 	// ownedapp.DomainValidator is a validator for the "domain" field. It is called by the builders before save.
-	ownedapp.DomainValidator = ownedappDescDomain.Validators[0].(func(string) error)
+	ownedapp.DomainValidator = func() func(string) error {
+		validators := ownedappDescDomain.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(domain string) error {
+			for _, fn := range fns {
+				if err := fn(domain); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// ownedappDescApplicationID is the schema descriptor for application_id field.
 	ownedappDescApplicationID := ownedappFields[3].Descriptor()
 	// ownedapp.ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.

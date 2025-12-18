@@ -97,6 +97,9 @@ func (_u *AuthorizationUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *AuthorizationUpdate) check() error {
+	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Authorization.application"`)
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Authorization.user"`)
 	}
@@ -226,6 +229,9 @@ func (_u *AuthorizationUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *AuthorizationUpdateOne) check() error {
+	if _u.mutation.ApplicationCleared() && len(_u.mutation.ApplicationIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Authorization.application"`)
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Authorization.user"`)
 	}

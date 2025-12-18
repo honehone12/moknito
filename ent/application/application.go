@@ -24,8 +24,12 @@ const (
 	FieldName = "name"
 	// FieldDomain holds the string denoting the domain field in the database.
 	FieldDomain = "domain"
+	// FieldRedirect holds the string denoting the redirect field in the database.
+	FieldRedirect = "redirect"
 	// EdgeOwned holds the string denoting the owned edge name in mutations.
 	EdgeOwned = "owned"
+	// EdgeOuthed holds the string denoting the outhed edge name in mutations.
+	EdgeOuthed = "outhed"
 	// Table holds the table name of the application in the database.
 	Table = "applications"
 	// OwnedTable is the table that holds the owned relation/edge.
@@ -35,6 +39,13 @@ const (
 	OwnedInverseTable = "owned_apps"
 	// OwnedColumn is the table column denoting the owned relation/edge.
 	OwnedColumn = "application_id"
+	// OuthedTable is the table that holds the outhed relation/edge.
+	OuthedTable = "authorizations"
+	// OuthedInverseTable is the table name for the Authorization entity.
+	// It exists in this package in order to avoid circular dependency with the "authorization" package.
+	OuthedInverseTable = "authorizations"
+	// OuthedColumn is the table column denoting the outhed relation/edge.
+	OuthedColumn = "application_id"
 )
 
 // Columns holds all SQL columns for application fields.
@@ -45,6 +56,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldName,
 	FieldDomain,
+	FieldRedirect,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -68,6 +80,8 @@ var (
 	NameValidator func(string) error
 	// DomainValidator is a validator for the "domain" field. It is called by the builders before save.
 	DomainValidator func(string) error
+	// RedirectValidator is a validator for the "redirect" field. It is called by the builders before save.
+	RedirectValidator func(string) error
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )
@@ -105,6 +119,11 @@ func ByDomain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDomain, opts...).ToFunc()
 }
 
+// ByRedirect orders the results by the redirect field.
+func ByRedirect(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRedirect, opts...).ToFunc()
+}
+
 // ByOwnedCount orders the results by owned count.
 func ByOwnedCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -118,10 +137,31 @@ func ByOwned(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newOwnedStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByOuthedCount orders the results by outhed count.
+func ByOuthedCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newOuthedStep(), opts...)
+	}
+}
+
+// ByOuthed orders the results by outhed terms.
+func ByOuthed(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOuthedStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newOwnedStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(OwnedInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, OwnedTable, OwnedColumn),
+	)
+}
+func newOuthedStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OuthedInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, OuthedTable, OuthedColumn),
 	)
 }

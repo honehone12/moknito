@@ -46,10 +46,14 @@ type ApplicationMutation struct {
 	deleted_at    *time.Time
 	name          *string
 	domain        *string
+	redirect      *string
 	clearedFields map[string]struct{}
 	owned         map[string]struct{}
 	removedowned  map[string]struct{}
 	clearedowned  bool
+	outhed        map[string]struct{}
+	removedouthed map[string]struct{}
+	clearedouthed bool
 	done          bool
 	oldValue      func(context.Context) (*Application, error)
 	predicates    []predicate.Application
@@ -352,6 +356,42 @@ func (m *ApplicationMutation) ResetDomain() {
 	m.domain = nil
 }
 
+// SetRedirect sets the "redirect" field.
+func (m *ApplicationMutation) SetRedirect(s string) {
+	m.redirect = &s
+}
+
+// Redirect returns the value of the "redirect" field in the mutation.
+func (m *ApplicationMutation) Redirect() (r string, exists bool) {
+	v := m.redirect
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRedirect returns the old "redirect" field's value of the Application entity.
+// If the Application object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ApplicationMutation) OldRedirect(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRedirect is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRedirect requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRedirect: %w", err)
+	}
+	return oldValue.Redirect, nil
+}
+
+// ResetRedirect resets all changes to the "redirect" field.
+func (m *ApplicationMutation) ResetRedirect() {
+	m.redirect = nil
+}
+
 // AddOwnedIDs adds the "owned" edge to the OwnedApp entity by ids.
 func (m *ApplicationMutation) AddOwnedIDs(ids ...string) {
 	if m.owned == nil {
@@ -406,6 +446,60 @@ func (m *ApplicationMutation) ResetOwned() {
 	m.removedowned = nil
 }
 
+// AddOuthedIDs adds the "outhed" edge to the Authorization entity by ids.
+func (m *ApplicationMutation) AddOuthedIDs(ids ...string) {
+	if m.outhed == nil {
+		m.outhed = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.outhed[ids[i]] = struct{}{}
+	}
+}
+
+// ClearOuthed clears the "outhed" edge to the Authorization entity.
+func (m *ApplicationMutation) ClearOuthed() {
+	m.clearedouthed = true
+}
+
+// OuthedCleared reports if the "outhed" edge to the Authorization entity was cleared.
+func (m *ApplicationMutation) OuthedCleared() bool {
+	return m.clearedouthed
+}
+
+// RemoveOuthedIDs removes the "outhed" edge to the Authorization entity by IDs.
+func (m *ApplicationMutation) RemoveOuthedIDs(ids ...string) {
+	if m.removedouthed == nil {
+		m.removedouthed = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.outhed, ids[i])
+		m.removedouthed[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedOuthed returns the removed IDs of the "outhed" edge to the Authorization entity.
+func (m *ApplicationMutation) RemovedOuthedIDs() (ids []string) {
+	for id := range m.removedouthed {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// OuthedIDs returns the "outhed" edge IDs in the mutation.
+func (m *ApplicationMutation) OuthedIDs() (ids []string) {
+	for id := range m.outhed {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetOuthed resets all changes to the "outhed" edge.
+func (m *ApplicationMutation) ResetOuthed() {
+	m.outhed = nil
+	m.clearedouthed = false
+	m.removedouthed = nil
+}
+
 // Where appends a list predicates to the ApplicationMutation builder.
 func (m *ApplicationMutation) Where(ps ...predicate.Application) {
 	m.predicates = append(m.predicates, ps...)
@@ -440,7 +534,7 @@ func (m *ApplicationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ApplicationMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, application.FieldCreatedAt)
 	}
@@ -455,6 +549,9 @@ func (m *ApplicationMutation) Fields() []string {
 	}
 	if m.domain != nil {
 		fields = append(fields, application.FieldDomain)
+	}
+	if m.redirect != nil {
+		fields = append(fields, application.FieldRedirect)
 	}
 	return fields
 }
@@ -474,6 +571,8 @@ func (m *ApplicationMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case application.FieldDomain:
 		return m.Domain()
+	case application.FieldRedirect:
+		return m.Redirect()
 	}
 	return nil, false
 }
@@ -493,6 +592,8 @@ func (m *ApplicationMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldName(ctx)
 	case application.FieldDomain:
 		return m.OldDomain(ctx)
+	case application.FieldRedirect:
+		return m.OldRedirect(ctx)
 	}
 	return nil, fmt.Errorf("unknown Application field %s", name)
 }
@@ -536,6 +637,13 @@ func (m *ApplicationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDomain(v)
+		return nil
+	case application.FieldRedirect:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRedirect(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Application field %s", name)
@@ -610,15 +718,21 @@ func (m *ApplicationMutation) ResetField(name string) error {
 	case application.FieldDomain:
 		m.ResetDomain()
 		return nil
+	case application.FieldRedirect:
+		m.ResetRedirect()
+		return nil
 	}
 	return fmt.Errorf("unknown Application field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ApplicationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.owned != nil {
 		edges = append(edges, application.EdgeOwned)
+	}
+	if m.outhed != nil {
+		edges = append(edges, application.EdgeOuthed)
 	}
 	return edges
 }
@@ -633,15 +747,24 @@ func (m *ApplicationMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case application.EdgeOuthed:
+		ids := make([]ent.Value, 0, len(m.outhed))
+		for id := range m.outhed {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ApplicationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedowned != nil {
 		edges = append(edges, application.EdgeOwned)
+	}
+	if m.removedouthed != nil {
+		edges = append(edges, application.EdgeOuthed)
 	}
 	return edges
 }
@@ -656,15 +779,24 @@ func (m *ApplicationMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case application.EdgeOuthed:
+		ids := make([]ent.Value, 0, len(m.removedouthed))
+		for id := range m.removedouthed {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ApplicationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedowned {
 		edges = append(edges, application.EdgeOwned)
+	}
+	if m.clearedouthed {
+		edges = append(edges, application.EdgeOuthed)
 	}
 	return edges
 }
@@ -675,6 +807,8 @@ func (m *ApplicationMutation) EdgeCleared(name string) bool {
 	switch name {
 	case application.EdgeOwned:
 		return m.clearedowned
+	case application.EdgeOuthed:
+		return m.clearedouthed
 	}
 	return false
 }
@@ -693,6 +827,9 @@ func (m *ApplicationMutation) ResetEdge(name string) error {
 	switch name {
 	case application.EdgeOwned:
 		m.ResetOwned()
+		return nil
+	case application.EdgeOuthed:
+		m.ResetOuthed()
 		return nil
 	}
 	return fmt.Errorf("unknown Application edge %s", name)
@@ -1544,22 +1681,23 @@ func (m *AuthenticationMutation) ResetEdge(name string) error {
 // AuthorizationMutation represents an operation that mutates the Authorization nodes in the graph.
 type AuthorizationMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *string
-	created_at     *time.Time
-	updated_at     *time.Time
-	deleted_at     *time.Time
-	application_id *string
-	code           *[]byte
-	challenge      *[]byte
-	expire_at      *time.Time
-	clearedFields  map[string]struct{}
-	user           *string
-	cleareduser    bool
-	done           bool
-	oldValue       func(context.Context) (*Authorization, error)
-	predicates     []predicate.Authorization
+	op                 Op
+	typ                string
+	id                 *string
+	created_at         *time.Time
+	updated_at         *time.Time
+	deleted_at         *time.Time
+	code               *[]byte
+	challenge          *[]byte
+	expire_at          *time.Time
+	clearedFields      map[string]struct{}
+	application        *string
+	clearedapplication bool
+	user               *string
+	cleareduser        bool
+	done               bool
+	oldValue           func(context.Context) (*Authorization, error)
+	predicates         []predicate.Authorization
 }
 
 var _ ent.Mutation = (*AuthorizationMutation)(nil)
@@ -1787,42 +1925,6 @@ func (m *AuthorizationMutation) ResetDeletedAt() {
 	delete(m.clearedFields, authorization.FieldDeletedAt)
 }
 
-// SetApplicationID sets the "application_id" field.
-func (m *AuthorizationMutation) SetApplicationID(s string) {
-	m.application_id = &s
-}
-
-// ApplicationID returns the value of the "application_id" field in the mutation.
-func (m *AuthorizationMutation) ApplicationID() (r string, exists bool) {
-	v := m.application_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldApplicationID returns the old "application_id" field's value of the Authorization entity.
-// If the Authorization object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizationMutation) OldApplicationID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldApplicationID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldApplicationID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldApplicationID: %w", err)
-	}
-	return oldValue.ApplicationID, nil
-}
-
-// ResetApplicationID resets all changes to the "application_id" field.
-func (m *AuthorizationMutation) ResetApplicationID() {
-	m.application_id = nil
-}
-
 // SetCode sets the "code" field.
 func (m *AuthorizationMutation) SetCode(b []byte) {
 	m.code = &b
@@ -1931,6 +2033,42 @@ func (m *AuthorizationMutation) ResetExpireAt() {
 	m.expire_at = nil
 }
 
+// SetApplicationID sets the "application_id" field.
+func (m *AuthorizationMutation) SetApplicationID(s string) {
+	m.application = &s
+}
+
+// ApplicationID returns the value of the "application_id" field in the mutation.
+func (m *AuthorizationMutation) ApplicationID() (r string, exists bool) {
+	v := m.application
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApplicationID returns the old "application_id" field's value of the Authorization entity.
+// If the Authorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthorizationMutation) OldApplicationID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApplicationID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApplicationID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApplicationID: %w", err)
+	}
+	return oldValue.ApplicationID, nil
+}
+
+// ResetApplicationID resets all changes to the "application_id" field.
+func (m *AuthorizationMutation) ResetApplicationID() {
+	m.application = nil
+}
+
 // SetUserID sets the "user_id" field.
 func (m *AuthorizationMutation) SetUserID(s string) {
 	m.user = &s
@@ -1965,6 +2103,33 @@ func (m *AuthorizationMutation) OldUserID(ctx context.Context) (v string, err er
 // ResetUserID resets all changes to the "user_id" field.
 func (m *AuthorizationMutation) ResetUserID() {
 	m.user = nil
+}
+
+// ClearApplication clears the "application" edge to the Application entity.
+func (m *AuthorizationMutation) ClearApplication() {
+	m.clearedapplication = true
+	m.clearedFields[authorization.FieldApplicationID] = struct{}{}
+}
+
+// ApplicationCleared reports if the "application" edge to the Application entity was cleared.
+func (m *AuthorizationMutation) ApplicationCleared() bool {
+	return m.clearedapplication
+}
+
+// ApplicationIDs returns the "application" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ApplicationID instead. It exists only for internal usage by the builders.
+func (m *AuthorizationMutation) ApplicationIDs() (ids []string) {
+	if id := m.application; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetApplication resets all changes to the "application" edge.
+func (m *AuthorizationMutation) ResetApplication() {
+	m.application = nil
+	m.clearedapplication = false
 }
 
 // ClearUser clears the "user" edge to the User entity.
@@ -2038,9 +2203,6 @@ func (m *AuthorizationMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, authorization.FieldDeletedAt)
 	}
-	if m.application_id != nil {
-		fields = append(fields, authorization.FieldApplicationID)
-	}
 	if m.code != nil {
 		fields = append(fields, authorization.FieldCode)
 	}
@@ -2049,6 +2211,9 @@ func (m *AuthorizationMutation) Fields() []string {
 	}
 	if m.expire_at != nil {
 		fields = append(fields, authorization.FieldExpireAt)
+	}
+	if m.application != nil {
+		fields = append(fields, authorization.FieldApplicationID)
 	}
 	if m.user != nil {
 		fields = append(fields, authorization.FieldUserID)
@@ -2067,14 +2232,14 @@ func (m *AuthorizationMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case authorization.FieldDeletedAt:
 		return m.DeletedAt()
-	case authorization.FieldApplicationID:
-		return m.ApplicationID()
 	case authorization.FieldCode:
 		return m.Code()
 	case authorization.FieldChallenge:
 		return m.Challenge()
 	case authorization.FieldExpireAt:
 		return m.ExpireAt()
+	case authorization.FieldApplicationID:
+		return m.ApplicationID()
 	case authorization.FieldUserID:
 		return m.UserID()
 	}
@@ -2092,14 +2257,14 @@ func (m *AuthorizationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldUpdatedAt(ctx)
 	case authorization.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case authorization.FieldApplicationID:
-		return m.OldApplicationID(ctx)
 	case authorization.FieldCode:
 		return m.OldCode(ctx)
 	case authorization.FieldChallenge:
 		return m.OldChallenge(ctx)
 	case authorization.FieldExpireAt:
 		return m.OldExpireAt(ctx)
+	case authorization.FieldApplicationID:
+		return m.OldApplicationID(ctx)
 	case authorization.FieldUserID:
 		return m.OldUserID(ctx)
 	}
@@ -2132,13 +2297,6 @@ func (m *AuthorizationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeletedAt(v)
 		return nil
-	case authorization.FieldApplicationID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetApplicationID(v)
-		return nil
 	case authorization.FieldCode:
 		v, ok := value.([]byte)
 		if !ok {
@@ -2159,6 +2317,13 @@ func (m *AuthorizationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetExpireAt(v)
+		return nil
+	case authorization.FieldApplicationID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApplicationID(v)
 		return nil
 	case authorization.FieldUserID:
 		v, ok := value.(string)
@@ -2234,9 +2399,6 @@ func (m *AuthorizationMutation) ResetField(name string) error {
 	case authorization.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
-	case authorization.FieldApplicationID:
-		m.ResetApplicationID()
-		return nil
 	case authorization.FieldCode:
 		m.ResetCode()
 		return nil
@@ -2245,6 +2407,9 @@ func (m *AuthorizationMutation) ResetField(name string) error {
 		return nil
 	case authorization.FieldExpireAt:
 		m.ResetExpireAt()
+		return nil
+	case authorization.FieldApplicationID:
+		m.ResetApplicationID()
 		return nil
 	case authorization.FieldUserID:
 		m.ResetUserID()
@@ -2255,7 +2420,10 @@ func (m *AuthorizationMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AuthorizationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.application != nil {
+		edges = append(edges, authorization.EdgeApplication)
+	}
 	if m.user != nil {
 		edges = append(edges, authorization.EdgeUser)
 	}
@@ -2266,6 +2434,10 @@ func (m *AuthorizationMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *AuthorizationMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case authorization.EdgeApplication:
+		if id := m.application; id != nil {
+			return []ent.Value{*id}
+		}
 	case authorization.EdgeUser:
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
@@ -2276,7 +2448,7 @@ func (m *AuthorizationMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AuthorizationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -2288,7 +2460,10 @@ func (m *AuthorizationMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AuthorizationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.clearedapplication {
+		edges = append(edges, authorization.EdgeApplication)
+	}
 	if m.cleareduser {
 		edges = append(edges, authorization.EdgeUser)
 	}
@@ -2299,6 +2474,8 @@ func (m *AuthorizationMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *AuthorizationMutation) EdgeCleared(name string) bool {
 	switch name {
+	case authorization.EdgeApplication:
+		return m.clearedapplication
 	case authorization.EdgeUser:
 		return m.cleareduser
 	}
@@ -2309,6 +2486,9 @@ func (m *AuthorizationMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *AuthorizationMutation) ClearEdge(name string) error {
 	switch name {
+	case authorization.EdgeApplication:
+		m.ClearApplication()
+		return nil
 	case authorization.EdgeUser:
 		m.ClearUser()
 		return nil
@@ -2320,6 +2500,9 @@ func (m *AuthorizationMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AuthorizationMutation) ResetEdge(name string) error {
 	switch name {
+	case authorization.EdgeApplication:
+		m.ResetApplication()
+		return nil
 	case authorization.EdgeUser:
 		m.ResetUser()
 		return nil
@@ -2339,10 +2522,10 @@ type OwnedAppMutation struct {
 	name               *string
 	domain             *string
 	clearedFields      map[string]struct{}
-	user               *string
-	cleareduser        bool
 	application        *string
 	clearedapplication bool
+	user               *string
+	cleareduser        bool
 	done               bool
 	oldValue           func(context.Context) (*OwnedApp, error)
 	predicates         []predicate.OwnedApp
@@ -2717,33 +2900,6 @@ func (m *OwnedAppMutation) ResetUserID() {
 	m.user = nil
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (m *OwnedAppMutation) ClearUser() {
-	m.cleareduser = true
-	m.clearedFields[ownedapp.FieldUserID] = struct{}{}
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *OwnedAppMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *OwnedAppMutation) UserIDs() (ids []string) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *OwnedAppMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
 // ClearApplication clears the "application" edge to the Application entity.
 func (m *OwnedAppMutation) ClearApplication() {
 	m.clearedapplication = true
@@ -2769,6 +2925,33 @@ func (m *OwnedAppMutation) ApplicationIDs() (ids []string) {
 func (m *OwnedAppMutation) ResetApplication() {
 	m.application = nil
 	m.clearedapplication = false
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *OwnedAppMutation) ClearUser() {
+	m.cleareduser = true
+	m.clearedFields[ownedapp.FieldUserID] = struct{}{}
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *OwnedAppMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *OwnedAppMutation) UserIDs() (ids []string) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *OwnedAppMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
 }
 
 // Where appends a list predicates to the OwnedAppMutation builder.
@@ -3016,11 +3199,11 @@ func (m *OwnedAppMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *OwnedAppMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.user != nil {
-		edges = append(edges, ownedapp.EdgeUser)
-	}
 	if m.application != nil {
 		edges = append(edges, ownedapp.EdgeApplication)
+	}
+	if m.user != nil {
+		edges = append(edges, ownedapp.EdgeUser)
 	}
 	return edges
 }
@@ -3029,12 +3212,12 @@ func (m *OwnedAppMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *OwnedAppMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case ownedapp.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
 	case ownedapp.EdgeApplication:
 		if id := m.application; id != nil {
+			return []ent.Value{*id}
+		}
+	case ownedapp.EdgeUser:
+		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -3056,11 +3239,11 @@ func (m *OwnedAppMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *OwnedAppMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.cleareduser {
-		edges = append(edges, ownedapp.EdgeUser)
-	}
 	if m.clearedapplication {
 		edges = append(edges, ownedapp.EdgeApplication)
+	}
+	if m.cleareduser {
+		edges = append(edges, ownedapp.EdgeUser)
 	}
 	return edges
 }
@@ -3069,10 +3252,10 @@ func (m *OwnedAppMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *OwnedAppMutation) EdgeCleared(name string) bool {
 	switch name {
-	case ownedapp.EdgeUser:
-		return m.cleareduser
 	case ownedapp.EdgeApplication:
 		return m.clearedapplication
+	case ownedapp.EdgeUser:
+		return m.cleareduser
 	}
 	return false
 }
@@ -3081,11 +3264,11 @@ func (m *OwnedAppMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *OwnedAppMutation) ClearEdge(name string) error {
 	switch name {
-	case ownedapp.EdgeUser:
-		m.ClearUser()
-		return nil
 	case ownedapp.EdgeApplication:
 		m.ClearApplication()
+		return nil
+	case ownedapp.EdgeUser:
+		m.ClearUser()
 		return nil
 	}
 	return fmt.Errorf("unknown OwnedApp unique edge %s", name)
@@ -3095,11 +3278,11 @@ func (m *OwnedAppMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *OwnedAppMutation) ResetEdge(name string) error {
 	switch name {
-	case ownedapp.EdgeUser:
-		m.ResetUser()
-		return nil
 	case ownedapp.EdgeApplication:
 		m.ResetApplication()
+		return nil
+	case ownedapp.EdgeUser:
+		m.ResetUser()
 		return nil
 	}
 	return fmt.Errorf("unknown OwnedApp edge %s", name)

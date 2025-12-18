@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"moknito/ent/application"
+	"moknito/ent/authorization"
 	"moknito/ent/ownedapp"
 	"time"
 
@@ -75,6 +76,12 @@ func (_c *ApplicationCreate) SetDomain(v string) *ApplicationCreate {
 	return _c
 }
 
+// SetRedirect sets the "redirect" field.
+func (_c *ApplicationCreate) SetRedirect(v string) *ApplicationCreate {
+	_c.mutation.SetRedirect(v)
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *ApplicationCreate) SetID(v string) *ApplicationCreate {
 	_c.mutation.SetID(v)
@@ -94,6 +101,21 @@ func (_c *ApplicationCreate) AddOwned(v ...*OwnedApp) *ApplicationCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddOwnedIDs(ids...)
+}
+
+// AddOuthedIDs adds the "outhed" edge to the Authorization entity by IDs.
+func (_c *ApplicationCreate) AddOuthedIDs(ids ...string) *ApplicationCreate {
+	_c.mutation.AddOuthedIDs(ids...)
+	return _c
+}
+
+// AddOuthed adds the "outhed" edges to the Authorization entity.
+func (_c *ApplicationCreate) AddOuthed(v ...*Authorization) *ApplicationCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddOuthedIDs(ids...)
 }
 
 // Mutation returns the ApplicationMutation object of the builder.
@@ -165,6 +187,14 @@ func (_c *ApplicationCreate) check() error {
 			return &ValidationError{Name: "domain", err: fmt.Errorf(`ent: validator failed for field "Application.domain": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.Redirect(); !ok {
+		return &ValidationError{Name: "redirect", err: errors.New(`ent: missing required field "Application.redirect"`)}
+	}
+	if v, ok := _c.mutation.Redirect(); ok {
+		if err := application.RedirectValidator(v); err != nil {
+			return &ValidationError{Name: "redirect", err: fmt.Errorf(`ent: validator failed for field "Application.redirect": %w`, err)}
+		}
+	}
 	if v, ok := _c.mutation.ID(); ok {
 		if err := application.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Application.id": %w`, err)}
@@ -225,6 +255,10 @@ func (_c *ApplicationCreate) createSpec() (*Application, *sqlgraph.CreateSpec) {
 		_spec.SetField(application.FieldDomain, field.TypeString, value)
 		_node.Domain = value
 	}
+	if value, ok := _c.mutation.Redirect(); ok {
+		_spec.SetField(application.FieldRedirect, field.TypeString, value)
+		_node.Redirect = value
+	}
 	if nodes := _c.mutation.OwnedIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -234,6 +268,22 @@ func (_c *ApplicationCreate) createSpec() (*Application, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ownedapp.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.OuthedIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   application.OuthedTable,
+			Columns: []string{application.OuthedColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

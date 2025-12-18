@@ -27,6 +27,8 @@ type Application struct {
 	Name string `json:"name,omitempty"`
 	// Domain holds the value of the "domain" field.
 	Domain string `json:"domain,omitempty"`
+	// Redirect holds the value of the "redirect" field.
+	Redirect string `json:"redirect,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ApplicationQuery when eager-loading is set.
 	Edges        ApplicationEdges `json:"edges"`
@@ -37,9 +39,11 @@ type Application struct {
 type ApplicationEdges struct {
 	// Owned holds the value of the owned edge.
 	Owned []*OwnedApp `json:"owned,omitempty"`
+	// Outhed holds the value of the outhed edge.
+	Outhed []*Authorization `json:"outhed,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // OwnedOrErr returns the Owned value or an error if the edge
@@ -51,12 +55,21 @@ func (e ApplicationEdges) OwnedOrErr() ([]*OwnedApp, error) {
 	return nil, &NotLoadedError{edge: "owned"}
 }
 
+// OuthedOrErr returns the Outhed value or an error if the edge
+// was not loaded in eager-loading.
+func (e ApplicationEdges) OuthedOrErr() ([]*Authorization, error) {
+	if e.loadedTypes[1] {
+		return e.Outhed, nil
+	}
+	return nil, &NotLoadedError{edge: "outhed"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Application) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case application.FieldID, application.FieldName, application.FieldDomain:
+		case application.FieldID, application.FieldName, application.FieldDomain, application.FieldRedirect:
 			values[i] = new(sql.NullString)
 		case application.FieldCreatedAt, application.FieldUpdatedAt, application.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -112,6 +125,12 @@ func (_m *Application) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Domain = value.String
 			}
+		case application.FieldRedirect:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field redirect", values[i])
+			} else if value.Valid {
+				_m.Redirect = value.String
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -128,6 +147,11 @@ func (_m *Application) Value(name string) (ent.Value, error) {
 // QueryOwned queries the "owned" edge of the Application entity.
 func (_m *Application) QueryOwned() *OwnedAppQuery {
 	return NewApplicationClient(_m.config).QueryOwned(_m)
+}
+
+// QueryOuthed queries the "outhed" edge of the Application entity.
+func (_m *Application) QueryOuthed() *AuthorizationQuery {
+	return NewApplicationClient(_m.config).QueryOuthed(_m)
 }
 
 // Update returns a builder for updating this Application.
@@ -169,6 +193,9 @@ func (_m *Application) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("domain=")
 	builder.WriteString(_m.Domain)
+	builder.WriteString(", ")
+	builder.WriteString("redirect=")
+	builder.WriteString(_m.Redirect)
 	builder.WriteByte(')')
 	return builder.String()
 }
