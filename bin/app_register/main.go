@@ -60,8 +60,9 @@ func main() {
 	ctx := context.Background()
 	app, err := client.Application.Create().
 		SetID(string(id)).
-		SetName(*appName).
-		SetDomain(*domain).
+		SetName(args.Name).
+		SetDomain(args.Domain).
+		SetRedirect(args.Redirect).
 		Save(ctx)
 	if err != nil {
 		log.Fatalln(err)
@@ -70,9 +71,10 @@ func main() {
 	encId := base64.RawURLEncoding.EncodeToString([]byte(id))
 
 	log.Printf(
-		"created application id: %s name: %s domain: %s\n",
+		"created application id: %s name: %s domain: %s redirect: %s\n",
 		encId,
 		app.Name,
 		app.Domain,
+		app.Redirect,
 	)
 }
