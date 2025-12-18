@@ -11,20 +11,28 @@ type InfoSys interface {
 	InfoApp(
 		ctx context.Context,
 		id string,
-	) (*ent.Application, error, error)
+	) *InfoAppResult
 }
 
-// (!) returns application, validation error, system error
+type InfoAppResult struct {
+	Name   string
+	Domain string
+	E
+}
+
 func (s *EntRdsSys) InfoApp(
 	ctx context.Context,
 	appUiid string,
-) (*ent.Application, error, error) {
+) *InfoAppResult {
+	r := &InfoAppResult{}
+
 	id, err := id.FromUUIDString(appUiid)
 	if err != nil {
-		return nil, err, nil
+		r.ValidationErr = err
+		return r
 	}
 
-	a, err := s.ent.Application.Query().
+	app, err := s.ent.Application.Query().
 		Where(
 			application.ID(string(id)),
 			application.DeletedAtIsNil(),
@@ -35,10 +43,14 @@ func (s *EntRdsSys) InfoApp(
 		).
 		Only(ctx)
 	if ent.IsNotFound(err) {
-		return nil, err, nil
+		r.ValidationErr = err
+		return r
 	} else if err != nil {
-		return nil, nil, err
+		r.SystemErr = err
+		return r
 	}
 
-	return a, nil, nil
+	r.Name = app.Name
+	r.Domain = app.Domain
+	return r
 }

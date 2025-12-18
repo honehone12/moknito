@@ -26,17 +26,17 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	ok, err := m.system.UserRegister(
+	r := m.system.UserRegister(
 		ctx.Request().Context(),
 		form.Name,
 		form.Email,
 		form.Password,
 	)
-	if err != nil {
-		return err
+	if r.SystemErr != nil {
+		return r.SystemErr
 	}
-	if !ok {
-		ctx.Logger().Warn("duplicated user")
+	if r.ValidationErr != nil {
+		ctx.Logger().Warn(r.ValidationErr)
 		return res.BadRequest(ctx)
 	}
 
@@ -52,20 +52,20 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 	}
 
 	req := ctx.Request()
-	cookie, ok, err := m.system.UserJoin(
+	r := m.system.UserJoin(
 		req.Context(),
 		form.Email, form.Password,
 		ctx.RealIP(), req.Header.Get("User-Agent"),
 	)
-	if err != nil {
-		return err
+	if r.SystemErr != nil {
+		return r.SystemErr
 	}
-	if !ok {
-		ctx.Logger().Warn("wrong credentials")
+	if r.ValidationErr != nil {
+		ctx.Logger().Warn(r.ValidationErr)
 		return res.BadRequest(ctx)
 	}
 
-	ctx.SetCookie(cookie)
+	ctx.SetCookie(r.Cookie)
 	return ctx.NoContent(http.StatusOK)
 }
 
@@ -78,19 +78,19 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 	}
 
 	req := ctx.Request()
-	cookie, ok, err := m.system.UserAuthenticate(
+	r := m.system.UserAuthenticate(
 		req.Context(),
 		form.Email, form.Password,
 		ctx.RealIP(), req.Header.Get("User-Agent"),
 	)
-	if err != nil {
-		return err
+	if r.SystemErr != nil {
+		return r.SystemErr
 	}
-	if !ok {
-		ctx.Logger().Warn("wrong credentials")
+	if r.ValidationErr != nil {
+		ctx.Logger().Warn(r.ValidationErr)
 		return res.BadRequest(ctx)
 	}
 
-	ctx.SetCookie(cookie)
+	ctx.SetCookie(r.Cookie)
 	return ctx.NoContent(http.StatusOK)
 }

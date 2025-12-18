@@ -32,6 +32,7 @@ func NewMocknito() (*Moknito, error) {
 
 	system, err := sys.NewEntRdsSys(
 		time.Hour*24,
+		time.Minute*5,
 		ent.Debug(),
 	)
 	if err != nil {

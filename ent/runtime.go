@@ -135,20 +135,20 @@ func init() {
 	authorization.DefaultUpdatedAt = authorizationDescUpdatedAt.Default.(func() time.Time)
 	// authorization.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	authorization.UpdateDefaultUpdatedAt = authorizationDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// authorizationDescCode is the schema descriptor for code field.
-	authorizationDescCode := authorizationFields[1].Descriptor()
-	// authorization.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	authorization.CodeValidator = authorizationDescCode.Validators[0].(func([]byte) error)
 	// authorizationDescChallenge is the schema descriptor for challenge field.
-	authorizationDescChallenge := authorizationFields[2].Descriptor()
+	authorizationDescChallenge := authorizationFields[1].Descriptor()
 	// authorization.ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
 	authorization.ChallengeValidator = authorizationDescChallenge.Validators[0].(func([]byte) error)
+	// authorizationDescCode is the schema descriptor for code field.
+	authorizationDescCode := authorizationFields[2].Descriptor()
+	// authorization.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	authorization.CodeValidator = authorizationDescCode.Validators[0].(func([]byte) error)
 	// authorizationDescApplicationID is the schema descriptor for application_id field.
-	authorizationDescApplicationID := authorizationFields[4].Descriptor()
+	authorizationDescApplicationID := authorizationFields[5].Descriptor()
 	// authorization.ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
 	authorization.ApplicationIDValidator = authorizationDescApplicationID.Validators[0].(func(string) error)
 	// authorizationDescUserID is the schema descriptor for user_id field.
-	authorizationDescUserID := authorizationFields[5].Descriptor()
+	authorizationDescUserID := authorizationFields[6].Descriptor()
 	// authorization.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	authorization.UserIDValidator = authorizationDescUserID.Validators[0].(func(string) error)
 	// authorizationDescID is the schema descriptor for id field.

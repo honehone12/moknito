@@ -56,8 +56,9 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "code", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "challenge", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(32)"}},
+		{Name: "code", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "code_expire_at", Type: field.TypeTime},
 		{Name: "expire_at", Type: field.TypeTime},
 		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
@@ -70,13 +71,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "authorizations_applications_application",
-				Columns:    []*schema.Column{AuthorizationsColumns[7]},
+				Columns:    []*schema.Column{AuthorizationsColumns[8]},
 				RefColumns: []*schema.Column{ApplicationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "authorizations_users_authorizations",
-				Columns:    []*schema.Column{AuthorizationsColumns[8]},
+				Columns:    []*schema.Column{AuthorizationsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

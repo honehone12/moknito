@@ -20,10 +20,12 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldCode holds the string denoting the code field in the database.
-	FieldCode = "code"
 	// FieldChallenge holds the string denoting the challenge field in the database.
 	FieldChallenge = "challenge"
+	// FieldCode holds the string denoting the code field in the database.
+	FieldCode = "code"
+	// FieldCodeExpireAt holds the string denoting the code_expire_at field in the database.
+	FieldCodeExpireAt = "code_expire_at"
 	// FieldExpireAt holds the string denoting the expire_at field in the database.
 	FieldExpireAt = "expire_at"
 	// FieldApplicationID holds the string denoting the application_id field in the database.
@@ -58,8 +60,9 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
-	FieldCode,
 	FieldChallenge,
+	FieldCode,
+	FieldCodeExpireAt,
 	FieldExpireAt,
 	FieldApplicationID,
 	FieldUserID,
@@ -82,10 +85,10 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	CodeValidator func([]byte) error
 	// ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
 	ChallengeValidator func([]byte) error
+	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	CodeValidator func([]byte) error
 	// ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
 	ApplicationIDValidator func(string) error
 	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
@@ -115,6 +118,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByCodeExpireAt orders the results by the code_expire_at field.
+func ByCodeExpireAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCodeExpireAt, opts...).ToFunc()
 }
 
 // ByExpireAt orders the results by the expire_at field.

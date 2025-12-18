@@ -24,20 +24,20 @@ func (m *Moknito) InfoApp(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	app, invalid, err := m.system.InfoApp(
+	r := m.system.InfoApp(
 		ctx.Request().Context(),
 		query.Id,
 	)
-	if invalid != nil {
-		ctx.Logger().Warn(invalid)
-		return res.BadRequest(ctx)
+	if r.SystemErr != nil {
+		return r.SystemErr
 	}
-	if err != nil {
-		return err
+	if r.ValidationErr != nil {
+		ctx.Logger().Warn(r.ValidationErr)
+		return res.BadRequest(ctx)
 	}
 
 	return ctx.JSON(http.StatusOK, InfoAppResponse{
-		Name:   app.Name,
-		Domain: app.Domain,
+		Name:   r.Name,
+		Domain: r.Domain,
 	})
 }

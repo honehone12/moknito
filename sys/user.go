@@ -16,22 +16,37 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const MAX_AUTHENTICATION_ERROR = 10
+const USER_REGISTRATION_REDIS_KEY = "USERREG"
+const ERROR_REDIS_KEY = "ERROR"
+
 type UserSys interface {
 	UserRegister(
 		ctx context.Context,
 		name, email, password string,
-	) (bool, error)
+	) *UserRegsterResult
 	UserJoin(
 		ctx context.Context,
 		email, password,
 		ip, userAgent string,
-	) (*http.Cookie, bool, error)
+	) *UserJoinResult
 	UserAuthenticate(
 		ctx context.Context,
 		email, password,
 		ip, userAgent string,
-	) (*http.Cookie, bool, error)
+	) *UserAuthenticateResult
 }
+
+type UserRegsterResult = E
+
+type UserResult struct {
+	Cookie *http.Cookie
+	E
+}
+
+type UserJoinResult = UserResult
+
+type UserAuthenticateResult = UserResult
 
 type userRegistration struct {
 	Name   string `json:"name"`
@@ -39,14 +54,12 @@ type userRegistration struct {
 	PwHash string `json:"pwhash"`
 }
 
-const MAX_AUTHENTICATION_ERROR = 10
-const USER_REGISTRATION_REDIS_KEY = "USERREG"
-const ERROR_REDIS_KEY = "ERROR"
-
 func (s *EntRdsSys) UserRegister(
 	ctx context.Context,
 	name, email, password string,
-) (bool, error) {
+) *UserRegsterResult {
+	r := &UserRegsterResult{}
+
 	exist, err := s.ent.User.Query().
 		Where(
 			user.Email(email),
@@ -54,19 +67,22 @@ func (s *EntRdsSys) UserRegister(
 		).
 		Exist(ctx)
 	if err != nil {
-		return false, err
+		r.SystemErr = err
+		return r
 	}
 	if exist {
-		return false, nil
+		r.ValidationErr = errors.New("duplicated user")
+		return r
 	}
 
 	pwHash, err := hash.Hash(password)
 	if err != nil {
-		return false, err
+		r.SystemErr = err
+		return r
 	}
 
 	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_REDIS_KEY, email)
-	if err := s.redis.JSONSetMode(
+	err = s.redis.JSONSetMode(
 		ctx,
 		key,
 		"$", userRegistration{
@@ -75,14 +91,20 @@ func (s *EntRdsSys) UserRegister(
 			PwHash: pwHash,
 		},
 		"NX",
-	).Err(); err != nil {
-		return false, err
+	).Err()
+	if errors.Is(err, redis.Nil) {
+		r.ValidationErr = errors.New("duplicated user")
+		return r
+	} else if err != nil {
+		r.SystemErr = err
+		return r
 	}
 	if err := s.redis.Expire(ctx, key, time.Minute*5).Err(); err != nil {
-		return false, err
+		r.SystemErr = err
+		return r
 	}
 
-	return true, nil
+	return r
 }
 
 func (s *EntRdsSys) checkErrorCount(
@@ -91,9 +113,7 @@ func (s *EntRdsSys) checkErrorCount(
 ) (bool, error) {
 	eKey := fmt.Sprintf("%s:%s", ERROR_REDIS_KEY, email)
 	e, err := s.redis.Get(ctx, eKey).Result()
-	if errors.Is(err, redis.Nil) {
-		return true, nil
-	} else if err != nil {
+	if err != nil {
 		return false, err
 	}
 	eCount, err := strconv.Atoi(e)
@@ -124,45 +144,65 @@ func (s *EntRdsSys) UserJoin(
 	ctx context.Context,
 	email, password,
 	ip, userAgent string,
-) (*http.Cookie, bool, error) {
+) *UserJoinResult {
+	r := &UserResult{}
+
 	ok, err := s.checkErrorCount(ctx, email)
-	if err != nil {
-		return nil, false, err
+	if errors.Is(err, redis.Nil) {
+		r.ValidationErr = errors.New("user is not registered")
+		return r
+	} else if err != nil {
+		r.SystemErr = err
+		return r
 	}
 	if !ok {
-		return nil, false, nil
+		r.ValidationErr = errors.New("user is locked")
+		return r
 	}
 
 	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_REDIS_KEY, email)
-	r, err := s.redis.JSONGet(ctx, key, "$").Result()
+	j, err := s.redis.JSONGet(ctx, key, "$").Result()
 	if errors.Is(err, redis.Nil) {
-		return nil, false, nil
+		r.ValidationErr = errors.New("registration not found")
+		return r
 	} else if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
 	var reg []userRegistration
-	if err := json.Unmarshal([]byte(r), &reg); err != nil {
-		return nil, false, err
+	if err := json.Unmarshal([]byte(j), &reg); err != nil {
+		r.SystemErr = err
+		return r
 	}
+	if len(reg) == 0 {
+		r.SystemErr = errors.New("failed to unmarshal registration array")
+		return r
+	}
+
 	register := reg[0]
 
 	ok, err = hash.Check(password, register.PwHash)
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 	if !ok {
 		err := s.incrErrCount(ctx, email)
-		return nil, false, err
+		r.SystemErr = err
+		r.ValidationErr = errors.New("invalid password")
+		return r
 	}
 
 	userId, err := id.NewSequential()
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 	authId, err := id.NewSequential()
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
 	tx, err := s.ent.Tx(ctx)
@@ -173,8 +213,13 @@ func (s *EntRdsSys) UserJoin(
 		SetPwhash(register.PwHash).
 		Save(ctx)
 	if err != nil {
+		// we just set this err as system error because
+		// user should already registered and params are validated
+		// and user does not have constraints
+
 		err := s.rollback(tx, err)
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 	auth, err := tx.Authentication.Create().
 		SetID(string(authId)).
@@ -185,14 +230,17 @@ func (s *EntRdsSys) UserJoin(
 		Save(ctx)
 	if err != nil {
 		err := s.rollback(tx, err)
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 	if err := tx.Commit(); err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
 	if err := s.redis.JSONDel(ctx, key, "$").Err(); err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
 	cookie, err := s.createAuthentication(
@@ -200,23 +248,33 @@ func (s *EntRdsSys) UserJoin(
 		id.Id(user.ID),
 	)
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
-	return cookie, true, nil
+	r.Cookie = cookie
+	return r
 }
 
 func (s *EntRdsSys) UserAuthenticate(
 	ctx context.Context,
 	email, password,
 	ip, userAgent string,
-) (*http.Cookie, bool, error) {
+) *UserAuthenticateResult {
+	r := &UserAuthenticateResult{}
+
 	ok, err := s.checkErrorCount(ctx, email)
+	if errors.Is(err, redis.Nil) {
+		r.ValidationErr = errors.New("user is not registered")
+		return r
+	}
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 	if !ok {
-		return nil, false, nil
+		r.ValidationErr = errors.New("user is locked")
+		return r
 	}
 
 	user, err := s.ent.User.Query().
@@ -226,24 +284,30 @@ func (s *EntRdsSys) UserAuthenticate(
 		).
 		Only(ctx)
 	if ent.IsNotFound(err) {
-		return nil, false, nil
+		r.ValidationErr = err
+		return r
 	}
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
 	ok, err = hash.Check(password, user.Pwhash)
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 	if !ok {
 		err := s.incrErrCount(ctx, email)
-		return nil, false, err
+		r.SystemErr = err
+		r.ValidationErr = errors.New("invalid password")
+		return r
 	}
 
 	authId, err := id.NewSequential()
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
 	auth, err := s.ent.Authentication.Create().
@@ -254,7 +318,8 @@ func (s *EntRdsSys) UserAuthenticate(
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
 	cookie, err := s.createAuthentication(
@@ -262,8 +327,10 @@ func (s *EntRdsSys) UserAuthenticate(
 		id.Id(user.ID),
 	)
 	if err != nil {
-		return nil, false, err
+		r.SystemErr = err
+		return r
 	}
 
-	return cookie, true, nil
+	r.Cookie = cookie
+	return r
 }

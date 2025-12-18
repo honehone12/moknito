@@ -16,7 +16,7 @@ import (
 func main() {
 	echo := echo4.New()
 	echo.Use(echo4middleware.Logger())
-	echo.Logger.SetLevel(log.DEBUG)
+	echo.Logger.SetLevel(log.INFO)
 	echo.Logger.SetPrefix("MOKNITO")
 	echo.HTTPErrorHandler = func(err error, ctx echo4.Context) {
 		ctx.Logger().Error(err)
@@ -69,6 +69,7 @@ func main() {
 	userApi.POST("/join", moknito.UserJoin)
 	userApi.POST("/authenticate", moknito.UserAuthenticate)
 	appApi := api.Group("/app", moknito.VerifyAuthentication())
+	appApi.POST("/allow", moknito.AppAllow)
 	appApi.POST("/authorize", moknito.AppAuthorize)
 
 	// routes for GETs

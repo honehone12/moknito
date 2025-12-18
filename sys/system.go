@@ -5,9 +5,7 @@ import (
 	"errors"
 	"io"
 	"moknito/ent"
-	"moknito/id"
 	"moknito/token"
-	"net/http"
 	"os"
 	"time"
 
@@ -15,32 +13,18 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type SessionSigner interface {
-	CreateSession(ctx context.Context) (*http.Cookie, error)
-	IncrSession(
-		ctx context.Context,
-		sessKey []byte,
-	) (*http.Cookie, error)
-	VerifySession(
-		ctx context.Context,
-		cookie *http.Cookie,
-	) ([]byte, error, error)
-}
-
-type AuthSigner interface {
-	VerifyAuthentication(
-		ctx context.Context,
-		cookie *http.Cookie,
-	) (id.Id, error, error)
-}
-
 type Sys interface {
 	SessionSigner
-	AuthSigner
+	AuthenticationSigner
 	UserSys
 	InfoSys
 	AppSys
 	io.Closer
+}
+
+type E struct {
+	ValidationErr error
+	SystemErr     error
 }
 
 type EntRdsSys struct {
@@ -48,12 +32,13 @@ type EntRdsSys struct {
 	redis *redis.Client
 
 	tokenTtl      time.Duration
+	codeTtl       time.Duration
 	sessionSigner *token.SessionTokenSigner
 	authSigner    *token.AuthTokenSigner
 }
 
 func NewEntRdsSys(
-	tokenTtl time.Duration,
+	tokenTtl, codeTtl time.Duration,
 	entOptions ...ent.Option,
 ) (*EntRdsSys, error) {
 	// don't inject other than env
@@ -104,6 +89,7 @@ func NewEntRdsSys(
 		ent,
 		redis,
 		tokenTtl,
+		codeTtl,
 		sessionSigner,
 		authSigner,
 	}, nil

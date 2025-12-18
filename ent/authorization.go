@@ -25,10 +25,12 @@ type Authorization struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
-	// Code holds the value of the "code" field.
-	Code []byte `json:"code,omitempty"`
 	// Challenge holds the value of the "challenge" field.
 	Challenge []byte `json:"challenge,omitempty"`
+	// Code holds the value of the "code" field.
+	Code []byte `json:"code,omitempty"`
+	// CodeExpireAt holds the value of the "code_expire_at" field.
+	CodeExpireAt time.Time `json:"code_expire_at,omitempty"`
 	// ExpireAt holds the value of the "expire_at" field.
 	ExpireAt time.Time `json:"expire_at,omitempty"`
 	// ApplicationID holds the value of the "application_id" field.
@@ -79,11 +81,11 @@ func (*Authorization) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case authorization.FieldCode, authorization.FieldChallenge:
+		case authorization.FieldChallenge, authorization.FieldCode:
 			values[i] = new([]byte)
 		case authorization.FieldID, authorization.FieldApplicationID, authorization.FieldUserID:
 			values[i] = new(sql.NullString)
-		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldExpireAt:
+		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldCodeExpireAt, authorization.FieldExpireAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -125,17 +127,23 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 				_m.DeletedAt = new(time.Time)
 				*_m.DeletedAt = value.Time
 			}
+		case authorization.FieldChallenge:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field challenge", values[i])
+			} else if value != nil {
+				_m.Challenge = *value
+			}
 		case authorization.FieldCode:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value != nil {
 				_m.Code = *value
 			}
-		case authorization.FieldChallenge:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field challenge", values[i])
-			} else if value != nil {
-				_m.Challenge = *value
+		case authorization.FieldCodeExpireAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field code_expire_at", values[i])
+			} else if value.Valid {
+				_m.CodeExpireAt = value.Time
 			}
 		case authorization.FieldExpireAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -212,11 +220,14 @@ func (_m *Authorization) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
+	builder.WriteString("challenge=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Challenge))
+	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Code))
 	builder.WriteString(", ")
-	builder.WriteString("challenge=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Challenge))
+	builder.WriteString("code_expire_at=")
+	builder.WriteString(_m.CodeExpireAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("expire_at=")
 	builder.WriteString(_m.ExpireAt.Format(time.ANSIC))

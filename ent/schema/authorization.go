@@ -19,18 +19,20 @@ func (Authorization) Fields() []ent.Field {
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
+		field.Bytes("challenge").
+			NotEmpty().
+			Immutable().
+			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
 		// this should be unique, yes
 		// but i'm not sure we should return error as constraint
 		field.Bytes("code").
 			NotEmpty().
 			Immutable().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
+		field.Time("code_expire_at").
+			Immutable(),
 		// this should be unique, yes
 		// but i'm not sure we should return error as constraint
-		field.Bytes("challenge").
-			NotEmpty().
-			Immutable().
-			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
 		field.Time("expire_at").
 			Immutable(),
 		field.String("application_id").

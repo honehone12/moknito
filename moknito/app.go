@@ -2,6 +2,7 @@ package moknito
 
 import (
 	"errors"
+	"fmt"
 	"moknito/id"
 	"moknito/res"
 	"net/http"
@@ -9,14 +10,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type AppAuthorizeRequest struct {
+type AppAllowRequest struct {
 	Id string `form:"id" validate:"len=36"`
 }
 
-func (m *Moknito) AppAuthorize(ctx echo.Context) error {
-	query := AppAuthorizeRequest{}
+type AppAuthorizeRequest struct {
+	Id        string `form:"id" validate:"len=36"`
+	Challenge string `form:"challenge" validate:"len=22,base64rawurl"`
+}
 
-	if err := m.bind(ctx, &query); err != nil {
+func (m *Moknito) AppAllow(ctx echo.Context) error {
+	form := AppAllowRequest{}
+
+	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)
 		return res.BadRequest(ctx)
 	}
@@ -27,18 +33,57 @@ func (m *Moknito) AppAuthorize(ctx echo.Context) error {
 		return errors.New("failed to cast ctx user id value to id")
 	}
 
-	invalid, err := m.system.AppAuthorize(
+	r := m.system.AppAllow(
 		ctx.Request().Context(),
 		userId,
-		query.Id,
+		form.Id,
 	)
-	if invalid != nil {
-		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+	if r.SystemErr != nil {
+		return r.SystemErr
 	}
-	if err != nil {
-		return err
+	if r.ValidationErr != nil {
+		ctx.Logger().Warn(r.ValidationErr)
+		return res.BadRequest(ctx)
 	}
 
 	return ctx.NoContent(http.StatusOK)
+}
+
+func (m *Moknito) AppAuthorize(ctx echo.Context) error {
+	form := AppAuthorizeRequest{}
+
+	if err := m.bind(ctx, &form); err != nil {
+		ctx.Logger().Warn(err)
+		return res.BadRequest(ctx)
+	}
+
+	rawUser := ctx.Get(CONTEXT_KEY_AUTHED_USER_ID)
+	userId, ok := rawUser.(id.Id)
+	if !ok {
+		return errors.New("failed to cast ctx user id value to id")
+	}
+
+	r := m.system.AppAuthorize(
+		ctx.Request().Context(),
+		userId,
+		form.Id,
+		form.Challenge,
+	)
+
+	if r.SystemErr != nil {
+		return r.SystemErr
+	}
+	if r.ValidationErr != nil {
+		ctx.Logger().Warn(r.ValidationErr)
+		return res.BadRequest(ctx)
+	}
+
+	redirect := fmt.Sprintf(
+		"%s?code=%s",
+		r.Redirect,
+		r.Code,
+	)
+
+	ctx.Response().Header().Set("Location", redirect)
+	return ctx.NoContent(http.StatusSeeOther)
 }

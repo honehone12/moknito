@@ -17,17 +17,37 @@ const SESSION_KEY_LEN = 16
 const SESSION_COOKIE_KEY = "ss"
 const SESSION_REDIS_KEY = "SESS"
 
-// (!) return session key, verification error, system error (!)
+type SessionSigner interface {
+	CreateSession(ctx context.Context) (*http.Cookie, error)
+	IncrSession(
+		ctx context.Context,
+		sessKey []byte,
+	) (*http.Cookie, error)
+	VerifySession(
+		ctx context.Context,
+		cookie *http.Cookie,
+	) *VerifySessionResult
+}
+
+type VerifySessionResult struct {
+	SessionKey []byte
+	E
+}
+
 func (s *EntRdsSys) VerifySession(
 	ctx context.Context,
 	cookie *http.Cookie,
-) ([]byte, error, error) {
+) *VerifySessionResult {
+	r := &VerifySessionResult{}
+
 	dec, err := base64.RawURLEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		return nil, nil, err
+		r.ValidationErr = err
+		return r
 	}
 	if len(dec) != token.SIGNATURE_LEN+SESSION_KEY_LEN {
-		return nil, errors.New("invalid decoded session length"), nil
+		r.ValidationErr = errors.New("invalid decoded session length")
+		return r
 	}
 
 	sessKey := dec[token.SIGNATURE_LEN:]
@@ -35,9 +55,11 @@ func (s *EntRdsSys) VerifySession(
 	key := fmt.Sprintf("%s:%x", SESSION_REDIS_KEY, sessKey)
 	nonce, err := s.redis.Get(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
-		return nil, fmt.Errorf("session key not found: %x", sessKey), nil
+		r.ValidationErr = errors.New("session key not found")
+		return r
 	} else if err != nil {
-		return nil, nil, err
+		r.SystemErr = err
+		return r
 	}
 
 	ok, err := s.sessionSigner.Verify(
@@ -46,13 +68,16 @@ func (s *EntRdsSys) VerifySession(
 		nonce,
 	)
 	if err != nil {
-		return nil, nil, err
+		r.SystemErr = err
+		return r
 	}
 	if !ok {
-		return nil, errors.New("wrong session signature"), nil
+		r.ValidationErr = errors.New("wrong session signature")
+		return r
 	}
 
-	return sessKey, nil, nil
+	r.SessionKey = sessKey
+	return r
 }
 
 func (s *EntRdsSys) CreateSession(ctx context.Context) (*http.Cookie, error) {

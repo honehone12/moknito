@@ -41,17 +41,17 @@ func (m *Moknito) setSession(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		c := ctx.Request().Context()
-		sessKey, invalid, err := m.system.VerifySession(c, cookie)
-		if invalid != nil {
-			ctx.Logger().Debug(err)
+		r := m.system.VerifySession(c, cookie)
+		if r.SystemErr != nil {
+			return r.SystemErr
+		}
+		if r.ValidationErr != nil {
+			ctx.Logger().Debug(r.ValidationErr)
 			m.setNewSession(ctx)
 			return next(ctx)
 		}
-		if err != nil {
-			return err
-		}
 
-		incrCookie, err := m.system.IncrSession(c, sessKey)
+		incrCookie, err := m.system.IncrSession(c, r.SessionKey)
 		if err != nil {
 			return err
 		}
@@ -85,16 +85,16 @@ func (m *Moknito) verifySession(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		c := ctx.Request().Context()
-		sessKey, invalid, err := m.system.VerifySession(c, cookie)
-		if invalid != nil {
-			ctx.Logger().Warn(invalid)
+		r := m.system.VerifySession(c, cookie)
+		if r.SystemErr != nil {
+			return r.SystemErr
+		}
+		if r.ValidationErr != nil {
+			ctx.Logger().Warn(r.ValidationErr)
 			return res.BadRequest(ctx)
 		}
-		if err != nil {
-			return err
-		}
 
-		incrCookie, err := m.system.IncrSession(c, sessKey)
+		incrCookie, err := m.system.IncrSession(c, r.SessionKey)
 		if err != nil {
 			return err
 		}

@@ -32,19 +32,19 @@ func (m *Moknito) verifyAuthentication(next echo.HandlerFunc) echo.HandlerFunc {
 			return res.BadRequest(ctx)
 		}
 
-		userId, invalid, err := m.system.VerifyAuthentication(
+		r := m.system.VerifyAuthentication(
 			ctx.Request().Context(),
 			cookie,
 		)
-		if invalid != nil {
-			ctx.Logger().Warn(invalid)
+		if r.SystemErr != nil {
+			return r.SystemErr
+		}
+		if r.ValidationErr != nil {
+			ctx.Logger().Warn(r.ValidationErr)
 			return res.BadRequest(ctx)
 		}
-		if err != nil {
-			return err
-		}
 
-		ctx.Set(CONTEXT_KEY_AUTHED_USER_ID, userId)
+		ctx.Set(CONTEXT_KEY_AUTHED_USER_ID, r.UserId)
 
 		return next(ctx)
 	}

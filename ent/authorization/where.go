@@ -80,14 +80,19 @@ func DeletedAt(v time.Time) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldDeletedAt, v))
 }
 
+// Challenge applies equality check predicate on the "challenge" field. It's identical to ChallengeEQ.
+func Challenge(v []byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldChallenge, v))
+}
+
 // Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
 func Code(v []byte) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldCode, v))
 }
 
-// Challenge applies equality check predicate on the "challenge" field. It's identical to ChallengeEQ.
-func Challenge(v []byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldEQ(FieldChallenge, v))
+// CodeExpireAt applies equality check predicate on the "code_expire_at" field. It's identical to CodeExpireAtEQ.
+func CodeExpireAt(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldCodeExpireAt, v))
 }
 
 // ExpireAt applies equality check predicate on the "expire_at" field. It's identical to ExpireAtEQ.
@@ -235,6 +240,46 @@ func DeletedAtNotNil() predicate.Authorization {
 	return predicate.Authorization(sql.FieldNotNull(FieldDeletedAt))
 }
 
+// ChallengeEQ applies the EQ predicate on the "challenge" field.
+func ChallengeEQ(v []byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldChallenge, v))
+}
+
+// ChallengeNEQ applies the NEQ predicate on the "challenge" field.
+func ChallengeNEQ(v []byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNEQ(FieldChallenge, v))
+}
+
+// ChallengeIn applies the In predicate on the "challenge" field.
+func ChallengeIn(vs ...[]byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldIn(FieldChallenge, vs...))
+}
+
+// ChallengeNotIn applies the NotIn predicate on the "challenge" field.
+func ChallengeNotIn(vs ...[]byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNotIn(FieldChallenge, vs...))
+}
+
+// ChallengeGT applies the GT predicate on the "challenge" field.
+func ChallengeGT(v []byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGT(FieldChallenge, v))
+}
+
+// ChallengeGTE applies the GTE predicate on the "challenge" field.
+func ChallengeGTE(v []byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGTE(FieldChallenge, v))
+}
+
+// ChallengeLT applies the LT predicate on the "challenge" field.
+func ChallengeLT(v []byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLT(FieldChallenge, v))
+}
+
+// ChallengeLTE applies the LTE predicate on the "challenge" field.
+func ChallengeLTE(v []byte) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLTE(FieldChallenge, v))
+}
+
 // CodeEQ applies the EQ predicate on the "code" field.
 func CodeEQ(v []byte) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldCode, v))
@@ -275,44 +320,44 @@ func CodeLTE(v []byte) predicate.Authorization {
 	return predicate.Authorization(sql.FieldLTE(FieldCode, v))
 }
 
-// ChallengeEQ applies the EQ predicate on the "challenge" field.
-func ChallengeEQ(v []byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldEQ(FieldChallenge, v))
+// CodeExpireAtEQ applies the EQ predicate on the "code_expire_at" field.
+func CodeExpireAtEQ(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldCodeExpireAt, v))
 }
 
-// ChallengeNEQ applies the NEQ predicate on the "challenge" field.
-func ChallengeNEQ(v []byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldNEQ(FieldChallenge, v))
+// CodeExpireAtNEQ applies the NEQ predicate on the "code_expire_at" field.
+func CodeExpireAtNEQ(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNEQ(FieldCodeExpireAt, v))
 }
 
-// ChallengeIn applies the In predicate on the "challenge" field.
-func ChallengeIn(vs ...[]byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldIn(FieldChallenge, vs...))
+// CodeExpireAtIn applies the In predicate on the "code_expire_at" field.
+func CodeExpireAtIn(vs ...time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldIn(FieldCodeExpireAt, vs...))
 }
 
-// ChallengeNotIn applies the NotIn predicate on the "challenge" field.
-func ChallengeNotIn(vs ...[]byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldNotIn(FieldChallenge, vs...))
+// CodeExpireAtNotIn applies the NotIn predicate on the "code_expire_at" field.
+func CodeExpireAtNotIn(vs ...time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNotIn(FieldCodeExpireAt, vs...))
 }
 
-// ChallengeGT applies the GT predicate on the "challenge" field.
-func ChallengeGT(v []byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldGT(FieldChallenge, v))
+// CodeExpireAtGT applies the GT predicate on the "code_expire_at" field.
+func CodeExpireAtGT(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGT(FieldCodeExpireAt, v))
 }
 
-// ChallengeGTE applies the GTE predicate on the "challenge" field.
-func ChallengeGTE(v []byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldGTE(FieldChallenge, v))
+// CodeExpireAtGTE applies the GTE predicate on the "code_expire_at" field.
+func CodeExpireAtGTE(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGTE(FieldCodeExpireAt, v))
 }
 
-// ChallengeLT applies the LT predicate on the "challenge" field.
-func ChallengeLT(v []byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldLT(FieldChallenge, v))
+// CodeExpireAtLT applies the LT predicate on the "code_expire_at" field.
+func CodeExpireAtLT(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLT(FieldCodeExpireAt, v))
 }
 
-// ChallengeLTE applies the LTE predicate on the "challenge" field.
-func ChallengeLTE(v []byte) predicate.Authorization {
-	return predicate.Authorization(sql.FieldLTE(FieldChallenge, v))
+// CodeExpireAtLTE applies the LTE predicate on the "code_expire_at" field.
+func CodeExpireAtLTE(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLTE(FieldCodeExpireAt, v))
 }
 
 // ExpireAtEQ applies the EQ predicate on the "expire_at" field.

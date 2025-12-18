@@ -64,15 +64,21 @@ func (_c *AuthorizationCreate) SetNillableDeletedAt(v *time.Time) *Authorization
 	return _c
 }
 
+// SetChallenge sets the "challenge" field.
+func (_c *AuthorizationCreate) SetChallenge(v []byte) *AuthorizationCreate {
+	_c.mutation.SetChallenge(v)
+	return _c
+}
+
 // SetCode sets the "code" field.
 func (_c *AuthorizationCreate) SetCode(v []byte) *AuthorizationCreate {
 	_c.mutation.SetCode(v)
 	return _c
 }
 
-// SetChallenge sets the "challenge" field.
-func (_c *AuthorizationCreate) SetChallenge(v []byte) *AuthorizationCreate {
-	_c.mutation.SetChallenge(v)
+// SetCodeExpireAt sets the "code_expire_at" field.
+func (_c *AuthorizationCreate) SetCodeExpireAt(v time.Time) *AuthorizationCreate {
+	_c.mutation.SetCodeExpireAt(v)
 	return _c
 }
 
@@ -163,6 +169,14 @@ func (_c *AuthorizationCreate) check() error {
 	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Authorization.updated_at"`)}
 	}
+	if _, ok := _c.mutation.Challenge(); !ok {
+		return &ValidationError{Name: "challenge", err: errors.New(`ent: missing required field "Authorization.challenge"`)}
+	}
+	if v, ok := _c.mutation.Challenge(); ok {
+		if err := authorization.ChallengeValidator(v); err != nil {
+			return &ValidationError{Name: "challenge", err: fmt.Errorf(`ent: validator failed for field "Authorization.challenge": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "Authorization.code"`)}
 	}
@@ -171,13 +185,8 @@ func (_c *AuthorizationCreate) check() error {
 			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "Authorization.code": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Challenge(); !ok {
-		return &ValidationError{Name: "challenge", err: errors.New(`ent: missing required field "Authorization.challenge"`)}
-	}
-	if v, ok := _c.mutation.Challenge(); ok {
-		if err := authorization.ChallengeValidator(v); err != nil {
-			return &ValidationError{Name: "challenge", err: fmt.Errorf(`ent: validator failed for field "Authorization.challenge": %w`, err)}
-		}
+	if _, ok := _c.mutation.CodeExpireAt(); !ok {
+		return &ValidationError{Name: "code_expire_at", err: errors.New(`ent: missing required field "Authorization.code_expire_at"`)}
 	}
 	if _, ok := _c.mutation.ExpireAt(); !ok {
 		return &ValidationError{Name: "expire_at", err: errors.New(`ent: missing required field "Authorization.expire_at"`)}
@@ -256,13 +265,17 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 		_spec.SetField(authorization.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := _c.mutation.Challenge(); ok {
+		_spec.SetField(authorization.FieldChallenge, field.TypeBytes, value)
+		_node.Challenge = value
+	}
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(authorization.FieldCode, field.TypeBytes, value)
 		_node.Code = value
 	}
-	if value, ok := _c.mutation.Challenge(); ok {
-		_spec.SetField(authorization.FieldChallenge, field.TypeBytes, value)
-		_node.Challenge = value
+	if value, ok := _c.mutation.CodeExpireAt(); ok {
+		_spec.SetField(authorization.FieldCodeExpireAt, field.TypeTime, value)
+		_node.CodeExpireAt = value
 	}
 	if value, ok := _c.mutation.ExpireAt(); ok {
 		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
