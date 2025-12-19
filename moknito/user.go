@@ -2,6 +2,7 @@ package moknito
 
 import (
 	"moknito/res"
+	"moknito/sys"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -14,8 +15,9 @@ type userRegisterRequest struct {
 }
 
 type userAuthenticationRequest struct {
-	Email    string `form:"email" validate:"email,max=128"`
-	Password string `form:"password" validate:"min=8,max=128"`
+	Email     string `form:"email" validate:"email,max=128"`
+	Password  string `form:"password" validate:"min=8,max=128"`
+	Challenge string `form:"challenge" validate:"len=43,base64rawurl"`
 }
 
 func (m *Moknito) UserRegister(ctx echo.Context) error {
@@ -28,9 +30,11 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 
 	r := m.system.UserRegister(
 		ctx.Request().Context(),
-		form.Name,
-		form.Email,
-		form.Password,
+		sys.UserRegisterParams{
+			Name:     form.Name,
+			Email:    form.Email,
+			Password: form.Password,
+		},
 	)
 	if r.SystemErr != nil {
 		return r.SystemErr
@@ -54,8 +58,13 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 	req := ctx.Request()
 	r := m.system.UserJoin(
 		req.Context(),
-		form.Email, form.Password,
-		ctx.RealIP(), req.Header.Get("User-Agent"),
+		sys.UserJoinParams{
+			Email:     form.Email,
+			Password:  form.Password,
+			Challenge: form.Challenge,
+			Ip:        ctx.RealIP(),
+			UserAgent: req.Header.Get("User-Agent"),
+		},
 	)
 	if r.SystemErr != nil {
 		return r.SystemErr
@@ -80,8 +89,13 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 	req := ctx.Request()
 	r := m.system.UserAuthenticate(
 		req.Context(),
-		form.Email, form.Password,
-		ctx.RealIP(), req.Header.Get("User-Agent"),
+		sys.UserAuthenticateParams{
+			Email:     form.Email,
+			Password:  form.Password,
+			Challenge: form.Challenge,
+			Ip:        ctx.RealIP(),
+			UserAgent: req.Header.Get("User-Agent"),
+		},
 	)
 	if r.SystemErr != nil {
 		return r.SystemErr

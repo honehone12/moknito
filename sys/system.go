@@ -13,6 +13,16 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const USER_REGISTRATION_REDIS_KEY = "USERREG"
+const AUTHENTICATED_COOKIE_KEY = "ae"
+const AUTHENTICATION_MAX_ERROR = 10
+const AUTHENTICATION_ERROR_REDIS_KEY = "ERROR"
+const CHALLENGE_REDIS_KEY = "CHALL"
+const SESSION_KEY_LEN = 16
+const SESSION_COOKIE_KEY = "ss"
+const SESSION_REDIS_KEY = "SESS"
+const SESSION_NONCE_MAX = 100
+
 type Sys interface {
 	SessionSigner
 	AuthenticationSigner
@@ -27,18 +37,25 @@ type E struct {
 	SystemErr     error
 }
 
+type TtlParams struct {
+	RegistrationTtl time.Duration
+	SessionTtl      time.Duration
+	TokenTtl        time.Duration
+	CodeTtl         time.Duration
+}
+
 type EntRdsSys struct {
 	ent   *ent.Client
 	redis *redis.Client
 
-	tokenTtl      time.Duration
-	codeTtl       time.Duration
+	ttl TtlParams
+
 	sessionSigner *token.SessionTokenSigner
 	authSigner    *token.AuthTokenSigner
 }
 
 func NewEntRdsSys(
-	tokenTtl, codeTtl time.Duration,
+	ttl TtlParams,
 	entOptions ...ent.Option,
 ) (*EntRdsSys, error) {
 	// don't inject other than env
@@ -88,8 +105,7 @@ func NewEntRdsSys(
 	return &EntRdsSys{
 		ent,
 		redis,
-		tokenTtl,
-		codeTtl,
+		ttl,
 		sessionSigner,
 		authSigner,
 	}, nil

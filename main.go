@@ -58,9 +58,7 @@ func main() {
 	echo.Group("/auth")
 
 	// routes for POSTs
-	api := echo.Group(
-		"/api",
-	)
+	api := echo.Group("/api")
 	userApi := api.Group(
 		"/user",
 		moknito.OriginGuard(), moknito.VerifySession(),

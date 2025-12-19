@@ -8,7 +8,7 @@ import (
 )
 
 type InfoAppRequest struct {
-	Id string `query:"id" validate:"len=36"`
+	Id string `query:"id" validate:"len=36,uuid7"`
 }
 
 type InfoAppResponse struct {

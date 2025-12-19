@@ -13,10 +13,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-const SESSION_KEY_LEN = 16
-const SESSION_COOKIE_KEY = "ss"
-const SESSION_REDIS_KEY = "SESS"
-
 type SessionSigner interface {
 	CreateSession(ctx context.Context) (*http.Cookie, error)
 	IncrSession(
@@ -107,7 +103,7 @@ func (s *EntRdsSys) createSession(ctx context.Context) (string, error) {
 
 	key := fmt.Sprintf("%s:%x", SESSION_REDIS_KEY, sessKey)
 	nonce := "0"
-	if err := s.redis.SetEx(ctx, key, nonce, s.tokenTtl).Err(); err != nil {
+	if err := s.redis.SetEx(ctx, key, nonce, s.ttl.SessionTtl).Err(); err != nil {
 		return "", err
 	}
 
@@ -120,7 +116,11 @@ func (s *EntRdsSys) incrSession(ctx context.Context, sessKey []byte) (string, er
 	if err != nil {
 		return "", err
 	}
-	if err := s.redis.Expire(ctx, key, s.tokenTtl).Err(); err != nil {
+	if nonce >= SESSION_NONCE_MAX {
+		return "", errors.New("session nonce count is over normal behavior")
+	}
+
+	if err := s.redis.Expire(ctx, key, s.ttl.SessionTtl).Err(); err != nil {
 		return "", err
 	}
 
@@ -132,7 +132,7 @@ func (s *EntRdsSys) createSessionCookie(value string) (*http.Cookie, error) {
 		Name:     SESSION_COOKIE_KEY,
 		Value:    value,
 		Path:     "/",
-		MaxAge:   int(s.tokenTtl.Seconds()),
+		MaxAge:   int(s.ttl.SessionTtl.Seconds()),
 		Secure:   false, // for local
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,

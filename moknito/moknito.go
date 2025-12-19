@@ -5,19 +5,40 @@ import (
 	"moknito/ent"
 	"moknito/sys"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
-const CONTEXT_KEY_AUTHED_USER_ID = "AUTHED_USER_ID"
+const CTX_KEY_AUTHED_USER_ID = "AUTHED_USER_ID"
+const CTX_KEY_AUTH_ID = "AUTH_ID"
 
 type Moknito struct {
 	system    sys.Sys
 	validator *validator.Validate
 
 	origin string
+
+	regex *RegexValidator
+}
+
+type RegexValidator struct {
+	uuid7Regex *regexp.Regexp
+}
+
+func NewRegexValidator() (*RegexValidator, error) {
+	uuid7Regex, err := regexp.Compile(`^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RegexValidator{uuid7Regex}, nil
+}
+
+func (r *RegexValidator) ValidateUuidV7(f validator.FieldLevel) bool {
+	return r.uuid7Regex.MatchString(f.Field().String())
 }
 
 func NewMocknito() (*Moknito, error) {
@@ -30,9 +51,18 @@ func NewMocknito() (*Moknito, error) {
 		return nil, errors.New("could not find origin env")
 	}
 
+	regex, err := NewRegexValidator()
+	if err != nil {
+		return nil, err
+	}
+
 	system, err := sys.NewEntRdsSys(
-		time.Hour*24,
-		time.Minute*5,
+		sys.TtlParams{
+			RegistrationTtl: time.Minute * 5,
+			SessionTtl:      time.Hour,
+			TokenTtl:        time.Hour * 12,
+			CodeTtl:         time.Minute * 5,
+		},
 		ent.Debug(),
 	)
 	if err != nil {
@@ -40,11 +70,13 @@ func NewMocknito() (*Moknito, error) {
 	}
 
 	validator := validator.New()
+	validator.RegisterValidation("uuid7", regex.ValidateUuidV7)
 
 	return &Moknito{
 		system,
 		validator,
 		origin,
+		regex,
 	}, nil
 }
 

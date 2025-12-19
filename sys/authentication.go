@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-const AUTHENTICATED_COOKIE_KEY = "ae"
-
 type AuthenticationSigner interface {
 	VerifyAuthentication(
 		ctx context.Context,
@@ -22,6 +20,7 @@ type AuthenticationSigner interface {
 
 type VerifyAuthenticationResult struct {
 	UserId id.Id
+	AuthId id.Id
 	E
 }
 
@@ -69,8 +68,7 @@ func (s *EntRdsSys) VerifyAuthentication(
 		return r
 	}
 
-	id := id.Id(a.UserID)
-	if id != userId {
+	if id.Id(a.UserID) != userId {
 		r.ValidationErr = errors.New("wrong subject")
 		return r
 	}
@@ -81,7 +79,8 @@ func (s *EntRdsSys) VerifyAuthentication(
 	//   same browser ?
 	// but they are currentry out of scope
 
-	r.UserId = id
+	r.UserId = userId
+	r.AuthId = authId
 	return r
 }
 
@@ -101,7 +100,7 @@ func (s *EntRdsSys) createAuthentication(
 		token.TOKEN_TYPE_AUTHENTICATION,
 		authUuid.String(),
 		userUuid.String(),
-		s.tokenTtl,
+		s.ttl.TokenTtl,
 	)
 	if err != nil {
 		return nil, err
@@ -111,7 +110,7 @@ func (s *EntRdsSys) createAuthentication(
 		Name:     AUTHENTICATED_COOKIE_KEY,
 		Value:    tkn,
 		Path:     "/",
-		MaxAge:   int(s.tokenTtl.Seconds()),
+		MaxAge:   int(s.ttl.TokenTtl.Seconds()),
 		Secure:   false, // for local
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,

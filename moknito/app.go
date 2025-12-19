@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"moknito/id"
 	"moknito/res"
+	"moknito/sys"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type AppAllowRequest struct {
-	Id string `form:"id" validate:"len=36"`
+	Id string `form:"id" validate:"len=36,uuid7"`
 }
 
 type AppAuthorizeRequest struct {
-	Id        string `form:"id" validate:"len=36"`
-	Challenge string `form:"challenge" validate:"len=22,base64rawurl"`
+	Id string `form:"id" validate:"len=36,uuid7"`
 }
 
 func (m *Moknito) AppAllow(ctx echo.Context) error {
@@ -27,7 +27,7 @@ func (m *Moknito) AppAllow(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	rawUser := ctx.Get(CONTEXT_KEY_AUTHED_USER_ID)
+	rawUser := ctx.Get(CTX_KEY_AUTHED_USER_ID)
 	userId, ok := rawUser.(id.Id)
 	if !ok {
 		return errors.New("failed to cast ctx user id value to id")
@@ -57,17 +57,25 @@ func (m *Moknito) AppAuthorize(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	rawUser := ctx.Get(CONTEXT_KEY_AUTHED_USER_ID)
+	rawUser := ctx.Get(CTX_KEY_AUTHED_USER_ID)
 	userId, ok := rawUser.(id.Id)
 	if !ok {
-		return errors.New("failed to cast ctx user id value to id")
+		return errors.New("failed to cast ctx user id")
+	}
+
+	rawAuth := ctx.Get(CTX_KEY_AUTH_ID)
+	authId, ok := rawAuth.(id.Id)
+	if !ok {
+		return errors.New("failed to cast ctx auth id")
 	}
 
 	r := m.system.AppAuthorize(
 		ctx.Request().Context(),
-		userId,
-		form.Id,
-		form.Challenge,
+		sys.AppAuthorizeParams{
+			UserId:  userId,
+			AuthId:  authId,
+			AppUuid: form.Id,
+		},
 	)
 
 	if r.SystemErr != nil {

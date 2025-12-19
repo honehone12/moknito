@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"moknito/code"
 	"moknito/ent"
 	"moknito/ent/application"
 	"moknito/ent/authorizedapp"
 	"moknito/id"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type AppSys interface {
@@ -20,9 +23,14 @@ type AppSys interface {
 	) *AppAllowResult
 	AppAuthorize(
 		ctx context.Context,
-		userId id.Id,
-		appUuid, challenge string,
+		p AppAuthorizeParams,
 	) *AppAuthorizeResult
+}
+
+type AppAuthorizeParams struct {
+	UserId  id.Id
+	AuthId  id.Id
+	AppUuid string
 }
 
 type AppAllowResult = E
@@ -43,6 +51,21 @@ func (s *EntRdsSys) AppAllow(
 	appId, err := id.FromUUIDString(appUuid)
 	if err != nil {
 		r.ValidationErr = err
+		return r
+	}
+
+	exist, err := s.ent.AuthorizedApp.Query().
+		Where(
+			authorizedapp.UserID(string(userId)),
+			authorizedapp.ApplicationID(string(appId)),
+			authorizedapp.DeletedAtIsNil(),
+		).
+		Exist(ctx)
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+	if exist {
 		return r
 	}
 
@@ -70,26 +93,41 @@ func (s *EntRdsSys) AppAllow(
 
 func (s *EntRdsSys) AppAuthorize(
 	ctx context.Context,
-	userId id.Id,
-	appUuid, challenge string,
+	p AppAuthorizeParams,
 ) *AppAuthorizeResult {
 	r := &AppAuthorizeResult{}
 
-	appId, err := id.FromUUIDString(appUuid)
+	appId, err := id.FromUUIDString(p.AppUuid)
 	if err != nil {
 		r.ValidationErr = err
 		return r
 	}
 
-	ch, err := base64.RawURLEncoding.DecodeString(challenge)
+	challKey := fmt.Sprintf(
+		"%s:%x:%x",
+		CHALLENGE_REDIS_KEY,
+		p.UserId,
+		p.AuthId,
+	)
+	c, err := s.redis.Get(ctx, challKey).Result()
+	if errors.Is(err, redis.Nil) {
+		r.ValidationErr = errors.New("could not find challenge")
+		return r
+	} else if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
+	challenge, err := base64.RawURLEncoding.DecodeString(c)
 	if err != nil {
 		r.ValidationErr = err
 		return r
 	}
 
 	app, err := s.ent.AuthorizedApp.Query().
+		Select(authorizedapp.FieldID).
 		Where(
-			authorizedapp.UserID(string(userId)),
+			authorizedapp.UserID(string(p.UserId)),
 			authorizedapp.ApplicationID(string(appId)),
 			authorizedapp.DeletedAtIsNil(),
 		).
@@ -124,12 +162,12 @@ func (s *EntRdsSys) AppAuthorize(
 
 	err = s.ent.Authorization.Create().
 		SetID(string(id)).
-		SetChallenge(ch).
+		SetChallenge(challenge).
 		SetCode(code).
-		SetCodeExpireAt(now.Add(s.codeTtl)).
-		SetExpireAt(now.Add(s.tokenTtl)).
+		SetCodeExpireAt(now.Add(s.ttl.CodeTtl)).
+		SetExpireAt(now.Add(s.ttl.TokenTtl)).
 		SetApplicationID(string(appId)).
-		SetUserID(string(userId)).
+		SetUserID(string(p.UserId)).
 		Exec(ctx)
 	if ent.IsConstraintError(err) {
 		r.ValidationErr = err
