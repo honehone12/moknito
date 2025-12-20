@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"moknito/ent"
+	"moknito/ent/application"
 	"moknito/ent/user"
 	"moknito/hash"
 	"moknito/id"
@@ -38,11 +39,13 @@ type UserRegisterParams struct {
 }
 
 type UserLoginParams struct {
-	Email     string
-	Password  string
-	Challenge string
-	Ip        string
-	UserAgent string
+	ApplicationId id.Id
+	Email         string
+	Password      string
+	Challenge     string
+	Redirect      string
+	Ip            string
+	UserAgent     string
 }
 
 type UserJoinParams = UserLoginParams
@@ -154,13 +157,41 @@ func (s *EntRdsSys) incrErrCount(
 	return nil
 }
 
+func (s *EntRdsSys) checkRedirect(
+	ctx context.Context,
+	appId id.Id,
+	redirect string,
+) (bool, error) {
+	app, err := s.ent.Application.Query().
+		Select(application.FieldRedirect).
+		Where(application.ID(string(appId))).
+		Only(ctx)
+	if ent.IsNotFound(err) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	return app.Redirect == redirect, nil
+}
+
 func (s *EntRdsSys) UserJoin(
 	ctx context.Context,
 	p UserJoinParams,
 ) *UserJoinResult {
 	r := &UserJoinResult{}
 
-	ok, err := s.checkErrorCount(ctx, p.Email)
+	ok, err := s.checkRedirect(ctx, p.ApplicationId, p.Redirect)
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+	if !ok {
+		r.ValidationErr = errors.New("invalid redirect")
+		return r
+	}
+
+	ok, err = s.checkErrorCount(ctx, p.Email)
 	if err != nil {
 		r.SystemErr = err
 		return r
@@ -223,10 +254,6 @@ func (s *EntRdsSys) UserJoin(
 		SetPwhash(register.PwHash).
 		Exec(ctx)
 	if err != nil {
-		// we just set this err as system error because
-		// user should already registered and params are validated
-		// and user does not have constraints
-
 		err := s.rollback(tx, err)
 		r.SystemErr = err
 		return r
@@ -248,11 +275,7 @@ func (s *EntRdsSys) UserJoin(
 		return r
 	}
 
-	challKey := fmt.Sprintf("%s:%x:%x",
-		CHALLENGE_REDIS_KEY,
-		userId,
-		authId,
-	)
+	challKey := fmt.Sprintf("%s:%x:%x", CHALLENGE_REDIS_KEY, userId, authId)
 	if err := s.redis.SetEx(
 		ctx,
 		challKey,
@@ -260,6 +283,7 @@ func (s *EntRdsSys) UserJoin(
 		s.ttl.CodeTtl,
 	).Err(); err != nil {
 		r.SystemErr = err
+		return r
 	}
 
 	if err := s.redis.JSONDel(ctx, userRegKey, "$").Err(); err != nil {
@@ -267,10 +291,7 @@ func (s *EntRdsSys) UserJoin(
 		return r
 	}
 
-	cookie, err := s.createAuthentication(
-		authId,
-		userId,
-	)
+	cookie, err := s.createAuthentication(authId, userId)
 	if err != nil {
 		r.SystemErr = err
 		return r
@@ -286,7 +307,17 @@ func (s *EntRdsSys) UserAuthenticate(
 ) *UserAuthenticateResult {
 	r := &UserAuthenticateResult{}
 
-	ok, err := s.checkErrorCount(ctx, p.Email)
+	ok, err := s.checkRedirect(ctx, p.ApplicationId, p.Redirect)
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+	if !ok {
+		r.ValidationErr = errors.New("invalid redirect")
+		return r
+	}
+
+	ok, err = s.checkErrorCount(ctx, p.Email)
 	if err != nil {
 		r.SystemErr = err
 		return r
@@ -345,11 +376,7 @@ func (s *EntRdsSys) UserAuthenticate(
 		return r
 	}
 
-	challKey := fmt.Sprintf("%s:%x:%x",
-		CHALLENGE_REDIS_KEY,
-		user.ID,
-		authId,
-	)
+	challKey := fmt.Sprintf("%s:%x:%x", CHALLENGE_REDIS_KEY, user.ID, authId)
 	if err := s.redis.SetEx(
 		ctx,
 		challKey,
@@ -357,12 +384,10 @@ func (s *EntRdsSys) UserAuthenticate(
 		s.ttl.CodeTtl,
 	).Err(); err != nil {
 		r.SystemErr = err
+		return r
 	}
 
-	cookie, err := s.createAuthentication(
-		authId,
-		id.Id(user.ID),
-	)
+	cookie, err := s.createAuthentication(authId, id.Id(user.ID))
 	if err != nil {
 		r.SystemErr = err
 		return r

@@ -56,6 +56,7 @@ func (s *EntRdsSys) AuthTokenCode(
 		Select(
 			authorization.FieldID,
 			authorization.FieldChallenge,
+			authorization.FieldChallengeMethod,
 			authorization.FieldCode,
 			authorization.FieldUserID,
 			authorization.FieldExpireAt,
@@ -82,6 +83,10 @@ func (s *EntRdsSys) AuthTokenCode(
 		return r
 	} else if err != nil {
 		r.SystemErr = err
+		return r
+	}
+	if auth.ChallengeMethod != challenge.CHALLENGE_METHOD_S256 {
+		r.SystemErr = errors.New("unexpected challenge method")
 		return r
 	}
 

@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"moknito/challenge"
 	"moknito/code"
 	"moknito/ent"
 	"moknito/ent/application"
@@ -109,7 +110,7 @@ func (s *EntRdsSys) AppAuthorize(
 		p.UserId,
 		p.AuthId,
 	)
-	c, err := s.redis.Get(ctx, challKey).Result()
+	clg, err := s.redis.Get(ctx, challKey).Result()
 	if errors.Is(err, redis.Nil) {
 		r.ValidationErr = errors.New("could not find challenge")
 		return r
@@ -118,7 +119,7 @@ func (s *EntRdsSys) AppAuthorize(
 		return r
 	}
 
-	challenge, err := base64.RawURLEncoding.DecodeString(c)
+	chall, err := base64.RawURLEncoding.DecodeString(clg)
 	if err != nil {
 		r.ValidationErr = err
 		return r
@@ -162,8 +163,8 @@ func (s *EntRdsSys) AppAuthorize(
 
 	err = s.ent.Authorization.Create().
 		SetID(string(id)).
-		SetChallengeMethod("S256").
-		SetChallenge(challenge).
+		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
+		SetChallenge(chall).
 		SetCode(code).
 		SetCodeExpireAt(now.Add(s.ttl.CodeTtl)).
 		SetExpireAt(now.Add(s.ttl.TokenTtl)).
@@ -172,6 +173,7 @@ func (s *EntRdsSys) AppAuthorize(
 		Exec(ctx)
 	if ent.IsConstraintError(err) {
 		r.ValidationErr = err
+		return r
 	} else if err != nil {
 		r.SystemErr = err
 		return r

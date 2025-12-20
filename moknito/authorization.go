@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type authTokenRequest struct {
-	apiRequest
+type AuthTokenRequest struct {
+	ApiRequest
 	Grant    string `form:"grant" validate:"oneof=code refresh"`
 	Code     string `form:"code" validate:"len=22,base64rawurl"`
 	Verifier string `form:"verifier" validate:"min=43,max=256,base64rawurl"`
@@ -18,7 +18,7 @@ type authTokenRequest struct {
 }
 
 func (m *Moknito) AuthToken(ctx echo.Context) error {
-	form := authTokenRequest{}
+	form := AuthTokenRequest{}
 
 	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)

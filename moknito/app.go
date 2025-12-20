@@ -11,9 +11,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type AppAllowRequest = apiRequest
+type AppAllowRequest = ApiRequest
 
-type AppAuthorizeRequest = apiRequest
+type AppAuthorizeRequest = ApiRequest
 
 func (m *Moknito) AppAllow(ctx echo.Context) error {
 	params := AppAllowRequest{}

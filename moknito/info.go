@@ -7,15 +7,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type InfoAppRequest = apiRequest
+type InfoRequest = ApiRequest
 
-type InfoAppResponse struct {
+type InfoResponse struct {
 	Name   string `json:"name"`
 	Domain string `json:"domain"`
 }
 
 func (m *Moknito) InfoApp(ctx echo.Context) error {
-	params := InfoAppRequest{}
+	params := InfoRequest{}
 
 	if err := m.bind(ctx, &params); err != nil {
 		ctx.Logger().Warn(err)
@@ -34,7 +34,7 @@ func (m *Moknito) InfoApp(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	return ctx.JSON(http.StatusOK, InfoAppResponse{
+	return ctx.JSON(http.StatusOK, InfoResponse{
 		Name:   r.Name,
 		Domain: r.Domain,
 	})
