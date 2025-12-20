@@ -47,7 +47,7 @@ func (s *EntRdsSys) VerifyAuthentication(
 		return r
 	}
 
-	a, err := s.ent.Authentication.Query().
+	auth, err := s.ent.Authentication.Query().
 		Select(
 			authentication.FieldIP,
 			authentication.FieldUserAgent,
@@ -68,7 +68,7 @@ func (s *EntRdsSys) VerifyAuthentication(
 		return r
 	}
 
-	if id.Id(a.UserID) != userId {
+	if id.Id(auth.UserID) != userId {
 		r.ValidationErr = errors.New("wrong subject")
 		return r
 	}
@@ -96,12 +96,12 @@ func (s *EntRdsSys) createAuthentication(
 		return nil, err
 	}
 
-	tkn, err := s.authSigner.CreateAuthToken(
-		token.TOKEN_TYPE_AUTHENTICATION,
-		authUuid.String(),
-		userUuid.String(),
-		s.ttl.TokenTtl,
-	)
+	tkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
+		AuthUuid:  authUuid,
+		UserUuid:  userUuid,
+		Ttl:       s.ttl.TokenTtl,
+	})
 	if err != nil {
 		return nil, err
 	}

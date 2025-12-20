@@ -16,9 +16,9 @@ type AppAllowRequest = apiRequest
 type AppAuthorizeRequest = apiRequest
 
 func (m *Moknito) AppAllow(ctx echo.Context) error {
-	form := AppAllowRequest{}
+	params := AppAllowRequest{}
 
-	if err := m.bind(ctx, &form); err != nil {
+	if err := m.bind(ctx, &params); err != nil {
 		ctx.Logger().Warn(err)
 		return res.BadRequest(ctx)
 	}
@@ -32,7 +32,7 @@ func (m *Moknito) AppAllow(ctx echo.Context) error {
 	r := m.system.AppAllow(
 		ctx.Request().Context(),
 		userId,
-		form.Id,
+		params.Id,
 	)
 	if r.SystemErr != nil {
 		return r.SystemErr
@@ -46,9 +46,9 @@ func (m *Moknito) AppAllow(ctx echo.Context) error {
 }
 
 func (m *Moknito) AppAuthorize(ctx echo.Context) error {
-	form := AppAuthorizeRequest{}
+	params := AppAuthorizeRequest{}
 
-	if err := m.bind(ctx, &form); err != nil {
+	if err := m.bind(ctx, &params); err != nil {
 		ctx.Logger().Warn(err)
 		return res.BadRequest(ctx)
 	}
@@ -70,7 +70,7 @@ func (m *Moknito) AppAuthorize(ctx echo.Context) error {
 		sys.AppAuthorizeParams{
 			UserId:  userId,
 			AuthId:  authId,
-			AppUuid: form.Id,
+			AppUuid: params.Id,
 		},
 	)
 

@@ -7,11 +7,21 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 const TOKEN_TYPE_AUTHENTICATION = "authentication"
 const TOKEN_TYPE_AUTHORIZATION = "authorization"
+const TOKEN_TYPE_REFRESH = "refresh"
+const BUNDLE_TOKEN_TYPE_BEARER = "bearer"
 const AUTHENTICATED_TOKEN_VERSION = "0.0.1"
+
+type AuthTokenBundle struct {
+	AccessToken     string `json:"access_token"`
+	RefreshToken    string `json:"refresh_token"`
+	BundleTokenType string `json:"token_type"`
+	ExpiresIn       int    `json:"expire_in"`
+}
 
 type AutheClaims struct {
 	Version string `json:"version"`
@@ -25,6 +35,7 @@ func (a *AutheClaims) Validate() error {
 		switch a.Type {
 		case TOKEN_TYPE_AUTHENTICATION:
 		case TOKEN_TYPE_AUTHORIZATION:
+		case TOKEN_TYPE_REFRESH:
 		default:
 			return errors.New("unexpected token type")
 		}
@@ -64,29 +75,32 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 	return &AuthTokenSigner{host, key}, nil
 }
 
-func (a *AuthTokenSigner) CreateAuthToken(
-	tokenType,
-	authId, userId string,
-	ttl time.Duration,
-	applications ...string,
-) (string, error) {
-	if len(applications) == 0 {
-		applications = []string{a.host}
+type CreateAuthTokenParams struct {
+	TokenType    string
+	AuthUuid     uuid.UUID
+	UserUuid     uuid.UUID
+	Ttl          time.Duration
+	Applications []string
+}
+
+func (a *AuthTokenSigner) CreateAuthToken(p CreateAuthTokenParams) (string, error) {
+	if len(p.Applications) == 0 {
+		p.Applications = []string{a.host}
 	}
 	now := time.Now()
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
 		AutheClaims{
 			Version: AUTHENTICATED_TOKEN_VERSION,
-			Type:    tokenType,
+			Type:    p.TokenType,
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    a.host,
-				Subject:   userId,
-				Audience:  applications,
-				ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
+				Subject:   p.UserUuid.String(),
+				Audience:  p.Applications,
+				ExpiresAt: jwt.NewNumericDate(now.Add(p.Ttl)),
 				NotBefore: jwt.NewNumericDate(now),
 				IssuedAt:  jwt.NewNumericDate(now),
-				ID:        authId,
+				ID:        p.AuthUuid.String(),
 			},
 		},
 	)

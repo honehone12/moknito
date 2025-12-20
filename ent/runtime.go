@@ -162,11 +162,11 @@ func init() {
 	// authorization.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	authorization.CodeValidator = authorizationDescCode.Validators[0].(func([]byte) error)
 	// authorizationDescApplicationID is the schema descriptor for application_id field.
-	authorizationDescApplicationID := authorizationFields[6].Descriptor()
+	authorizationDescApplicationID := authorizationFields[7].Descriptor()
 	// authorization.ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
 	authorization.ApplicationIDValidator = authorizationDescApplicationID.Validators[0].(func(string) error)
 	// authorizationDescUserID is the schema descriptor for user_id field.
-	authorizationDescUserID := authorizationFields[7].Descriptor()
+	authorizationDescUserID := authorizationFields[8].Descriptor()
 	// authorization.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	authorization.UserIDValidator = authorizationDescUserID.Validators[0].(func(string) error)
 	// authorizationDescID is the schema descriptor for id field.

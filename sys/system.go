@@ -26,6 +26,7 @@ const SESSION_NONCE_MAX = 100
 type Sys interface {
 	SessionSigner
 	AuthenticationSigner
+	AuthorizationSigner
 	UserSys
 	InfoSys
 	AppSys

@@ -1691,6 +1691,7 @@ type AuthorizationMutation struct {
 	challenge_method   *string
 	code               *[]byte
 	code_expire_at     *time.Time
+	code_consumed_at   *time.Time
 	expire_at          *time.Time
 	clearedFields      map[string]struct{}
 	application        *string
@@ -2071,6 +2072,55 @@ func (m *AuthorizationMutation) ResetCodeExpireAt() {
 	m.code_expire_at = nil
 }
 
+// SetCodeConsumedAt sets the "code_consumed_at" field.
+func (m *AuthorizationMutation) SetCodeConsumedAt(t time.Time) {
+	m.code_consumed_at = &t
+}
+
+// CodeConsumedAt returns the value of the "code_consumed_at" field in the mutation.
+func (m *AuthorizationMutation) CodeConsumedAt() (r time.Time, exists bool) {
+	v := m.code_consumed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCodeConsumedAt returns the old "code_consumed_at" field's value of the Authorization entity.
+// If the Authorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthorizationMutation) OldCodeConsumedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCodeConsumedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCodeConsumedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCodeConsumedAt: %w", err)
+	}
+	return oldValue.CodeConsumedAt, nil
+}
+
+// ClearCodeConsumedAt clears the value of the "code_consumed_at" field.
+func (m *AuthorizationMutation) ClearCodeConsumedAt() {
+	m.code_consumed_at = nil
+	m.clearedFields[authorization.FieldCodeConsumedAt] = struct{}{}
+}
+
+// CodeConsumedAtCleared returns if the "code_consumed_at" field was cleared in this mutation.
+func (m *AuthorizationMutation) CodeConsumedAtCleared() bool {
+	_, ok := m.clearedFields[authorization.FieldCodeConsumedAt]
+	return ok
+}
+
+// ResetCodeConsumedAt resets all changes to the "code_consumed_at" field.
+func (m *AuthorizationMutation) ResetCodeConsumedAt() {
+	m.code_consumed_at = nil
+	delete(m.clearedFields, authorization.FieldCodeConsumedAt)
+}
+
 // SetExpireAt sets the "expire_at" field.
 func (m *AuthorizationMutation) SetExpireAt(t time.Time) {
 	m.expire_at = &t
@@ -2267,7 +2317,7 @@ func (m *AuthorizationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthorizationMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, authorization.FieldCreatedAt)
 	}
@@ -2288,6 +2338,9 @@ func (m *AuthorizationMutation) Fields() []string {
 	}
 	if m.code_expire_at != nil {
 		fields = append(fields, authorization.FieldCodeExpireAt)
+	}
+	if m.code_consumed_at != nil {
+		fields = append(fields, authorization.FieldCodeConsumedAt)
 	}
 	if m.expire_at != nil {
 		fields = append(fields, authorization.FieldExpireAt)
@@ -2320,6 +2373,8 @@ func (m *AuthorizationMutation) Field(name string) (ent.Value, bool) {
 		return m.Code()
 	case authorization.FieldCodeExpireAt:
 		return m.CodeExpireAt()
+	case authorization.FieldCodeConsumedAt:
+		return m.CodeConsumedAt()
 	case authorization.FieldExpireAt:
 		return m.ExpireAt()
 	case authorization.FieldApplicationID:
@@ -2349,6 +2404,8 @@ func (m *AuthorizationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCode(ctx)
 	case authorization.FieldCodeExpireAt:
 		return m.OldCodeExpireAt(ctx)
+	case authorization.FieldCodeConsumedAt:
+		return m.OldCodeConsumedAt(ctx)
 	case authorization.FieldExpireAt:
 		return m.OldExpireAt(ctx)
 	case authorization.FieldApplicationID:
@@ -2413,6 +2470,13 @@ func (m *AuthorizationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCodeExpireAt(v)
 		return nil
+	case authorization.FieldCodeConsumedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCodeConsumedAt(v)
+		return nil
 	case authorization.FieldExpireAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -2467,6 +2531,9 @@ func (m *AuthorizationMutation) ClearedFields() []string {
 	if m.FieldCleared(authorization.FieldDeletedAt) {
 		fields = append(fields, authorization.FieldDeletedAt)
 	}
+	if m.FieldCleared(authorization.FieldCodeConsumedAt) {
+		fields = append(fields, authorization.FieldCodeConsumedAt)
+	}
 	return fields
 }
 
@@ -2483,6 +2550,9 @@ func (m *AuthorizationMutation) ClearField(name string) error {
 	switch name {
 	case authorization.FieldDeletedAt:
 		m.ClearDeletedAt()
+		return nil
+	case authorization.FieldCodeConsumedAt:
+		m.ClearCodeConsumedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Authorization nullable field %s", name)
@@ -2512,6 +2582,9 @@ func (m *AuthorizationMutation) ResetField(name string) error {
 		return nil
 	case authorization.FieldCodeExpireAt:
 		m.ResetCodeExpireAt()
+		return nil
+	case authorization.FieldCodeConsumedAt:
+		m.ResetCodeConsumedAt()
 		return nil
 	case authorization.FieldExpireAt:
 		m.ResetExpireAt()

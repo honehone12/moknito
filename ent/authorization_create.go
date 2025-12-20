@@ -88,6 +88,20 @@ func (_c *AuthorizationCreate) SetCodeExpireAt(v time.Time) *AuthorizationCreate
 	return _c
 }
 
+// SetCodeConsumedAt sets the "code_consumed_at" field.
+func (_c *AuthorizationCreate) SetCodeConsumedAt(v time.Time) *AuthorizationCreate {
+	_c.mutation.SetCodeConsumedAt(v)
+	return _c
+}
+
+// SetNillableCodeConsumedAt sets the "code_consumed_at" field if the given value is not nil.
+func (_c *AuthorizationCreate) SetNillableCodeConsumedAt(v *time.Time) *AuthorizationCreate {
+	if v != nil {
+		_c.SetCodeConsumedAt(*v)
+	}
+	return _c
+}
+
 // SetExpireAt sets the "expire_at" field.
 func (_c *AuthorizationCreate) SetExpireAt(v time.Time) *AuthorizationCreate {
 	_c.mutation.SetExpireAt(v)
@@ -294,6 +308,10 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.CodeExpireAt(); ok {
 		_spec.SetField(authorization.FieldCodeExpireAt, field.TypeTime, value)
 		_node.CodeExpireAt = value
+	}
+	if value, ok := _c.mutation.CodeConsumedAt(); ok {
+		_spec.SetField(authorization.FieldCodeConsumedAt, field.TypeTime, value)
+		_node.CodeConsumedAt = &value
 	}
 	if value, ok := _c.mutation.ExpireAt(); ok {
 		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)

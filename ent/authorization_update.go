@@ -54,6 +54,26 @@ func (_u *AuthorizationUpdate) ClearDeletedAt() *AuthorizationUpdate {
 	return _u
 }
 
+// SetCodeConsumedAt sets the "code_consumed_at" field.
+func (_u *AuthorizationUpdate) SetCodeConsumedAt(v time.Time) *AuthorizationUpdate {
+	_u.mutation.SetCodeConsumedAt(v)
+	return _u
+}
+
+// SetNillableCodeConsumedAt sets the "code_consumed_at" field if the given value is not nil.
+func (_u *AuthorizationUpdate) SetNillableCodeConsumedAt(v *time.Time) *AuthorizationUpdate {
+	if v != nil {
+		_u.SetCodeConsumedAt(*v)
+	}
+	return _u
+}
+
+// ClearCodeConsumedAt clears the value of the "code_consumed_at" field.
+func (_u *AuthorizationUpdate) ClearCodeConsumedAt() *AuthorizationUpdate {
+	_u.mutation.ClearCodeConsumedAt()
+	return _u
+}
+
 // Mutation returns the AuthorizationMutation object of the builder.
 func (_u *AuthorizationUpdate) Mutation() *AuthorizationMutation {
 	return _u.mutation
@@ -127,6 +147,12 @@ func (_u *AuthorizationUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authorization.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.CodeConsumedAt(); ok {
+		_spec.SetField(authorization.FieldCodeConsumedAt, field.TypeTime, value)
+	}
+	if _u.mutation.CodeConsumedAtCleared() {
+		_spec.ClearField(authorization.FieldCodeConsumedAt, field.TypeTime)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{authorization.Label}
@@ -170,6 +196,26 @@ func (_u *AuthorizationUpdateOne) SetNillableDeletedAt(v *time.Time) *Authorizat
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (_u *AuthorizationUpdateOne) ClearDeletedAt() *AuthorizationUpdateOne {
 	_u.mutation.ClearDeletedAt()
+	return _u
+}
+
+// SetCodeConsumedAt sets the "code_consumed_at" field.
+func (_u *AuthorizationUpdateOne) SetCodeConsumedAt(v time.Time) *AuthorizationUpdateOne {
+	_u.mutation.SetCodeConsumedAt(v)
+	return _u
+}
+
+// SetNillableCodeConsumedAt sets the "code_consumed_at" field if the given value is not nil.
+func (_u *AuthorizationUpdateOne) SetNillableCodeConsumedAt(v *time.Time) *AuthorizationUpdateOne {
+	if v != nil {
+		_u.SetCodeConsumedAt(*v)
+	}
+	return _u
+}
+
+// ClearCodeConsumedAt clears the value of the "code_consumed_at" field.
+func (_u *AuthorizationUpdateOne) ClearCodeConsumedAt() *AuthorizationUpdateOne {
+	_u.mutation.ClearCodeConsumedAt()
 	return _u
 }
 
@@ -275,6 +321,12 @@ func (_u *AuthorizationUpdateOne) sqlSave(ctx context.Context) (_node *Authoriza
 	}
 	if _u.mutation.DeletedAtCleared() {
 		_spec.ClearField(authorization.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CodeConsumedAt(); ok {
+		_spec.SetField(authorization.FieldCodeConsumedAt, field.TypeTime, value)
+	}
+	if _u.mutation.CodeConsumedAtCleared() {
+		_spec.ClearField(authorization.FieldCodeConsumedAt, field.TypeTime)
 	}
 	_node = &Authorization{config: _u.config}
 	_spec.Assign = _node.assignValues

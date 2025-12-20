@@ -28,6 +28,8 @@ const (
 	FieldCode = "code"
 	// FieldCodeExpireAt holds the string denoting the code_expire_at field in the database.
 	FieldCodeExpireAt = "code_expire_at"
+	// FieldCodeConsumedAt holds the string denoting the code_consumed_at field in the database.
+	FieldCodeConsumedAt = "code_consumed_at"
 	// FieldExpireAt holds the string denoting the expire_at field in the database.
 	FieldExpireAt = "expire_at"
 	// FieldApplicationID holds the string denoting the application_id field in the database.
@@ -66,6 +68,7 @@ var Columns = []string{
 	FieldChallengeMethod,
 	FieldCode,
 	FieldCodeExpireAt,
+	FieldCodeConsumedAt,
 	FieldExpireAt,
 	FieldApplicationID,
 	FieldUserID,
@@ -133,6 +136,11 @@ func ByChallengeMethod(opts ...sql.OrderTermOption) OrderOption {
 // ByCodeExpireAt orders the results by the code_expire_at field.
 func ByCodeExpireAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCodeExpireAt, opts...).ToFunc()
+}
+
+// ByCodeConsumedAt orders the results by the code_consumed_at field.
+func ByCodeConsumedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCodeConsumedAt, opts...).ToFunc()
 }
 
 // ByExpireAt orders the results by the expire_at field.

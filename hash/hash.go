@@ -92,12 +92,12 @@ func Hash(password string) (string, error) {
 	return pwHash, nil
 }
 
-func check(hash, saved []byte) bool {
-	if subtle.ConstantTimeEq(int32(len(hash)), int32(len(saved))) != 1 {
+func BytesCheck(new, saved []byte) bool {
+	if subtle.ConstantTimeEq(int32(len(new)), int32(len(saved))) != 1 {
 		return false
 	}
 
-	if subtle.ConstantTimeCompare(hash, saved) != 1 {
+	if subtle.ConstantTimeCompare(new, saved) != 1 {
 		return false
 	}
 
@@ -146,5 +146,5 @@ func Check(password, pwHash string) (bool, error) {
 		return false, err
 	}
 
-	return check(hash, saved), nil
+	return BytesCheck(hash, saved), nil
 }

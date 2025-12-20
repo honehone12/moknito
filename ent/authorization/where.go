@@ -100,6 +100,11 @@ func CodeExpireAt(v time.Time) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldCodeExpireAt, v))
 }
 
+// CodeConsumedAt applies equality check predicate on the "code_consumed_at" field. It's identical to CodeConsumedAtEQ.
+func CodeConsumedAt(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldCodeConsumedAt, v))
+}
+
 // ExpireAt applies equality check predicate on the "expire_at" field. It's identical to ExpireAtEQ.
 func ExpireAt(v time.Time) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldExpireAt, v))
@@ -428,6 +433,56 @@ func CodeExpireAtLT(v time.Time) predicate.Authorization {
 // CodeExpireAtLTE applies the LTE predicate on the "code_expire_at" field.
 func CodeExpireAtLTE(v time.Time) predicate.Authorization {
 	return predicate.Authorization(sql.FieldLTE(FieldCodeExpireAt, v))
+}
+
+// CodeConsumedAtEQ applies the EQ predicate on the "code_consumed_at" field.
+func CodeConsumedAtEQ(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldCodeConsumedAt, v))
+}
+
+// CodeConsumedAtNEQ applies the NEQ predicate on the "code_consumed_at" field.
+func CodeConsumedAtNEQ(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNEQ(FieldCodeConsumedAt, v))
+}
+
+// CodeConsumedAtIn applies the In predicate on the "code_consumed_at" field.
+func CodeConsumedAtIn(vs ...time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldIn(FieldCodeConsumedAt, vs...))
+}
+
+// CodeConsumedAtNotIn applies the NotIn predicate on the "code_consumed_at" field.
+func CodeConsumedAtNotIn(vs ...time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNotIn(FieldCodeConsumedAt, vs...))
+}
+
+// CodeConsumedAtGT applies the GT predicate on the "code_consumed_at" field.
+func CodeConsumedAtGT(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGT(FieldCodeConsumedAt, v))
+}
+
+// CodeConsumedAtGTE applies the GTE predicate on the "code_consumed_at" field.
+func CodeConsumedAtGTE(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGTE(FieldCodeConsumedAt, v))
+}
+
+// CodeConsumedAtLT applies the LT predicate on the "code_consumed_at" field.
+func CodeConsumedAtLT(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLT(FieldCodeConsumedAt, v))
+}
+
+// CodeConsumedAtLTE applies the LTE predicate on the "code_consumed_at" field.
+func CodeConsumedAtLTE(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLTE(FieldCodeConsumedAt, v))
+}
+
+// CodeConsumedAtIsNil applies the IsNil predicate on the "code_consumed_at" field.
+func CodeConsumedAtIsNil() predicate.Authorization {
+	return predicate.Authorization(sql.FieldIsNull(FieldCodeConsumedAt))
+}
+
+// CodeConsumedAtNotNil applies the NotNil predicate on the "code_consumed_at" field.
+func CodeConsumedAtNotNil() predicate.Authorization {
+	return predicate.Authorization(sql.FieldNotNull(FieldCodeConsumedAt))
 }
 
 // ExpireAtEQ applies the EQ predicate on the "expire_at" field.

@@ -15,16 +15,16 @@ type InfoAppResponse struct {
 }
 
 func (m *Moknito) InfoApp(ctx echo.Context) error {
-	query := InfoAppRequest{}
+	params := InfoAppRequest{}
 
-	if err := m.bind(ctx, &query); err != nil {
+	if err := m.bind(ctx, &params); err != nil {
 		ctx.Logger().Warn(err)
 		return res.BadRequest(ctx)
 	}
 
 	r := m.system.InfoApp(
 		ctx.Request().Context(),
-		query.Id,
+		params.Id,
 	)
 	if r.SystemErr != nil {
 		return r.SystemErr
