@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Authorization holds the schema definition for the Authorization entity.
@@ -19,10 +20,16 @@ func (Authorization) Fields() []ent.Field {
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
+		// this should be unique, yes
+		// but i'm not sure we should return error as constraint
 		field.Bytes("challenge").
 			NotEmpty().
 			Immutable().
 			SchemaType(map[string]string{dialect.MySQL: "binary(32)"}),
+		field.String("challenge_method").
+			NotEmpty().
+			Immutable().
+			MaxLen(256),
 		// this should be unique, yes
 		// but i'm not sure we should return error as constraint
 		field.Bytes("code").
@@ -31,8 +38,9 @@ func (Authorization) Fields() []ent.Field {
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		field.Time("code_expire_at").
 			Immutable(),
-		// this should be unique, yes
-		// but i'm not sure we should return error as constraint
+		field.Time("code_consumed_at").
+			Optional().
+			Nillable(),
 		field.Time("expire_at").
 			Immutable(),
 		field.String("application_id").
@@ -59,6 +67,14 @@ func (Authorization) Edges() []ent.Edge {
 			Required().
 			Immutable().
 			Unique(),
+	}
+}
+
+func (Authorization) Indexes() []ent.Index {
+	return []ent.Index{
+		// this should be unique, yes
+		// but i'm not sure we should return error as constraint
+		index.Fields("code"),
 	}
 }
 

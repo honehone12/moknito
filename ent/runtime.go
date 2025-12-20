@@ -139,16 +139,34 @@ func init() {
 	authorizationDescChallenge := authorizationFields[1].Descriptor()
 	// authorization.ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
 	authorization.ChallengeValidator = authorizationDescChallenge.Validators[0].(func([]byte) error)
+	// authorizationDescChallengeMethod is the schema descriptor for challenge_method field.
+	authorizationDescChallengeMethod := authorizationFields[2].Descriptor()
+	// authorization.ChallengeMethodValidator is a validator for the "challenge_method" field. It is called by the builders before save.
+	authorization.ChallengeMethodValidator = func() func(string) error {
+		validators := authorizationDescChallengeMethod.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(challenge_method string) error {
+			for _, fn := range fns {
+				if err := fn(challenge_method); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// authorizationDescCode is the schema descriptor for code field.
-	authorizationDescCode := authorizationFields[2].Descriptor()
+	authorizationDescCode := authorizationFields[3].Descriptor()
 	// authorization.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	authorization.CodeValidator = authorizationDescCode.Validators[0].(func([]byte) error)
 	// authorizationDescApplicationID is the schema descriptor for application_id field.
-	authorizationDescApplicationID := authorizationFields[5].Descriptor()
+	authorizationDescApplicationID := authorizationFields[6].Descriptor()
 	// authorization.ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
 	authorization.ApplicationIDValidator = authorizationDescApplicationID.Validators[0].(func(string) error)
 	// authorizationDescUserID is the schema descriptor for user_id field.
-	authorizationDescUserID := authorizationFields[6].Descriptor()
+	authorizationDescUserID := authorizationFields[7].Descriptor()
 	// authorization.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
 	authorization.UserIDValidator = authorizationDescUserID.Validators[0].(func(string) error)
 	// authorizationDescID is the schema descriptor for id field.
@@ -236,7 +254,21 @@ func init() {
 	// userDescPwhash is the schema descriptor for pwhash field.
 	userDescPwhash := userFields[3].Descriptor()
 	// user.PwhashValidator is a validator for the "pwhash" field. It is called by the builders before save.
-	user.PwhashValidator = userDescPwhash.Validators[0].(func(string) error)
+	user.PwhashValidator = func() func(string) error {
+		validators := userDescPwhash.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(pwhash string) error {
+			for _, fn := range fns {
+				if err := fn(pwhash); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.

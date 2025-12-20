@@ -85,6 +85,11 @@ func Challenge(v []byte) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldChallenge, v))
 }
 
+// ChallengeMethod applies equality check predicate on the "challenge_method" field. It's identical to ChallengeMethodEQ.
+func ChallengeMethod(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldChallengeMethod, v))
+}
+
 // Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
 func Code(v []byte) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldCode, v))
@@ -278,6 +283,71 @@ func ChallengeLT(v []byte) predicate.Authorization {
 // ChallengeLTE applies the LTE predicate on the "challenge" field.
 func ChallengeLTE(v []byte) predicate.Authorization {
 	return predicate.Authorization(sql.FieldLTE(FieldChallenge, v))
+}
+
+// ChallengeMethodEQ applies the EQ predicate on the "challenge_method" field.
+func ChallengeMethodEQ(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodNEQ applies the NEQ predicate on the "challenge_method" field.
+func ChallengeMethodNEQ(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNEQ(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodIn applies the In predicate on the "challenge_method" field.
+func ChallengeMethodIn(vs ...string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldIn(FieldChallengeMethod, vs...))
+}
+
+// ChallengeMethodNotIn applies the NotIn predicate on the "challenge_method" field.
+func ChallengeMethodNotIn(vs ...string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNotIn(FieldChallengeMethod, vs...))
+}
+
+// ChallengeMethodGT applies the GT predicate on the "challenge_method" field.
+func ChallengeMethodGT(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGT(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodGTE applies the GTE predicate on the "challenge_method" field.
+func ChallengeMethodGTE(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGTE(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodLT applies the LT predicate on the "challenge_method" field.
+func ChallengeMethodLT(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLT(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodLTE applies the LTE predicate on the "challenge_method" field.
+func ChallengeMethodLTE(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLTE(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodContains applies the Contains predicate on the "challenge_method" field.
+func ChallengeMethodContains(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldContains(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodHasPrefix applies the HasPrefix predicate on the "challenge_method" field.
+func ChallengeMethodHasPrefix(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldHasPrefix(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodHasSuffix applies the HasSuffix predicate on the "challenge_method" field.
+func ChallengeMethodHasSuffix(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldHasSuffix(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodEqualFold applies the EqualFold predicate on the "challenge_method" field.
+func ChallengeMethodEqualFold(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEqualFold(FieldChallengeMethod, v))
+}
+
+// ChallengeMethodContainsFold applies the ContainsFold predicate on the "challenge_method" field.
+func ChallengeMethodContainsFold(v string) predicate.Authorization {
+	return predicate.Authorization(sql.FieldContainsFold(FieldChallengeMethod, v))
 }
 
 // CodeEQ applies the EQ predicate on the "code" field.

@@ -70,6 +70,12 @@ func (_c *AuthorizationCreate) SetChallenge(v []byte) *AuthorizationCreate {
 	return _c
 }
 
+// SetChallengeMethod sets the "challenge_method" field.
+func (_c *AuthorizationCreate) SetChallengeMethod(v string) *AuthorizationCreate {
+	_c.mutation.SetChallengeMethod(v)
+	return _c
+}
+
 // SetCode sets the "code" field.
 func (_c *AuthorizationCreate) SetCode(v []byte) *AuthorizationCreate {
 	_c.mutation.SetCode(v)
@@ -177,6 +183,14 @@ func (_c *AuthorizationCreate) check() error {
 			return &ValidationError{Name: "challenge", err: fmt.Errorf(`ent: validator failed for field "Authorization.challenge": %w`, err)}
 		}
 	}
+	if _, ok := _c.mutation.ChallengeMethod(); !ok {
+		return &ValidationError{Name: "challenge_method", err: errors.New(`ent: missing required field "Authorization.challenge_method"`)}
+	}
+	if v, ok := _c.mutation.ChallengeMethod(); ok {
+		if err := authorization.ChallengeMethodValidator(v); err != nil {
+			return &ValidationError{Name: "challenge_method", err: fmt.Errorf(`ent: validator failed for field "Authorization.challenge_method": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "Authorization.code"`)}
 	}
@@ -268,6 +282,10 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.Challenge(); ok {
 		_spec.SetField(authorization.FieldChallenge, field.TypeBytes, value)
 		_node.Challenge = value
+	}
+	if value, ok := _c.mutation.ChallengeMethod(); ok {
+		_spec.SetField(authorization.FieldChallengeMethod, field.TypeString, value)
+		_node.ChallengeMethod = value
 	}
 	if value, ok := _c.mutation.Code(); ok {
 		_spec.SetField(authorization.FieldCode, field.TypeBytes, value)

@@ -27,6 +27,8 @@ type Authorization struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Challenge holds the value of the "challenge" field.
 	Challenge []byte `json:"challenge,omitempty"`
+	// ChallengeMethod holds the value of the "challenge_method" field.
+	ChallengeMethod string `json:"challenge_method,omitempty"`
 	// Code holds the value of the "code" field.
 	Code []byte `json:"code,omitempty"`
 	// CodeExpireAt holds the value of the "code_expire_at" field.
@@ -83,7 +85,7 @@ func (*Authorization) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case authorization.FieldChallenge, authorization.FieldCode:
 			values[i] = new([]byte)
-		case authorization.FieldID, authorization.FieldApplicationID, authorization.FieldUserID:
+		case authorization.FieldID, authorization.FieldChallengeMethod, authorization.FieldApplicationID, authorization.FieldUserID:
 			values[i] = new(sql.NullString)
 		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldCodeExpireAt, authorization.FieldExpireAt:
 			values[i] = new(sql.NullTime)
@@ -132,6 +134,12 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field challenge", values[i])
 			} else if value != nil {
 				_m.Challenge = *value
+			}
+		case authorization.FieldChallengeMethod:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field challenge_method", values[i])
+			} else if value.Valid {
+				_m.ChallengeMethod = value.String
 			}
 		case authorization.FieldCode:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -222,6 +230,9 @@ func (_m *Authorization) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("challenge=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Challenge))
+	builder.WriteString(", ")
+	builder.WriteString("challenge_method=")
+	builder.WriteString(_m.ChallengeMethod)
 	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Code))

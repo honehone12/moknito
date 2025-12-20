@@ -24,13 +24,13 @@ func (User) Fields() []ent.Field {
 		field.String("name").
 			NotEmpty().
 			MaxLen(256),
-		field.
-			String("email").
+		field.String("email").
 			NotEmpty().
 			MaxLen(256).
 			Unique(),
 		field.String("pwhash").
-			NotEmpty(),
+			NotEmpty().
+			MaxLen(512),
 	}
 }
 

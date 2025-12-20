@@ -22,6 +22,8 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldChallenge holds the string denoting the challenge field in the database.
 	FieldChallenge = "challenge"
+	// FieldChallengeMethod holds the string denoting the challenge_method field in the database.
+	FieldChallengeMethod = "challenge_method"
 	// FieldCode holds the string denoting the code field in the database.
 	FieldCode = "code"
 	// FieldCodeExpireAt holds the string denoting the code_expire_at field in the database.
@@ -61,6 +63,7 @@ var Columns = []string{
 	FieldUpdatedAt,
 	FieldDeletedAt,
 	FieldChallenge,
+	FieldChallengeMethod,
 	FieldCode,
 	FieldCodeExpireAt,
 	FieldExpireAt,
@@ -87,6 +90,8 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
 	ChallengeValidator func([]byte) error
+	// ChallengeMethodValidator is a validator for the "challenge_method" field. It is called by the builders before save.
+	ChallengeMethodValidator func(string) error
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	CodeValidator func([]byte) error
 	// ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
@@ -118,6 +123,11 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByChallengeMethod orders the results by the challenge_method field.
+func ByChallengeMethod(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldChallengeMethod, opts...).ToFunc()
 }
 
 // ByCodeExpireAt orders the results by the code_expire_at field.

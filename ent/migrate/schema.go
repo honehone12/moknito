@@ -57,6 +57,7 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "challenge", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(32)"}},
+		{Name: "challenge_method", Type: field.TypeString, Size: 256},
 		{Name: "code", Type: field.TypeBytes, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "code_expire_at", Type: field.TypeTime},
 		{Name: "expire_at", Type: field.TypeTime},
@@ -71,15 +72,22 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "authorizations_applications_application",
-				Columns:    []*schema.Column{AuthorizationsColumns[8]},
+				Columns:    []*schema.Column{AuthorizationsColumns[9]},
 				RefColumns: []*schema.Column{ApplicationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "authorizations_users_authorizations",
-				Columns:    []*schema.Column{AuthorizationsColumns[9]},
+				Columns:    []*schema.Column{AuthorizationsColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "authorization_code",
+				Unique:  false,
+				Columns: []*schema.Column{AuthorizationsColumns[6]},
 			},
 		},
 	}
@@ -120,7 +128,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Size: 256},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 256},
-		{Name: "pwhash", Type: field.TypeString},
+		{Name: "pwhash", Type: field.TypeString, Size: 512},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
