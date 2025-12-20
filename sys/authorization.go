@@ -27,7 +27,8 @@ type AuthTokenCodeParams struct {
 }
 
 type AuthTokenResult struct {
-	Token *token.AuthTokenBundle
+	Token  *token.AuthTokenBundle
+	Domain string
 	E
 }
 
@@ -146,5 +147,6 @@ func (s *EntRdsSys) AuthTokenCode(
 	}
 
 	r.Token = bundle
+	r.Domain = auth.Edges.Application.Domain
 	return r
 }

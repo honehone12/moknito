@@ -23,6 +23,8 @@ const SESSION_COOKIE_KEY = "ss"
 const SESSION_REDIS_KEY = "SESS"
 const SESSION_NONCE_MAX = 100
 
+const SECURE_COOKIE = false // for local
+
 type Sys interface {
 	SessionSigner
 	AuthenticationSigner

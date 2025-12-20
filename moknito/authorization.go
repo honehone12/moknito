@@ -1,6 +1,7 @@
 package moknito
 
 import (
+	"fmt"
 	"moknito/id"
 	"moknito/res"
 	"moknito/sys"
@@ -54,5 +55,10 @@ func (m *Moknito) AuthToken(ctx echo.Context) error {
 		return r.SystemErr
 	}
 
+	origin := fmt.Sprintf("%s://%s", ORIGIN_SCHEME, r.Domain)
+
+	h := ctx.Response().Header()
+	h.Set("Access-Control-Allow-Origin", origin)
+	h.Add("Vary", "Origin")
 	return ctx.JSON(http.StatusOK, r.Token)
 }

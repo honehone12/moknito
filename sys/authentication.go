@@ -111,7 +111,7 @@ func (s *EntRdsSys) createAuthentication(
 		Value:    tkn,
 		Path:     "/",
 		MaxAge:   int(s.ttl.TokenTtl.Milliseconds() / 1000),
-		Secure:   false, // for local
+		Secure:   SECURE_COOKIE,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}

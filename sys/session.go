@@ -133,7 +133,7 @@ func (s *EntRdsSys) createSessionCookie(value string) (*http.Cookie, error) {
 		Value:    value,
 		Path:     "/",
 		MaxAge:   int(s.ttl.SessionTtl.Milliseconds() / 1000),
-		Secure:   false, // for local
+		Secure:   SECURE_COOKIE,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}
