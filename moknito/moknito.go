@@ -15,6 +15,10 @@ import (
 const CTX_KEY_AUTHED_USER_ID = "AUTHED_USER_ID"
 const CTX_KEY_AUTH_ID = "AUTH_ID"
 
+type apiRequest struct {
+	Id string `param:"id" validate:"len=36,uuid7"`
+}
+
 type Moknito struct {
 	system    sys.Sys
 	validator *validator.Validate

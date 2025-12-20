@@ -7,9 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type InfoAppRequest struct {
-	Id string `query:"id" validate:"len=36,uuid7"`
-}
+type InfoAppRequest = apiRequest
 
 type InfoAppResponse struct {
 	Name   string `json:"name"`

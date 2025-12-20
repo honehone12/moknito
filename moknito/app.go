@@ -11,13 +11,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type AppAllowRequest struct {
-	Id string `form:"id" validate:"len=36,uuid7"`
-}
+type AppAllowRequest = apiRequest
 
-type AppAuthorizeRequest struct {
-	Id string `form:"id" validate:"len=36,uuid7"`
-}
+type AppAuthorizeRequest = apiRequest
 
 func (m *Moknito) AppAllow(ctx echo.Context) error {
 	form := AppAllowRequest{}

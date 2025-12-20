@@ -55,7 +55,8 @@ func main() {
 	))
 
 	// route for public POSTs
-	echo.Group("/auth")
+	authGroup := echo.Group("/auth")
+	authGroup.POST("/:id/token", moknito.AuthToken)
 
 	// routes for POSTs
 	api := echo.Group("/api")
@@ -63,12 +64,12 @@ func main() {
 		"/user",
 		moknito.OriginGuard(), moknito.VerifySession(),
 	)
-	userApi.POST("/register", moknito.UserRegister)
-	userApi.POST("/join", moknito.UserJoin)
-	userApi.POST("/authenticate", moknito.UserAuthenticate)
+	userApi.POST("/:id/register", moknito.UserRegister)
+	userApi.POST("/:id/join", moknito.UserJoin)
+	userApi.POST("/:id/authenticate", moknito.UserAuthenticate)
 	appApi := api.Group("/app", moknito.VerifyAuthentication())
-	appApi.POST("/allow", moknito.AppAllow)
-	appApi.POST("/authorize", moknito.AppAuthorize)
+	appApi.POST("/:id/allow", moknito.AppAllow)
+	appApi.POST("/:id/authorize", moknito.AppAuthorize)
 
 	// routes for GETs
 	info := echo.Group(
@@ -76,21 +77,24 @@ func main() {
 		moknito.VerifySession(),
 		moknito.VerifyAuthentication(),
 	)
-	info.GET("/app", moknito.InfoApp)
+	info.GET("/:id", moknito.InfoApp)
 
 	// routes fo UIs
-	echo.Group(
-		"/user",
-		moknito.SetSession(),
-		uiProxy,
-	)
-	echo.Group(
-		"/app",
-		moknito.VerifySession(),
-		moknito.VerifyAuthentication(),
-		uiProxy,
-	)
-	echo.Group("/*", uiProxy)
+	// they should be static after build
+	{
+		echo.Group(
+			"/user",
+			moknito.SetSession(),
+			uiProxy,
+		)
+		echo.Group(
+			"/app",
+			moknito.VerifySession(),
+			moknito.VerifyAuthentication(),
+			uiProxy,
+		)
+		echo.Group("/*", uiProxy)
+	}
 
 	if err := echo.Start("localhost:8080"); err != nil {
 		echo.Logger.Fatal(err)

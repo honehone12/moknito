@@ -162,6 +162,7 @@ func (s *EntRdsSys) AppAuthorize(
 
 	err = s.ent.Authorization.Create().
 		SetID(string(id)).
+		SetChallengeMethod("S256").
 		SetChallenge(challenge).
 		SetCode(code).
 		SetCodeExpireAt(now.Add(s.ttl.CodeTtl)).

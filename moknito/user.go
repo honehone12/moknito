@@ -9,16 +9,22 @@ import (
 )
 
 type userRegisterRequest struct {
+	apiRequest
 	Name     string `form:"name" validate:"min=1,max=256"`
 	Email    string `form:"email" validate:"email,max=128"`
 	Password string `form:"password" validate:"min=8,max=128"`
 }
 
 type userAuthenticationRequest struct {
-	Email     string `form:"email" validate:"email,max=128"`
-	Password  string `form:"password" validate:"min=8,max=128"`
+	apiRequest
+	Email    string `form:"email" validate:"email,max=128"`
+	Password string `form:"password" validate:"min=8,max=128"`
+	// ChallengeMethod string `form:"challenge_method" validate:"oneof=plain S256"`
 	Challenge string `form:"challenge" validate:"len=43,base64rawurl"`
+	// Redirect        string `form:"redirect" validate:"url,max=256"`
 }
+
+type userJoinRequest = userAuthenticationRequest
 
 func (m *Moknito) UserRegister(ctx echo.Context) error {
 	form := userRegisterRequest{}
@@ -48,7 +54,7 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 }
 
 func (m *Moknito) UserJoin(ctx echo.Context) error {
-	form := userAuthenticationRequest{}
+	form := userJoinRequest{}
 
 	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)
