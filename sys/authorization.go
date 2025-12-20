@@ -124,7 +124,7 @@ func (s *EntRdsSys) AuthTokenCode(
 		return r
 	}
 
-	expiredIn := int(auth.ExpireAt.Sub(now).Seconds())
+	expiredIn := auth.ExpireAt.Sub(now).Milliseconds() / 1000
 
 	bundle := &token.AuthTokenBundle{
 		AccessToken:     authTkn,
