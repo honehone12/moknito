@@ -44,8 +44,8 @@ func (m *Moknito) verifyAuthentication(next echo.HandlerFunc) echo.HandlerFunc {
 			return res.BadRequest(ctx)
 		}
 
-		ctx.Set(CTX_KEY_AUTHED_USER_ID, r.UserId)
-		ctx.Set(CTX_KEY_AUTH_ID, r.AuthId)
+		ctx.Set(__CTX_KEY_AUTHED_USER_ID, r.UserId)
+		ctx.Set(__CTX_KEY_AUTH_ID, r.AuthId)
 
 		return next(ctx)
 	}

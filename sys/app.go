@@ -106,7 +106,7 @@ func (s *EntRdsSys) AppAuthorize(
 
 	challKey := fmt.Sprintf(
 		"%s:%x:%x",
-		CHALLENGE_REDIS_KEY,
+		__CHALLENGE_REDIS_KEY,
 		p.UserId,
 		p.AuthId,
 	)

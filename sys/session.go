@@ -48,7 +48,7 @@ func (s *EntRdsSys) VerifySession(
 
 	sessKey := dec[token.SIGNATURE_LEN:]
 
-	key := fmt.Sprintf("%s:%x", SESSION_REDIS_KEY, sessKey)
+	key := fmt.Sprintf("%s:%x", __SESSION_REDIS_KEY, sessKey)
 	nonce, err := s.redis.Get(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
 		r.ValidationErr = errors.New("session key not found")
@@ -101,7 +101,7 @@ func (s *EntRdsSys) createSession(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	key := fmt.Sprintf("%s:%x", SESSION_REDIS_KEY, sessKey)
+	key := fmt.Sprintf("%s:%x", __SESSION_REDIS_KEY, sessKey)
 	nonce := "0"
 	if err := s.redis.SetEx(ctx, key, nonce, s.ttl.SessionTtl).Err(); err != nil {
 		return "", err
@@ -111,7 +111,7 @@ func (s *EntRdsSys) createSession(ctx context.Context) (string, error) {
 }
 
 func (s *EntRdsSys) incrSession(ctx context.Context, sessKey []byte) (string, error) {
-	key := fmt.Sprintf("%s:%x", SESSION_REDIS_KEY, sessKey)
+	key := fmt.Sprintf("%s:%x", __SESSION_REDIS_KEY, sessKey)
 	nonce, err := s.redis.Incr(ctx, key).Result()
 	if err != nil {
 		return "", err
@@ -133,7 +133,7 @@ func (s *EntRdsSys) createSessionCookie(value string) (*http.Cookie, error) {
 		Value:    value,
 		Path:     "/",
 		MaxAge:   int(s.ttl.SessionTtl.Milliseconds() / 1000),
-		Secure:   SECURE_COOKIE,
+		Secure:   __SECURE_COOKIE,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}

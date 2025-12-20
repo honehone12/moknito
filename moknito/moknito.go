@@ -12,10 +12,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const CTX_KEY_AUTHED_USER_ID = "AUTHED_USER_ID"
-const CTX_KEY_AUTH_ID = "AUTH_ID"
+const __CTX_KEY_AUTHED_USER_ID = "AUTHED_USER_ID"
+const __CTX_KEY_AUTH_ID = "AUTH_ID"
 
-const ORIGIN_SCHEME = "http" // for local
+const __ORIGIN_SCHEME = "http" // for local
+
+const __REGEX_UUID_V7 = `^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`
 
 type ApiRequest struct {
 	Id string `param:"id" validate:"len=36,uuid7"`
@@ -35,7 +37,7 @@ type RegexValidator struct {
 }
 
 func NewRegexValidator() (*RegexValidator, error) {
-	uuid7Regex, err := regexp.Compile(`^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
+	uuid7Regex, err := regexp.Compile(__REGEX_UUID_V7)
 	if err != nil {
 		return nil, err
 	}

@@ -13,17 +13,17 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-const USER_REGISTRATION_REDIS_KEY = "USERREG"
+const __USER_REGISTRATION_REDIS_KEY = "USERREG"
 const AUTHENTICATED_COOKIE_KEY = "ae"
 const AUTHENTICATION_MAX_ERROR = 10
-const AUTHENTICATION_ERROR_REDIS_KEY = "ERROR"
-const CHALLENGE_REDIS_KEY = "CHALL"
+const __AUTHENTICATION_ERROR_REDIS_KEY = "ERROR"
+const __CHALLENGE_REDIS_KEY = "CHALL"
 const SESSION_KEY_LEN = 16
 const SESSION_COOKIE_KEY = "ss"
-const SESSION_REDIS_KEY = "SESS"
+const __SESSION_REDIS_KEY = "SESS"
 const SESSION_NONCE_MAX = 100
 
-const SECURE_COOKIE = false // for local
+const __SECURE_COOKIE = false // for local
 
 type Sys interface {
 	SessionSigner

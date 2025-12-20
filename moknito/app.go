@@ -23,7 +23,7 @@ func (m *Moknito) AppAllow(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	rawUser := ctx.Get(CTX_KEY_AUTHED_USER_ID)
+	rawUser := ctx.Get(__CTX_KEY_AUTHED_USER_ID)
 	userId, ok := rawUser.(id.Id)
 	if !ok {
 		return errors.New("failed to cast ctx user id value to id")
@@ -53,13 +53,13 @@ func (m *Moknito) AppAuthorize(ctx echo.Context) error {
 		return res.BadRequest(ctx)
 	}
 
-	rawUser := ctx.Get(CTX_KEY_AUTHED_USER_ID)
+	rawUser := ctx.Get(__CTX_KEY_AUTHED_USER_ID)
 	userId, ok := rawUser.(id.Id)
 	if !ok {
 		return errors.New("failed to cast ctx user id")
 	}
 
-	rawAuth := ctx.Get(CTX_KEY_AUTH_ID)
+	rawAuth := ctx.Get(__CTX_KEY_AUTH_ID)
 	authId, ok := rawAuth.(id.Id)
 	if !ok {
 		return errors.New("failed to cast ctx auth id")

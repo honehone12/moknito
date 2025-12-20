@@ -96,7 +96,7 @@ func (s *EntRdsSys) UserRegister(
 		return r
 	}
 
-	key := fmt.Sprintf("%s:%s", USER_REGISTRATION_REDIS_KEY, p.Email)
+	key := fmt.Sprintf("%s:%s", __USER_REGISTRATION_REDIS_KEY, p.Email)
 	err = s.redis.JSONSetMode(
 		ctx,
 		key,
@@ -126,7 +126,7 @@ func (s *EntRdsSys) checkErrorCount(
 	ctx context.Context,
 	email string,
 ) (bool, error) {
-	eKey := fmt.Sprintf("%s:%s", AUTHENTICATION_ERROR_REDIS_KEY, email)
+	eKey := fmt.Sprintf("%s:%s", __AUTHENTICATION_ERROR_REDIS_KEY, email)
 	e, err := s.redis.Get(ctx, eKey).Result()
 	if errors.Is(err, redis.Nil) {
 		return true, nil
@@ -146,7 +146,7 @@ func (s *EntRdsSys) incrErrCount(
 	ctx context.Context,
 	email string,
 ) error {
-	eKey := fmt.Sprintf("%s:%s", AUTHENTICATION_ERROR_REDIS_KEY, email)
+	eKey := fmt.Sprintf("%s:%s", __AUTHENTICATION_ERROR_REDIS_KEY, email)
 	if err := s.redis.Incr(ctx, eKey).Err(); err != nil {
 		return err
 	}
@@ -201,7 +201,7 @@ func (s *EntRdsSys) UserJoin(
 		return r
 	}
 
-	userRegKey := fmt.Sprintf("%s:%s", USER_REGISTRATION_REDIS_KEY, p.Email)
+	userRegKey := fmt.Sprintf("%s:%s", __USER_REGISTRATION_REDIS_KEY, p.Email)
 	j, err := s.redis.JSONGet(ctx, userRegKey, "$").Result()
 	if errors.Is(err, redis.Nil) {
 		r.ValidationErr = errors.New("registration not found")
@@ -275,7 +275,7 @@ func (s *EntRdsSys) UserJoin(
 		return r
 	}
 
-	challKey := fmt.Sprintf("%s:%x:%x", CHALLENGE_REDIS_KEY, userId, authId)
+	challKey := fmt.Sprintf("%s:%x:%x", __CHALLENGE_REDIS_KEY, userId, authId)
 	if err := s.redis.SetEx(
 		ctx,
 		challKey,
@@ -376,7 +376,7 @@ func (s *EntRdsSys) UserAuthenticate(
 		return r
 	}
 
-	challKey := fmt.Sprintf("%s:%x:%x", CHALLENGE_REDIS_KEY, user.ID, authId)
+	challKey := fmt.Sprintf("%s:%x:%x", __CHALLENGE_REDIS_KEY, user.ID, authId)
 	if err := s.redis.SetEx(
 		ctx,
 		challKey,

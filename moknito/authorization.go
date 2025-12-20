@@ -55,7 +55,7 @@ func (m *Moknito) AuthToken(ctx echo.Context) error {
 		return r.SystemErr
 	}
 
-	origin := fmt.Sprintf("%s://%s", ORIGIN_SCHEME, r.Domain)
+	origin := fmt.Sprintf("%s://%s", __ORIGIN_SCHEME, r.Domain)
 
 	h := ctx.Response().Header()
 	h.Set("Access-Control-Allow-Origin", origin)
