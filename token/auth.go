@@ -20,7 +20,7 @@ type AuthTokenBundle struct {
 	AccessToken     string `json:"access_token"`
 	RefreshToken    string `json:"refresh_token"`
 	BundleTokenType string `json:"token_type"`
-	ExpiresIn       int64  `json:"expire_in"`
+	ExpiresIn       int64  `json:"expires_in"`
 }
 
 type AutheClaims struct {
