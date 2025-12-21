@@ -18,14 +18,14 @@ func NewSessionTokenSigner() (*SessionTokenSigner, error) {
 	// just write within module for testing
 
 	encKey := os.Getenv("SESSION_TOKEN_KEY")
-	if len(encKey) != SIGNATURE_KEY_ENV_LEN {
+	if len(encKey) != SIGNATURE_HKEY_ENV_LEN {
 		return nil, errors.New("unexpected auth token signature key length")
 	}
 	key, err := base64.StdEncoding.DecodeString(encKey)
 	if err != nil {
 		return nil, err
 	}
-	if len(key) != SIGNATURE_KEY_LEN {
+	if len(key) != SIGNATURE_HKEY_LEN {
 		return nil, errors.New("unexpected signature key length")
 	}
 
@@ -52,11 +52,11 @@ func (s *SessionTokenSigner) SignedCookie(sessKey []byte, nonce string) (string,
 	}
 
 	l := len(sessKey)
-	raw := make([]byte, SIGNATURE_LEN+l)
-	if n := copy(raw[:SIGNATURE_LEN], hash); n != SIGNATURE_LEN {
+	raw := make([]byte, SIGNATURE_H_LEN+l)
+	if n := copy(raw[:SIGNATURE_H_LEN], hash); n != SIGNATURE_H_LEN {
 		return "", errors.New("failed to copy signature")
 	}
-	if n := copy(raw[SIGNATURE_LEN:], sessKey); n != l {
+	if n := copy(raw[SIGNATURE_H_LEN:], sessKey); n != l {
 		return "", errors.New("failed to copy session key")
 	}
 

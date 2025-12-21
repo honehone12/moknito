@@ -41,7 +41,7 @@ func (a *AutheClaims) Validate() error {
 
 type AuthTokenSigner struct {
 	host string
-	key  []byte
+	hkey []byte
 }
 
 func NewAuthTokenSigner() (*AuthTokenSigner, error) {
@@ -49,15 +49,15 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 	// to prevent exposing sensitive info
 	// just write within module for testing
 
-	encKey := os.Getenv("AUTH_TOKEN_KEY")
-	if len(encKey) != SIGNATURE_KEY_ENV_LEN {
+	encHKey := os.Getenv("AUTH_TOKEN_HKEY")
+	if len(encHKey) != SIGNATURE_HKEY_ENV_LEN {
 		return nil, errors.New("unexpected auth token signature key length")
 	}
-	key, err := base64.StdEncoding.DecodeString(encKey)
+	hkey, err := base64.StdEncoding.DecodeString(encHKey)
 	if err != nil {
 		return nil, err
 	}
-	if len(key) != SIGNATURE_KEY_LEN {
+	if len(hkey) != SIGNATURE_HKEY_LEN {
 		return nil, errors.New("unexpected signature key length")
 	}
 
@@ -66,7 +66,7 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 		return nil, errors.New("could not find env for auth host")
 	}
 
-	return &AuthTokenSigner{host, key}, nil
+	return &AuthTokenSigner{host, hkey}, nil
 }
 
 type CreateAuthTokenParams struct {
@@ -98,7 +98,7 @@ func (a *AuthTokenSigner) CreateAuthToken(p CreateAuthTokenParams) (string, erro
 			},
 		},
 	)
-	signed, err := token.SignedString(a.key)
+	signed, err := token.SignedString(a.hkey)
 	if err != nil {
 		return "", err
 	}
@@ -118,14 +118,14 @@ func (a *AuthTokenSigner) Parse(
 		raw,
 		&AutheClaims{},
 		func(*jwt.Token) (any, error) {
-			return a.key, nil
+			return a.hkey, nil
 		},
 		jwt.WithAllAudiences(applications...),
 		jwt.WithExpirationRequired(),
 		jwt.WithIssuedAt(),
 		jwt.WithIssuer(a.host),
 		jwt.WithStrictDecoding(),
-		jwt.WithValidMethods([]string{"HS256"}),
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}),
 	)
 	if err != nil {
 		return nil, err

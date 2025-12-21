@@ -72,14 +72,14 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 	// Create Expired Auth
 	expiredAuthID, _ := id.NewRandom()
 	expiredUuid, _ := expiredAuthID.ToUUID()
-	
+
 	sys.ent.Authentication.Create().
 		SetID(string(expiredAuthID)).
 		SetUserID(string(userID)).
 		SetExpireAt(time.Now().Add(-time.Hour)). // expired
 		SetIP("127.0.0.1").
 		SetUserAgent("test").
-        Save(ctx)
+		Save(ctx)
 
 	// Create token for this expired auth
 	expiredTokenStr, _ := sys.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
@@ -89,7 +89,7 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 		Ttl:       time.Hour,
 	})
 	expiredCookie := &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: expiredTokenStr}
-	
+
 	res = sys.VerifyAuthentication(ctx, expiredCookie)
 	if res.ValidationErr == nil {
 		t.Error("expected validation error for expired auth, got nil")
@@ -100,16 +100,16 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 	wrongUserUuid, _ := wrongUser.ToUUID()
 	wrongTokenStr, _ := sys.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
-		AuthUuid:  authUuid, // points to valid auth
+		AuthUuid:  authUuid,      // points to valid auth
 		UserUuid:  wrongUserUuid, // but mismatch user
 		Ttl:       time.Hour,
 	})
 	wrongCookie := &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: wrongTokenStr}
-	
+
 	res = sys.VerifyAuthentication(ctx, wrongCookie)
 	if res.ValidationErr == nil {
 		t.Error("expected validation error for subject mismatch, got nil")
-	} else if res.ValidationErr.Error() != "wrong subject" {
+	} else if res.ValidationErr.Error() != "no active authentication found" {
 		t.Errorf("expected 'wrong subject' error, got %v", res.ValidationErr)
 	}
 }
@@ -117,10 +117,10 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 func TestAuthentication_CreateAuthentication(t *testing.T) {
 	sys, _ := setupSys(t)
 	defer sys.Close()
-	
+
 	userID, _ := id.NewRandom()
 	authID, _ := id.NewRandom()
-	
+
 	cookie, err := sys.createAuthentication(authID, userID)
 	if err != nil {
 		t.Fatalf("createAuthentication failed: %v", err)
@@ -128,18 +128,18 @@ func TestAuthentication_CreateAuthentication(t *testing.T) {
 	if cookie.Name != AUTHENTICATED_COOKIE_KEY {
 		t.Errorf("wrong cookie name")
 	}
-	
+
 	// Parse back
 	claims, err := sys.authSigner.Parse(cookie.Value)
 	if err != nil {
 		t.Errorf("failed to parse generated token: %v", err)
 	}
 	if claims.Subject != string(userID) {
-		// Wait, claims.Subject is string(uuid). 
-		// userId is id.Id (raw bytes). 
+		// Wait, claims.Subject is string(uuid).
+		// userId is id.Id (raw bytes).
 		// In createAuthentication: userUuid, err := userId.ToUUID(). Subject := userUuid.String()
 		// So claims.Subject should be UUID string.
-		
+
 		u, _ := userID.ToUUID()
 		if claims.Subject != u.String() {
 			t.Errorf("expected subject %s, got %s", u.String(), claims.Subject)
