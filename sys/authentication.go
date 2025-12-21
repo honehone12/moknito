@@ -3,7 +3,6 @@ package sys
 import (
 	"context"
 	"errors"
-	"moknito/ent"
 	"moknito/ent/authentication"
 	"moknito/id"
 	"moknito/token"
@@ -47,29 +46,25 @@ func (s *EntRdsSys) VerifyAuthentication(
 		return r
 	}
 
-	auth, err := s.ent.Authentication.Query().
-		Select(
-			authentication.FieldIP,
-			authentication.FieldUserAgent,
-			authentication.FieldUserID,
-		).
+	ok, err := s.ent.Authentication.Query().
+		// Select(
+		// 	authentication.FieldIP,
+		// 	authentication.FieldUserAgent,
+		// ).
 		Where(
 			authentication.ID(string(authId)),
 			authentication.ExpireAtGT(time.Now()),
 			authentication.LogoutAtIsNil(),
 			authentication.DeletedAtIsNil(),
+			authentication.UserID(string(userId)),
 		).
-		Only(ctx)
-	if ent.IsNotFound(err) {
-		r.ValidationErr = err
-		return r
-	} else if err != nil {
+		Exist(ctx)
+	if err != nil {
 		r.SystemErr = err
 		return r
 	}
-
-	if id.Id(auth.UserID) != userId {
-		r.ValidationErr = errors.New("wrong subject")
+	if !ok {
+		r.ValidationErr = errors.New("no active authentication found")
 		return r
 	}
 
