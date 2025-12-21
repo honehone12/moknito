@@ -54,6 +54,10 @@ func (m *Moknito) AuthToken(ctx echo.Context) error {
 	if r.SystemErr != nil {
 		return r.SystemErr
 	}
+	if r.ValidationErr != nil {
+		ctx.Logger().Warn(r.ValidationErr)
+		return res.BadRequest(ctx)
+	}
 
 	origin := fmt.Sprintf("%s://%s", __ORIGIN_SCHEME, r.Domain)
 
