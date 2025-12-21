@@ -30,7 +30,7 @@ func main() {
 	if pepper := os.Getenv("PEPPER"); len(pepper) != hash.PEPPER_ENV_LEN {
 		echo.Logger.Fatal("env for perpper is invalid")
 	}
-	if atk := os.Getenv("AUTH_TOKEN_KEY"); len(atk) != token.SIGNATURE_HKEY_ENV_LEN {
+	if atk := os.Getenv("AUTH_TOKEN_KEY"); len(atk) != token.HMAC_KEY_ENV_LEN {
 		echo.Logger.Fatal("env for auth token key is invalid")
 	}
 	if host := os.Getenv("AUTH_HOST"); len(host) == 0 {

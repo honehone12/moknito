@@ -8,14 +8,13 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"log"
+	"moknito/token"
 )
-
-const RSA_PRIV_KEY_LEN = 2048
 
 func main() {
 	log.Println("(!) BE CAREFUL BECAUSE THE KEYS ARE PRINTED AS FOLLOW (!)")
 
-	privateKey, err := rsa.GenerateKey(rand.Reader, RSA_PRIV_KEY_LEN)
+	privateKey, err := rsa.GenerateKey(rand.Reader, token.RSA_PRIV_KEY_LEN)
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -32,10 +32,10 @@ func TestSession_CreateSession(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to decode cookie value: %v", err)
 	}
-	if len(dec) <= token.SIGNATURE_H_LEN {
+	if len(dec) <= token.HMAC_SIGNATURE_LEN {
 		t.Errorf("cookie value too short")
 	}
-	sessKey := dec[token.SIGNATURE_H_LEN:]
+	sessKey := dec[token.HMAC_SIGNATURE_LEN:]
 	if len(sessKey) != SESSION_KEY_LEN {
 		t.Errorf("expected session key len %d, got %d", SESSION_KEY_LEN, len(sessKey))
 	}
@@ -97,7 +97,7 @@ func TestSession_IncrSession(t *testing.T) {
 
 	// Extract sessKey
 	dec, _ := base64.RawURLEncoding.DecodeString(cookie.Value)
-	sessKey := dec[token.SIGNATURE_H_LEN:]
+	sessKey := dec[token.HMAC_SIGNATURE_LEN:]
 
 	// Incr
 	newCookie, err := sys.IncrSession(ctx, sessKey)

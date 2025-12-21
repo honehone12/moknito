@@ -58,12 +58,12 @@ func TestSessionTokenSigner_SignedCookie_And_Verify(t *testing.T) {
 			t.Fatalf("Failed to decode cookie value: %v", err)
 		}
 
-		if len(decoded) <= SIGNATURE_H_LEN {
+		if len(decoded) <= HMAC_SIGNATURE_LEN {
 			t.Fatalf("Decoded length too short: %d", len(decoded))
 		}
 
-		signature := decoded[:SIGNATURE_H_LEN]
-		extractedSessKey := decoded[SIGNATURE_H_LEN:]
+		signature := decoded[:HMAC_SIGNATURE_LEN]
+		extractedSessKey := decoded[HMAC_SIGNATURE_LEN:]
 
 		valid, err := signer.Verify(signature, extractedSessKey, nonce)
 		if err != nil {
@@ -83,8 +83,8 @@ func TestSessionTokenSigner_SignedCookie_And_Verify(t *testing.T) {
 
 		// Tamper with signature
 		decoded[0] ^= 0xFF
-		signature := decoded[:SIGNATURE_H_LEN]
-		extractedSessKey := decoded[SIGNATURE_H_LEN:]
+		signature := decoded[:HMAC_SIGNATURE_LEN]
+		extractedSessKey := decoded[HMAC_SIGNATURE_LEN:]
 
 		valid, err := signer.Verify(signature, extractedSessKey, nonce)
 		if err != nil {
@@ -101,8 +101,8 @@ func TestSessionTokenSigner_SignedCookie_And_Verify(t *testing.T) {
 			t.Fatalf("SignedCookie() error = %v", err)
 		}
 		decoded, _ := base64.RawURLEncoding.DecodeString(cookieVal)
-		signature := decoded[:SIGNATURE_H_LEN]
-		extractedSessKey := decoded[SIGNATURE_H_LEN:]
+		signature := decoded[:HMAC_SIGNATURE_LEN]
+		extractedSessKey := decoded[HMAC_SIGNATURE_LEN:]
 
 		valid, err := signer.Verify(signature, extractedSessKey, "wrong-nonce")
 		if err != nil {
@@ -135,7 +135,7 @@ func TestSignedCookieStructure(t *testing.T) {
 	cookieVal, _ := signer.SignedCookie(sessKey, nonce)
 
 	decoded, _ := base64.RawURLEncoding.DecodeString(cookieVal)
-	if len(decoded) != SIGNATURE_H_LEN+len(sessKey) {
-		t.Errorf("Expected length %d, got %d", SIGNATURE_H_LEN+len(sessKey), len(decoded))
+	if len(decoded) != HMAC_SIGNATURE_LEN+len(sessKey) {
+		t.Errorf("Expected length %d, got %d", HMAC_SIGNATURE_LEN+len(sessKey), len(decoded))
 	}
 }

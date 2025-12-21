@@ -50,14 +50,14 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 	// just write within module for testing
 
 	encHKey := os.Getenv("AUTH_TOKEN_HKEY")
-	if len(encHKey) != SIGNATURE_HKEY_ENV_LEN {
+	if len(encHKey) != HMAC_KEY_ENV_LEN {
 		return nil, errors.New("unexpected auth token signature key length")
 	}
 	hkey, err := base64.StdEncoding.DecodeString(encHKey)
 	if err != nil {
 		return nil, err
 	}
-	if len(hkey) != SIGNATURE_HKEY_LEN {
+	if len(hkey) != HMAC_KEY_LEN {
 		return nil, errors.New("unexpected signature key length")
 	}
 

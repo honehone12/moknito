@@ -41,12 +41,12 @@ func (s *EntRdsSys) VerifySession(
 		r.ValidationErr = err
 		return r
 	}
-	if len(dec) != token.SIGNATURE_H_LEN+SESSION_KEY_LEN {
+	if len(dec) != token.HMAC_SIGNATURE_LEN+SESSION_KEY_LEN {
 		r.ValidationErr = errors.New("invalid decoded session length")
 		return r
 	}
 
-	sessKey := dec[token.SIGNATURE_H_LEN:]
+	sessKey := dec[token.HMAC_SIGNATURE_LEN:]
 
 	key := fmt.Sprintf("%s:%x", __SESSION_REDIS_KEY, sessKey)
 	nonce, err := s.redis.Get(ctx, key).Result()
@@ -59,7 +59,7 @@ func (s *EntRdsSys) VerifySession(
 	}
 
 	ok, err := s.sessionSigner.Verify(
-		dec[:token.SIGNATURE_H_LEN],
+		dec[:token.HMAC_SIGNATURE_LEN],
 		sessKey,
 		nonce,
 	)
