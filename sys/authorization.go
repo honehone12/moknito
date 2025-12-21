@@ -12,6 +12,7 @@ import (
 	"moknito/token"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -119,6 +120,7 @@ func (s *EntRdsSys) AuthTokenCode(
 	}
 
 	authTkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		Method:       jwt.SigningMethodRS256,
 		TokenType:    token.TOKEN_TYPE_AUTHORIZATION,
 		AuthUuid:     authUuid,
 		UserUuid:     userUuid,

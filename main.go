@@ -1,9 +1,7 @@
 package main
 
 import (
-	"moknito/hash"
 	lib "moknito/moknito"
-	"moknito/token"
 	"net/url"
 	"os"
 
@@ -27,11 +25,14 @@ func main() {
 		echo.Logger.Fatal(err)
 	}
 
-	if pepper := os.Getenv("PEPPER"); len(pepper) != hash.PEPPER_ENV_LEN {
-		echo.Logger.Fatal("env for perpper is invalid")
+	if pepper := os.Getenv("PEPPER"); len(pepper) == 0 {
+		echo.Logger.Fatal("env for perpper is not set")
 	}
-	if atk := os.Getenv("AUTH_TOKEN_KEY"); len(atk) != token.HMAC_KEY_ENV_LEN {
-		echo.Logger.Fatal("env for auth token key is invalid")
+	if hk := os.Getenv("AUTH_TOKEN_HMAC_KEY"); len(hk) == 0 {
+		echo.Logger.Fatal("env for hmac key is not set")
+	}
+	if rk := os.Getenv("AUTHO_TOKEN_RSA_KEY"); len(rk) == 0 {
+		echo.Logger.Fatal("env for rsa key is not set")
 	}
 	if host := os.Getenv("AUTH_HOST"); len(host) == 0 {
 		echo.Logger.Fatal("env for auth host is invalid")

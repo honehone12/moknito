@@ -17,7 +17,7 @@ func NewSessionTokenSigner() (*SessionTokenSigner, error) {
 	// to prevent exposing sensitive info
 	// just write within module for testing
 
-	encKey := os.Getenv("SESSION_TOKEN_KEY")
+	encKey := os.Getenv("SESSION_TOKEN_HMAC_KEY")
 	if len(encKey) != HMAC_KEY_ENV_LEN {
 		return nil, errors.New("unexpected auth token signature key length")
 	}

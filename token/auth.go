@@ -1,6 +1,7 @@
 package token
 
 import (
+	"crypto/rsa"
 	"encoding/base64"
 	"errors"
 	"os"
@@ -40,8 +41,9 @@ func (a *AutheClaims) Validate() error {
 }
 
 type AuthTokenSigner struct {
-	host string
-	hkey []byte
+	host    string
+	hmacKey []byte
+	rsaKey  *rsa.PrivateKey
 }
 
 func NewAuthTokenSigner() (*AuthTokenSigner, error) {
@@ -49,27 +51,49 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 	// to prevent exposing sensitive info
 	// just write within module for testing
 
-	encHKey := os.Getenv("AUTH_TOKEN_HKEY")
-	if len(encHKey) != HMAC_KEY_ENV_LEN {
-		return nil, errors.New("unexpected auth token signature key length")
-	}
-	hkey, err := base64.StdEncoding.DecodeString(encHKey)
-	if err != nil {
-		return nil, err
-	}
-	if len(hkey) != HMAC_KEY_LEN {
-		return nil, errors.New("unexpected signature key length")
-	}
-
 	host := os.Getenv("AUTH_HOST")
 	if len(host) == 0 {
 		return nil, errors.New("could not find env for auth host")
 	}
 
-	return &AuthTokenSigner{host, hkey}, nil
+	var hmacKey []byte
+	{
+		encHKey := os.Getenv("AUTH_TOKEN_HMAC_KEY")
+		if len(encHKey) != HMAC_KEY_ENV_LEN {
+			return nil, errors.New("unexpected emac encoded key length")
+		}
+		hkey, err := base64.StdEncoding.DecodeString(encHKey)
+		if err != nil {
+			return nil, err
+		}
+		if len(hkey) != HMAC_KEY_LEN {
+			return nil, errors.New("unexpected hmac key length")
+		}
+		hmacKey = hkey
+	}
+
+	var rsaKey *rsa.PrivateKey
+	{
+		encRKey := os.Getenv("AUTH_TOKEN_RSA_KEY")
+		if len(encRKey) == 0 {
+			return nil, errors.New("un expected encoded rsa key length")
+		}
+		b, err := base64.StdEncoding.DecodeString(encRKey)
+		if err != nil {
+			return nil, err
+		}
+		priv, err := jwt.ParseRSAPrivateKeyFromPEM(b)
+		if err != nil {
+			return nil, err
+		}
+		rsaKey = priv
+	}
+
+	return &AuthTokenSigner{host, hmacKey, rsaKey}, nil
 }
 
 type CreateAuthTokenParams struct {
+	Method       jwt.SigningMethod
 	TokenType    string
 	AuthUuid     uuid.UUID
 	UserUuid     uuid.UUID
@@ -77,13 +101,35 @@ type CreateAuthTokenParams struct {
 	Applications []string
 }
 
+func (a *AuthTokenSigner) sign(t *jwt.Token, m jwt.SigningMethod) (string, error) {
+	switch m {
+	case jwt.SigningMethodHS256:
+		return t.SignedString(a.hmacKey)
+	case jwt.SigningMethodRS256:
+		return t.SignedString(a.rsaKey)
+	default:
+		return "", errors.New("unsupported signature method")
+	}
+}
+
+func (a *AuthTokenSigner) key(m jwt.SigningMethod) (any, error) {
+	switch m {
+	case jwt.SigningMethodHS256:
+		return a.hmacKey, nil
+	case jwt.SigningMethodRS256:
+		return a.rsaKey, nil
+	default:
+		return nil, errors.New("key is not available for the signature method")
+	}
+}
+
 func (a *AuthTokenSigner) CreateAuthToken(p CreateAuthTokenParams) (string, error) {
 	if len(p.Applications) == 0 {
 		p.Applications = []string{a.host}
 	}
 	now := time.Now()
-	token := jwt.NewWithClaims(
-		jwt.SigningMethodHS256,
+	tkn := jwt.NewWithClaims(
+		p.Method,
 		AutheClaims{
 			Version: AUTHENTICATED_TOKEN_VERSION,
 			Type:    p.TokenType,
@@ -98,34 +144,34 @@ func (a *AuthTokenSigner) CreateAuthToken(p CreateAuthTokenParams) (string, erro
 			},
 		},
 	)
-	signed, err := token.SignedString(a.hkey)
-	if err != nil {
-		return "", err
-	}
 
-	return signed, nil
+	return a.sign(tkn, p.Method)
+}
+
+type ParseParams struct {
+	Raw          string
+	Method       jwt.SigningMethod
+	Applications []string
 }
 
 // (!) token id and subject is not checked at parsing (!)
-func (a *AuthTokenSigner) Parse(
-	raw string,
-	applications ...string,
-) (*AutheClaims, error) {
-	if len(applications) == 0 {
-		applications = []string{a.host}
+func (a *AuthTokenSigner) Parse(p ParseParams) (*AutheClaims, error) {
+	if len(p.Applications) == 0 {
+		p.Applications = []string{a.host}
 	}
+
 	tkn, err := jwt.ParseWithClaims(
-		raw,
+		p.Raw,
 		&AutheClaims{},
 		func(*jwt.Token) (any, error) {
-			return a.hkey, nil
+			return a.key(p.Method)
 		},
-		jwt.WithAllAudiences(applications...),
+		jwt.WithAllAudiences(p.Applications...),
 		jwt.WithExpirationRequired(),
 		jwt.WithIssuedAt(),
 		jwt.WithIssuer(a.host),
 		jwt.WithStrictDecoding(),
-		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Name}),
+		jwt.WithValidMethods([]string{p.Method.Alg()}),
 	)
 	if err != nil {
 		return nil, err

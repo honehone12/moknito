@@ -5,8 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
+
+var _ jwt.ClaimsValidator = &AutheClaims{}
 
 func TestNewAuthTokenSigner(t *testing.T) {
 	// 32 bytes key
@@ -41,7 +44,7 @@ func TestNewAuthTokenSigner(t *testing.T) {
 
 	t.Run("InvalidKeyEncoding", func(t *testing.T) {
 		// Length 44 but invalid base64
-		invalid := "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" 
+		invalid := "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 		t.Setenv("AUTH_TOKEN_KEY", invalid)
 		t.Setenv("AUTH_HOST", "test-host")
 
@@ -97,7 +100,7 @@ func TestAuthTokenSigner_Flow(t *testing.T) {
 		if err != nil {
 			t.Fatalf("parse failed: %v", err)
 		}
-		
+
 		if claims.Type != params.TokenType {
 			t.Errorf("expected type %s, got %s", params.TokenType, claims.Type)
 		}

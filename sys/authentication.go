@@ -8,6 +8,8 @@ import (
 	"moknito/token"
 	"net/http"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthenticationSigner interface {
@@ -29,7 +31,10 @@ func (s *EntRdsSys) VerifyAuthentication(
 ) *VerifyAuthenticationResult {
 	r := &VerifyAuthenticationResult{}
 
-	claim, err := s.authSigner.Parse(cookie.Value)
+	claim, err := s.authSigner.Parse(token.ParseParams{
+		Raw:    cookie.Value,
+		Method: jwt.SigningMethodHS256,
+	})
 	if err != nil {
 		r.ValidationErr = err
 		return r
@@ -92,6 +97,7 @@ func (s *EntRdsSys) createAuthentication(
 	}
 
 	tkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
 		AuthUuid:  authUuid,
 		UserUuid:  userUuid,

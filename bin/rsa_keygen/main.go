@@ -49,5 +49,7 @@ func main() {
 	encPub := base64.StdEncoding.EncodeToString(pubBuf.Bytes())
 
 	log.Printf("\n%s\n", encPriv)
+	log.Printf("priv: %d", len(encPriv))
 	log.Printf("\n%s\n", encPub)
+	log.Printf("pub: %d", len(encPub))
 }
