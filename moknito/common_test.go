@@ -67,6 +67,8 @@ func TestMain(m *testing.M) {
 	}
 	validate := validator.New()
 	validate.RegisterValidation("uuid7", regex.ValidateUuidV7)
+	validate.RegisterValidation("name", regex.ValidateName)
+	validate.RegisterValidation("password", regex.ValidatePassword)
 
 	moknito := &Moknito{
 		system:    testSystem,
@@ -159,8 +161,8 @@ func newAuthenticatedTestClient(t *testing.T) (*http.Client, testClientIDs) {
 	appRedirect := fmt.Sprintf("https://test.app/%s/cb", uuid.NewString())
 	_, err = testSystem.Ent().Application.Create().
 		SetID(string(appID)).
-		SetName("Test App "+uuid.NewString()).
-		SetDomain("test.app."+uuid.NewString()).
+		SetName("Test App " + uuid.NewString()).
+		SetDomain("test.app." + uuid.NewString()).
 		SetRedirect(appRedirect).
 		Save(ctx)
 	if err != nil {

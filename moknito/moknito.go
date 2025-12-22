@@ -18,6 +18,8 @@ const __CTX_KEY_AUTH_ID = "AUTH_ID"
 const __ORIGIN_SCHEME = "http" // for local
 
 const __REGEX_UUID_V7 = `^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`
+const __REGEX_NAME = `^[a-zA-Z0-9\s\.\-']+$`
+const __REGEX_PASSWORD = `^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{}|;:'",./<>?~` + "`" + `]+$`
 
 type ApiRequest struct {
 	Id string `param:"id" validate:"len=36,uuid7"`
@@ -33,7 +35,9 @@ type Moknito struct {
 }
 
 type RegexValidator struct {
-	uuid7Regex *regexp.Regexp
+	uuid7Regex    *regexp.Regexp
+	nameRegex     *regexp.Regexp
+	passwordRegex *regexp.Regexp
 }
 
 func NewRegexValidator() (*RegexValidator, error) {
@@ -41,12 +45,32 @@ func NewRegexValidator() (*RegexValidator, error) {
 	if err != nil {
 		return nil, err
 	}
+	nameRegex, err := regexp.Compile(__REGEX_NAME)
+	if err != nil {
+		return nil, err
+	}
+	passwordRegex, err := regexp.Compile(__REGEX_PASSWORD)
+	if err != nil {
+		return nil, err
+	}
 
-	return &RegexValidator{uuid7Regex}, nil
+	return &RegexValidator{
+		uuid7Regex,
+		nameRegex,
+		passwordRegex,
+	}, nil
 }
 
 func (r *RegexValidator) ValidateUuidV7(f validator.FieldLevel) bool {
 	return r.uuid7Regex.MatchString(f.Field().String())
+}
+
+func (r *RegexValidator) ValidateName(f validator.FieldLevel) bool {
+	return r.nameRegex.MatchString(f.Field().String())
+}
+
+func (r *RegexValidator) ValidatePassword(f validator.FieldLevel) bool {
+	return r.passwordRegex.MatchString(f.Field().String())
 }
 
 func NewMocknito() (*Moknito, error) {
@@ -79,6 +103,8 @@ func NewMocknito() (*Moknito, error) {
 
 	validator := validator.New()
 	validator.RegisterValidation("uuid7", regex.ValidateUuidV7)
+	validator.RegisterValidation("name", regex.ValidateName)
+	validator.RegisterValidation("password", regex.ValidatePassword)
 
 	return &Moknito{
 		system,
