@@ -126,6 +126,14 @@ func (s *EntRdsSys) Redis() *redis.Client {
 	return s.redis
 }
 
+func (s *EntRdsSys) SessionSinger() *token.SessionTokenSigner {
+	return s.sessionSigner
+}
+
+func (s *EntRdsSys) AuthSigner() *token.AuthTokenSigner {
+	return s.authSigner
+}
+
 func (*EntRdsSys) rollback(tx *ent.Tx, original error) error {
 	if err := tx.Rollback(); err != nil {
 		return errors.Join(original, err)
