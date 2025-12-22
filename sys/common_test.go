@@ -2,7 +2,10 @@ package sys
 
 import (
 	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/pem"
 	"moknito/ent/enttest"
 	"moknito/token"
 	"os"
@@ -17,13 +20,43 @@ import (
 
 func setupSys(t *testing.T) (*EntRdsSys, *miniredis.Miniredis) {
 	// Set up Env
-	key := make([]byte, 32)
-	rand.Read(key)
-	encKey := base64.StdEncoding.EncodeToString(key)
-	os.Setenv("SESSION_TOKEN_KEY", encKey)
-	os.Setenv("AUTH_TOKEN_KEY", encKey)
+	// HMAC key
+	hmacKey := make([]byte, 32)
+	rand.Read(hmacKey)
+	encHmacKey := base64.StdEncoding.EncodeToString(hmacKey)
+	os.Setenv("SESSION_TOKEN_HMAC_KEY", encHmacKey)
+	os.Setenv("AUTH_TOKEN_HMAC_KEY", encHmacKey)
+
+	// RSA keys
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatal(err)
+	}
+	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
+	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: privateKeyBytes,
+	})
+	os.Setenv(
+		"AUTH_TOKEN_RSA_PRIV_KEY",
+		string(base64.StdEncoding.EncodeToString(privateKeyPEM)),
+	)
+
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKeyBytes,
+	})
+	os.Setenv(
+		"AUTH_TOKEN_RSA_PUB_KEY",
+		string(base64.StdEncoding.EncodeToString(publicKeyPEM)),
+	)
+
 	os.Setenv("AUTH_HOST", "test.local")
-	os.Setenv("PEPPER", encKey) // Using same key for convenience as it is 32 bytes base64 encoded
+	os.Setenv("PEPPER", encHmacKey) // Using same key for convenience as it is 32 bytes base64 encoded
 
 	sessionSigner, err := token.NewSessionTokenSigner()
 	if err != nil {

@@ -6,8 +6,11 @@ import (
 	"encoding/base64"
 	"moknito/challenge"
 	"moknito/id"
+	"moknito/token"
 	"testing"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func TestAuthorization_AuthTokenCode(t *testing.T) {
@@ -21,7 +24,7 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 	userID, _ := id.NewRandom()
 
 	// Challenge/Verifier logic:
-	// Verifier: "secret". 
+	// Verifier: "secret".
 	verifierRaw := []byte("my-verifier-secret")
 	// Params.Verifier is base64 encoded
 	verifierStr := base64.RawURLEncoding.EncodeToString(verifierRaw)
@@ -95,6 +98,19 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 	}
 	if res.Domain != "example.com" {
 		t.Errorf("expected domain example.com, got %s", res.Domain)
+	}
+
+	// Verify the token signature
+	claims, err := sys.authSigner.Parse(token.ParseParams{
+		Raw:          res.Token.AccessToken,
+		Method:       jwt.SigningMethodRS256,
+		Applications: []string{"example.com"},
+	})
+	if err != nil {
+		t.Fatalf("Failed to parse access token: %v", err)
+	}
+	if claims.Type != token.TOKEN_TYPE_AUTHORIZATION {
+		t.Errorf("wrong token type")
 	}
 
 	// 3. Verify Code is Consumed (Double use check)

@@ -1,7 +1,12 @@
 package token
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/pem"
+	"errors"
 	"testing"
 	"time"
 
@@ -9,19 +14,48 @@ import (
 	"github.com/google/uuid"
 )
 
-var _ jwt.ClaimsValidator = &AutheClaims{}
+var _ jwt.ClaimsValidator = &AuthClaims{}
+
+func newTestKey(t *testing.T) (hmacKey string, rsaPrivKey string, rsaPubKey string) {
+	t.Helper()
+	hkey := make([]byte, HMAC_KEY_LEN)
+	if _, err := rand.Read(hkey); err != nil {
+		t.Fatalf("failed to generate hmac key: %v", err)
+	}
+	hmacKey = base64.StdEncoding.EncodeToString(hkey)
+
+	pkey, err := rsa.GenerateKey(rand.Reader, RSA_PRIV_KEY_LEN)
+	if err != nil {
+		t.Fatalf("failed to generate rsa key: %v", err)
+	}
+	pkeyBytes := x509.MarshalPKCS1PrivateKey(pkey)
+	pkeyPem := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: pkeyBytes,
+	})
+	rsaPrivKey = base64.StdEncoding.EncodeToString(pkeyPem)
+
+	pubkeyBytes, err := x509.MarshalPKIXPublicKey(&pkey.PublicKey)
+	if err != nil {
+		t.Fatalf("failed to marshal public key: %v", err)
+	}
+	pubkeyPem := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: pubkeyBytes,
+	})
+	rsaPubKey = base64.StdEncoding.EncodeToString(pubkeyPem)
+	return
+}
 
 func TestNewAuthTokenSigner(t *testing.T) {
-	// 32 bytes key
-	validKey := make([]byte, 32)
-	for i := 0; i < 32; i++ {
-		validKey[i] = byte(i)
-	}
-	validKeyStr := base64.StdEncoding.EncodeToString(validKey)
+	hmacKey, rsaPrivKey, rsaPubKey := newTestKey(t)
+	host := "test-host"
 
 	t.Run("Success", func(t *testing.T) {
-		t.Setenv("AUTH_TOKEN_KEY", validKeyStr)
-		t.Setenv("AUTH_HOST", "test-host")
+		t.Setenv("AUTH_HOST", host)
+		t.Setenv("AUTH_TOKEN_HMAC_KEY", hmacKey)
+		t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", rsaPrivKey)
+		t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", rsaPubKey)
 
 		signer, err := NewAuthTokenSigner()
 		if err != nil {
@@ -32,55 +66,106 @@ func TestNewAuthTokenSigner(t *testing.T) {
 		}
 	})
 
-	t.Run("InvalidKeyLength", func(t *testing.T) {
-		t.Setenv("AUTH_TOKEN_KEY", "short")
-		t.Setenv("AUTH_HOST", "test-host")
-
-		_, err := NewAuthTokenSigner()
-		if err == nil {
-			t.Fatal("expected error for short key")
-		}
-	})
-
-	t.Run("InvalidKeyEncoding", func(t *testing.T) {
-		// Length 44 but invalid base64
-		invalid := "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-		t.Setenv("AUTH_TOKEN_KEY", invalid)
-		t.Setenv("AUTH_HOST", "test-host")
-
-		_, err := NewAuthTokenSigner()
-		if err == nil {
-			t.Fatal("expected error for invalid encoding")
-		}
-	})
-
-	t.Run("MissingHost", func(t *testing.T) {
-		t.Setenv("AUTH_TOKEN_KEY", validKeyStr)
+	t.Run("MissingAuthHost", func(t *testing.T) {
 		t.Setenv("AUTH_HOST", "")
+		t.Setenv("AUTH_TOKEN_HMAC_KEY", hmacKey)
+		t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", rsaPrivKey)
+		t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", rsaPubKey)
 
 		_, err := NewAuthTokenSigner()
 		if err == nil {
-			t.Fatal("expected error for missing host")
+			t.Fatal("expected error")
+		}
+	})
+
+	t.Run("MissingHmacKey", func(t *testing.T) {
+		t.Setenv("AUTH_HOST", host)
+		t.Setenv("AUTH_TOKEN_HMAC_KEY", "")
+		t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", rsaPrivKey)
+		t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", rsaPubKey)
+
+		_, err := NewAuthTokenSigner()
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+
+	t.Run("MissingRsaPrivKey", func(t *testing.T) {
+		t.Setenv("AUTH_HOST", host)
+		t.Setenv("AUTH_TOKEN_HMAC_KEY", hmacKey)
+		t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", "")
+		t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", rsaPubKey)
+
+		_, err := NewAuthTokenSigner()
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+
+	t.Run("MissingRsaPubKey", func(t *testing.T) {
+		t.Setenv("AUTH_HOST", host)
+		t.Setenv("AUTH_TOKEN_HMAC_KEY", hmacKey)
+		t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", rsaPrivKey)
+		t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", "")
+
+		_, err := NewAuthTokenSigner()
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+
+	t.Run("MalformedHmacKey", func(t *testing.T) {
+		t.Setenv("AUTH_HOST", host)
+		t.Setenv("AUTH_TOKEN_HMAC_KEY", "invalid-key")
+		t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", rsaPrivKey)
+		t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", rsaPubKey)
+
+		_, err := NewAuthTokenSigner()
+		if err == nil {
+			t.Fatal("expected error on malformed hmac key")
+		}
+	})
+
+	t.Run("MalformedRsaPrivKey", func(t *testing.T) {
+		t.Setenv("AUTH_HOST", host)
+		t.Setenv("AUTH_TOKEN_HMAC_KEY", hmacKey)
+		t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", "invalid-key")
+		t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", rsaPubKey)
+
+		_, err := NewAuthTokenSigner()
+		if err == nil {
+			t.Fatal("expected error on malformed rsa private key")
+		}
+	})
+
+	t.Run("MalformedRsaPubKey", func(t *testing.T) {
+		t.Setenv("AUTH_HOST", host)
+		t.Setenv("AUTH_TOKEN_HMAC_KEY", hmacKey)
+		t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", rsaPrivKey)
+		t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", "invalid-key")
+
+		_, err := NewAuthTokenSigner()
+		if err == nil {
+			t.Fatal("expected error on malformed rsa public key")
 		}
 	})
 }
 
-func TestAuthTokenSigner_Flow(t *testing.T) {
-	// Setup valid signer
-	validKey := make([]byte, 32)
-	for i := 0; i < 32; i++ {
-		validKey[i] = byte(i)
-	}
-	validKeyStr := base64.StdEncoding.EncodeToString(validKey)
-	t.Setenv("AUTH_TOKEN_KEY", validKeyStr)
-	t.Setenv("AUTH_HOST", "test-host")
+func testAuthTokenSignerFlow(t *testing.T, method jwt.SigningMethod) {
+	hmacKey, rsaPrivKey, rsaPubKey := newTestKey(t)
+	host := "test-host"
+	t.Setenv("AUTH_HOST", host)
+	t.Setenv("AUTH_TOKEN_HMAC_KEY", hmacKey)
+	t.Setenv("AUTH_TOKEN_RSA_PRIV_KEY", rsaPrivKey)
+	t.Setenv("AUTH_TOKEN_RSA_PUB_KEY", rsaPubKey)
 
 	signer, err := NewAuthTokenSigner()
 	if err != nil {
-		t.Fatalf("setup failed: %v", err)
+		t.Fatalf("unexpected error: %v", err)
 	}
 
 	params := CreateAuthTokenParams{
+		Method:    method,
 		TokenType: TOKEN_TYPE_AUTHENTICATION,
 		AuthUuid:  uuid.New(),
 		UserUuid:  uuid.New(),
@@ -92,11 +177,8 @@ func TestAuthTokenSigner_Flow(t *testing.T) {
 		if err != nil {
 			t.Fatalf("create failed: %v", err)
 		}
-		if tokenStr == "" {
-			t.Fatal("expected token string")
-		}
 
-		claims, err := signer.Parse(tokenStr)
+		claims, err := signer.Parse(ParseParams{Raw: tokenStr, Method: method})
 		if err != nil {
 			t.Fatalf("parse failed: %v", err)
 		}
@@ -113,20 +195,39 @@ func TestAuthTokenSigner_Flow(t *testing.T) {
 		if claims.Version != AUTHENTICATED_TOKEN_VERSION {
 			t.Errorf("expected version %s, got %s", AUTHENTICATED_TOKEN_VERSION, claims.Version)
 		}
+		if claims.Issuer != host {
+			t.Errorf("expected issuer %s, got %s", host, claims.Issuer)
+		}
 	})
 
 	t.Run("ExpiredToken", func(t *testing.T) {
 		expiredParams := params
-		expiredParams.Ttl = -time.Hour // Expired
+		expiredParams.Ttl = -time.Hour
 
 		tokenStr, err := signer.CreateAuthToken(expiredParams)
 		if err != nil {
 			t.Fatalf("create failed: %v", err)
 		}
 
-		_, err = signer.Parse(tokenStr)
+		_, err = signer.Parse(ParseParams{Raw: tokenStr, Method: method})
+		if !errors.Is(err, jwt.ErrTokenExpired) {
+			t.Fatalf("expected error for expired token, but got %v", err)
+		}
+	})
+
+	t.Run("InvalidTokenString", func(t *testing.T) {
+		_, err := signer.Parse(ParseParams{Raw: "invalid", Method: method})
 		if err == nil {
-			t.Fatal("expected error for expired token")
+			t.Fatal("expected error for invalid token string")
 		}
 	})
 }
+
+func TestAuthTokenSigner_Flow_HS256(t *testing.T) {
+	testAuthTokenSignerFlow(t, jwt.SigningMethodHS256)
+}
+
+func TestAuthTokenSigner_Flow_RS256(t *testing.T) {
+	testAuthTokenSignerFlow(t, jwt.SigningMethodRS256)
+}
+

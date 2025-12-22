@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func TestAuthentication_VerifyAuthentication(t *testing.T) {
@@ -39,6 +41,7 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 
 	// 2. Create Valid Token
 	tokenStr, err := sys.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
 		AuthUuid:  authUuid,
 		UserUuid:  userUuid,
@@ -83,6 +86,7 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 
 	// Create token for this expired auth
 	expiredTokenStr, _ := sys.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
 		AuthUuid:  expiredUuid,
 		UserUuid:  userUuid,
@@ -99,6 +103,7 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 	wrongUser, _ := id.NewRandom()
 	wrongUserUuid, _ := wrongUser.ToUUID()
 	wrongTokenStr, _ := sys.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
 		AuthUuid:  authUuid,      // points to valid auth
 		UserUuid:  wrongUserUuid, // but mismatch user
@@ -130,7 +135,10 @@ func TestAuthentication_CreateAuthentication(t *testing.T) {
 	}
 
 	// Parse back
-	claims, err := sys.authSigner.Parse(cookie.Value)
+	claims, err := sys.authSigner.Parse(token.ParseParams{
+		Raw:    cookie.Value,
+		Method: jwt.SigningMethodHS256,
+	})
 	if err != nil {
 		t.Errorf("failed to parse generated token: %v", err)
 	}
