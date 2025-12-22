@@ -26,9 +26,9 @@ const SESSION_NONCE_MAX = 100
 const __SECURE_COOKIE = false // for local
 
 type Sys interface {
-	SessionSigner
-	AuthenticationSigner
-	AuthorizationSigner
+	SessionSys
+	AuthenticationSys
+	AuthorizationSys
 	UserSys
 	InfoSys
 	AppSys
@@ -116,6 +116,14 @@ func NewEntRdsSys(
 
 func (s *EntRdsSys) Close() error {
 	return s.ent.Close()
+}
+
+func (s *EntRdsSys) Ent() *ent.Client {
+	return s.ent
+}
+
+func (s *EntRdsSys) Redis() *redis.Client {
+	return s.redis
 }
 
 func (*EntRdsSys) rollback(tx *ent.Tx, original error) error {

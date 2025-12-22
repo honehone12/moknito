@@ -13,7 +13,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type SessionSigner interface {
+type SessionSys interface {
 	CreateSession(ctx context.Context) (*http.Cookie, error)
 	IncrSession(
 		ctx context.Context,

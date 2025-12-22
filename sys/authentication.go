@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type AuthenticationSigner interface {
+type AuthenticationSys interface {
 	VerifyAuthentication(
 		ctx context.Context,
 		cookie *http.Cookie,

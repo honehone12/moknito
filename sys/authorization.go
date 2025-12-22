@@ -33,7 +33,7 @@ type AuthTokenResult struct {
 	E
 }
 
-type AuthorizationSigner interface {
+type AuthorizationSys interface {
 	AuthTokenCode(
 		ctx context.Context,
 		p AuthTokenCodeParams,
