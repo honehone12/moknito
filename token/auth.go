@@ -18,13 +18,13 @@ type AuthTokenBundle struct {
 	ExpiresIn       int64  `json:"expires_in"`
 }
 
-type AutheClaims struct {
+type AuthClaims struct {
 	Version string `json:"version"`
 	Type    string `json:"type"`
 	jwt.RegisteredClaims
 }
 
-func (a *AutheClaims) Validate() error {
+func (a *AuthClaims) Validate() error {
 	switch a.Version {
 	case AUTHENTICATED_TOKEN_VERSION:
 		switch a.Type {
@@ -41,9 +41,10 @@ func (a *AutheClaims) Validate() error {
 }
 
 type AuthTokenSigner struct {
-	host    string
-	hmacKey []byte
-	rsaKey  *rsa.PrivateKey
+	host       string
+	hmacKey    []byte
+	rsaPrivKey *rsa.PrivateKey
+	rsaPubKey  *rsa.PublicKey
 }
 
 func NewAuthTokenSigner() (*AuthTokenSigner, error) {
@@ -72,11 +73,11 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 		hmacKey = hkey
 	}
 
-	var rsaKey *rsa.PrivateKey
+	var rsaPrivKey *rsa.PrivateKey
 	{
-		encRKey := os.Getenv("AUTH_TOKEN_RSA_KEY")
+		encRKey := os.Getenv("AUTH_TOKEN_RSA_PRIV_KEY")
 		if len(encRKey) == 0 {
-			return nil, errors.New("un expected encoded rsa key length")
+			return nil, errors.New("unexpected encoded rsa key length")
 		}
 		b, err := base64.StdEncoding.DecodeString(encRKey)
 		if err != nil {
@@ -86,10 +87,31 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 		if err != nil {
 			return nil, err
 		}
-		rsaKey = priv
+		rsaPrivKey = priv
+	}
+	var rsaPubKey *rsa.PublicKey
+	{
+		encRKey := os.Getenv("AUTH_TOKEN_RSA_PUB_KEY")
+		if len(encRKey) == 0 {
+			return nil, errors.New("unexpected encoded rsa key length")
+		}
+		b, err := base64.StdEncoding.DecodeString(encRKey)
+		if err != nil {
+			return nil, err
+		}
+		pub, err := jwt.ParseRSAPublicKeyFromPEM(b)
+		if err != nil {
+			return nil, err
+		}
+		rsaPubKey = pub
 	}
 
-	return &AuthTokenSigner{host, hmacKey, rsaKey}, nil
+	return &AuthTokenSigner{
+		host,
+		hmacKey,
+		rsaPrivKey,
+		rsaPubKey,
+	}, nil
 }
 
 type CreateAuthTokenParams struct {
@@ -106,18 +128,18 @@ func (a *AuthTokenSigner) sign(t *jwt.Token, m jwt.SigningMethod) (string, error
 	case jwt.SigningMethodHS256:
 		return t.SignedString(a.hmacKey)
 	case jwt.SigningMethodRS256:
-		return t.SignedString(a.rsaKey)
+		return t.SignedString(a.rsaPrivKey)
 	default:
 		return "", errors.New("unsupported signature method")
 	}
 }
 
-func (a *AuthTokenSigner) key(m jwt.SigningMethod) (any, error) {
+func (a *AuthTokenSigner) verificationKey(m jwt.SigningMethod) (any, error) {
 	switch m {
 	case jwt.SigningMethodHS256:
 		return a.hmacKey, nil
 	case jwt.SigningMethodRS256:
-		return a.rsaKey, nil
+		return a.rsaPubKey, nil
 	default:
 		return nil, errors.New("key is not available for the signature method")
 	}
@@ -130,7 +152,7 @@ func (a *AuthTokenSigner) CreateAuthToken(p CreateAuthTokenParams) (string, erro
 	now := time.Now()
 	tkn := jwt.NewWithClaims(
 		p.Method,
-		AutheClaims{
+		AuthClaims{
 			Version: AUTHENTICATED_TOKEN_VERSION,
 			Type:    p.TokenType,
 			RegisteredClaims: jwt.RegisteredClaims{
@@ -155,16 +177,16 @@ type ParseParams struct {
 }
 
 // (!) token id and subject is not checked at parsing (!)
-func (a *AuthTokenSigner) Parse(p ParseParams) (*AutheClaims, error) {
+func (a *AuthTokenSigner) Parse(p ParseParams) (*AuthClaims, error) {
 	if len(p.Applications) == 0 {
 		p.Applications = []string{a.host}
 	}
 
 	tkn, err := jwt.ParseWithClaims(
 		p.Raw,
-		&AutheClaims{},
+		&AuthClaims{},
 		func(*jwt.Token) (any, error) {
-			return a.key(p.Method)
+			return a.verificationKey(p.Method)
 		},
 		jwt.WithAllAudiences(p.Applications...),
 		jwt.WithExpirationRequired(),
@@ -180,7 +202,7 @@ func (a *AuthTokenSigner) Parse(p ParseParams) (*AutheClaims, error) {
 		return nil, errors.New("token is invalid")
 	}
 
-	c, ok := tkn.Claims.(*AutheClaims)
+	c, ok := tkn.Claims.(*AuthClaims)
 	if !ok {
 		return nil, errors.New("failed to cast claims to authclaims")
 	}
