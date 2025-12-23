@@ -19,20 +19,10 @@ func Run() {
 		echo.DefaultHTTPErrorHandler(err, ctx)
 	}
 
+	// pepper is still loaded in runtime
+	// so check on initialize
 	if pepper := os.Getenv("PEPPER"); len(pepper) == 0 {
 		echo.Logger.Fatal("env for perpper is not set")
-	}
-	if hk := os.Getenv("AUTH_TOKEN_HMAC_KEY"); len(hk) == 0 {
-		echo.Logger.Fatal("env for hmac key is not set")
-	}
-	if rk := os.Getenv("AUTH_TOKEN_RSA_PRIV_KEY"); len(rk) == 0 {
-		echo.Logger.Fatal("env for rsa priv key is not set")
-	}
-	if rk := os.Getenv("AUTH_TOKEN_RSA_PUB_KEY"); len(rk) == 0 {
-		echo.Logger.Fatal("env for rsa pub key is not set")
-	}
-	if host := os.Getenv("AUTH_HOST"); len(host) == 0 {
-		echo.Logger.Fatal("env for auth host is not set")
 	}
 
 	moknito, err := NewMocknito()
