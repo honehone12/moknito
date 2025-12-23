@@ -135,10 +135,16 @@ func Check(password, pwHash string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	if len(salt) != SALT_LEN {
+		return false, errors.New("unexpected saved salt length")
+	}
 
 	saved, err := base64.RawStdEncoding.Strict().DecodeString(encs[5])
 	if err != nil {
 		return false, err
+	}
+	if len(saved) != HASH_LEN {
+		return false, errors.New("unexpected saved hash length")
 	}
 
 	hash, err := hash(password, salt, t, m, p)
