@@ -31,6 +31,9 @@ func (User) Fields() []ent.Field {
 		field.String("pwhash").
 			NotEmpty().
 			MaxLen(512),
+		field.Enum("login_method").
+			Values("password", "mfa-qr", "passkey").
+			Default("password"),
 	}
 }
 
