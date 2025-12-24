@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"moknito/id"
+	"moknito/binid"
 	"testing"
 	"time"
 )
@@ -14,13 +14,12 @@ func TestApp_AppAllow(t *testing.T) {
 	defer sys.Close()
 	ctx := context.Background()
 
-	userID, _ := id.NewRandom()
-	appID, _ := id.NewRandom()
-	appUuid, _ := appID.ToUUID()
+	userID, _ := binid.NewRandom()
+	appID, _ := binid.NewRandom()
 
 	// Create App
 	sys.ent.Application.Create().
-		SetID(string(appID)).
+		SetID(appID).
 		SetDomain("dom").
 		SetRedirect("sub").
 		SetName("name").
@@ -28,14 +27,14 @@ func TestApp_AppAllow(t *testing.T) {
 
 	// Create User
 	sys.ent.User.Create().
-		SetID(string(userID)).
+		SetID(userID).
 		SetName("Test User").
 		SetEmail("test@example.com").
 		SetPwhash("hash").
 		Save(ctx)
 
 	// Call Allow
-	res := sys.AppAllow(ctx, userID, appUuid.String())
+	res := sys.AppAllow(ctx, userID, appID.String())
 	if res.ValidationErr != nil {
 		t.Error(res.ValidationErr)
 	}
@@ -55,14 +54,13 @@ func TestApp_AppAuthorize(t *testing.T) {
 	defer sys.Close()
 	ctx := context.Background()
 
-	userID, _ := id.NewRandom()
-	authID, _ := id.NewRandom()
-	appID, _ := id.NewRandom()
-	appUuid, _ := appID.ToUUID()
+	userID, _ := binid.NewRandom()
+	authID, _ := binid.NewRandom()
+	appID, _ := binid.NewRandom()
 
 	// 1. Setup Data
 	sys.ent.Application.Create().
-		SetID(string(appID)).
+		SetID(appID).
 		SetDomain("dom").
 		SetRedirect("http://redirect.com"). // match redirect
 		SetName("name").
@@ -70,16 +68,16 @@ func TestApp_AppAuthorize(t *testing.T) {
 
 	// Create User
 	sys.ent.User.Create().
-		SetID(string(userID)).
+		SetID(userID).
 		SetName("u").SetEmail("e").SetPwhash("hash").
 		Save(ctx)
 
 	// Create AuthorizedApp (Must allow first)
-	authAppID, _ := id.NewRandom()
+	authAppID, _ := binid.NewRandom()
 	_, err := sys.ent.AuthorizedApp.Create().
-		SetID(string(authAppID)).
-		SetUserID(string(userID)).
-		SetApplicationID(string(appID)).
+		SetID(authAppID).
+		SetUserID(userID).
+		SetApplicationID(appID).
 		Save(ctx)
 	if err != nil {
 		t.Fatal(err)
@@ -94,14 +92,14 @@ func TestApp_AppAuthorize(t *testing.T) {
 	// Actually UserAuthenticate stores p.Challenge which is string.
 	// But AppAuthorize does: clg, _ := redis.Get(). chall, _ := base64.DecodeString(clg).
 	// So redis must store base64 encoded string.
-	
+
 	sys.redis.Set(ctx, challKey, challengeStr, time.Minute)
 
 	// 2. Call Authorize
 	res := sys.AppAuthorize(ctx, AppAuthorizeParams{
 		UserId:  userID,
 		AuthId:  authID,
-		AppUuid: appUuid.String(),
+		AppUuid: appID.String(),
 	})
 
 	if res.ValidationErr != nil {

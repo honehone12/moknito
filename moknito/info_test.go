@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"moknito/id"
+	"moknito/binid"
 	"net/http"
 	"testing"
 )
@@ -50,7 +50,7 @@ func TestInfo_Success(t *testing.T) {
 		t.Fatalf("failed to decode response: %v", err)
 	}
 
-	app, err := testSystem.Ent().Application.Get(context.Background(), string(ids.AppID))
+	app, err := testSystem.Ent().Application.Get(context.Background(), ids.AppID)
 	if err != nil {
 		t.Fatalf("failed to get app from db: %v", err)
 	}
@@ -65,10 +65,9 @@ func TestInfo_Success(t *testing.T) {
 
 func TestInfo_NonExistentApp(t *testing.T) {
 	client, _ := newAuthenticatedTestClient(t)
-	appID, _ := id.NewSequential()
-	appUUID, _ := appID.ToUUID()
+	appID, _ := binid.NewSequential()
 
-	path := fmt.Sprintf("/info/%s", appUUID.String())
+	path := fmt.Sprintf("/info/%s", appID.String())
 	resp, err := getRequest(client, path)
 	if err != nil {
 		t.Fatalf("request failed: %v", err)

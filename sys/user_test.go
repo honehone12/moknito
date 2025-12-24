@@ -3,11 +3,10 @@ package sys
 import (
 	"context"
 	"fmt"
+	"moknito/binid"
 	"moknito/hash"
-	"moknito/id"
 	"testing"
 )
-
 
 func TestUser_RegisterAndJoin(t *testing.T) {
 	sys, _ := setupSys(t)
@@ -18,10 +17,10 @@ func TestUser_RegisterAndJoin(t *testing.T) {
 	email := "test@example.com"
 	password := "password123"
 	appName := "TestApp"
-	appID, _ := id.NewRandom()
+	appID, _ := binid.NewRandom()
 
 	_, err := sys.ent.Application.Create().
-		SetID(string(appID)).
+		SetID(appID).
 		SetName(appName).
 		SetDomain("example.com").
 		SetRedirect("https://example.com/cb").
@@ -100,19 +99,19 @@ func TestUser_Authenticate(t *testing.T) {
 	email := "auth@example.com"
 	password := "securepass"
 	pwhash, _ := hash.Hash(password)
-	
-	appID, _ := id.NewRandom()
+
+	appID, _ := binid.NewRandom()
 	sys.ent.Application.Create().
-		SetID(string(appID)).
+		SetID(appID).
 		SetName("App").
 		SetDomain("app.com").
 		SetRedirect("http://app.com").
 		Save(ctx)
 
 	// Create User manually
-	userID, _ := id.NewRandom()
+	userID, _ := binid.NewRandom()
 	sys.ent.User.Create().
-		SetID(string(userID)).
+		SetID(userID).
 		SetName("Auth User").
 		SetEmail(email).
 		SetPwhash(pwhash).
@@ -144,14 +143,14 @@ func TestUser_Authenticate(t *testing.T) {
 	// We need authID. From result? Result doesn't return AuthID directly publicly?
 	// Oh, UserAuthenticateResult = UserLoginResult = {Cookie, E}.
 	// So we can't easily get authID to check redis key directly without parsing cookie or querying DB.
-	
+
 	// Query DB for authentication
 	auths := sys.ent.Authentication.Query().AllX(ctx)
 	if len(auths) != 1 {
 		t.Fatal("expected 1 auth record")
 	}
 	authRecord := auths[0]
-	
+
 	// Check Redis
 	challKey := fmt.Sprintf("%s:%x:%x", __CHALLENGE_REDIS_KEY, userID, authRecord.ID)
 	// Wait, code uses: fmt.Sprintf("%s:%x:%x", __CHALLENGE_REDIS_KEY, user.ID, authId)
@@ -160,7 +159,7 @@ func TestUser_Authenticate(t *testing.T) {
 	// challKey := fmt.Sprintf("%s:%x:%x", __CHALLENGE_REDIS_KEY, user.ID, authId)
 	// If user.ID is string "abc", %x of string is hex of ascii bytes.
 	// So we should replicate that.
-	
+
 	val, err := sys.redis.Get(ctx, challKey).Result()
 	if err != nil {
 		// Try to debug key format if fails

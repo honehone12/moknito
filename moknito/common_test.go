@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"moknito/binid"
 	"moknito/ent"
 	"moknito/ent/user"
-	"moknito/id"
 	"moknito/sys"
 	"net/http"
 	"net/http/cookiejar"
@@ -28,8 +28,8 @@ var testMoknito *Moknito
 var testSystem *sys.EntRdsSys
 
 type testClientIDs struct {
-	UserID      id.Id
-	AppID       id.Id
+	UserID      binid.BinId
+	AppID       binid.BinId
 	AppUUID     string
 	AppRedirect string
 	UserEmail   string
@@ -156,11 +156,10 @@ func newAuthenticatedTestClient(t *testing.T) (*http.Client, testClientIDs) {
 	resp.Body.Close()
 
 	// 2. Create App in DB for user registration context
-	appID, _ := id.NewSequential()
-	appUUID, _ := appID.ToUUID()
+	appID, _ := binid.NewSequential()
 	appRedirect := fmt.Sprintf("https://test.app/%s/cb", uuid.NewString())
 	_, err = testSystem.Ent().Application.Create().
-		SetID(string(appID)).
+		SetID(appID).
 		SetName("Test App " + uuid.NewString()).
 		SetDomain("test.app." + uuid.NewString()).
 		SetRedirect(appRedirect).
@@ -177,7 +176,7 @@ func newAuthenticatedTestClient(t *testing.T) (*http.Client, testClientIDs) {
 		"email":    {userEmail},
 		"password": {userPass},
 	}
-	resp, err = postForm(client, "/api/user/"+appUUID.String()+"/register", regData, testServer.URL)
+	resp, err = postForm(client, "/api/user/"+appID.String()+"/register", regData, testServer.URL)
 	if err != nil {
 		t.Fatalf("register request failed: %v", err)
 	}
@@ -195,7 +194,7 @@ func newAuthenticatedTestClient(t *testing.T) (*http.Client, testClientIDs) {
 		"challenge_method": {"S256"},
 		"redirect":         {appRedirect},
 	}
-	resp, err = postForm(client, "/api/user/"+appUUID.String()+"/join", joinData, testServer.URL)
+	resp, err = postForm(client, "/api/user/"+appID.String()+"/join", joinData, testServer.URL)
 	if err != nil {
 		t.Fatalf("join request failed: %v", err)
 	}
@@ -212,9 +211,9 @@ func newAuthenticatedTestClient(t *testing.T) (*http.Client, testClientIDs) {
 	}
 
 	ids := testClientIDs{
-		UserID:      id.Id(user.ID),
+		UserID:      user.ID,
 		AppID:       appID,
-		AppUUID:     appUUID.String(),
+		AppUUID:     appID.String(),
 		AppRedirect: appRedirect,
 		UserEmail:   userEmail,
 		UserPass:    userPass,

@@ -2,7 +2,7 @@ package sys
 
 import (
 	"context"
-	"moknito/id"
+	"moknito/binid"
 	"testing"
 )
 
@@ -11,19 +11,18 @@ func TestInfo_InfoApp(t *testing.T) {
 	defer sys.Close()
 	ctx := context.Background()
 
-	appID, _ := id.NewRandom()
-	appUuid, _ := appID.ToUUID()
+	appID, _ := binid.NewRandom()
 
 	// Create App
 	sys.ent.Application.Create().
-		SetID(string(appID)).
+		SetID(appID).
 		SetDomain("example.com").
 		SetRedirect("sub").
 		SetName("Test App").
 		Save(ctx)
 
 	// Test Success
-	res := sys.InfoApp(ctx, appUuid.String())
+	res := sys.InfoApp(ctx, appID.String())
 	if res.ValidationErr != nil {
 		t.Errorf("val err: %v", res.ValidationErr)
 	}
@@ -38,9 +37,9 @@ func TestInfo_InfoApp(t *testing.T) {
 	}
 
 	// Test Not Found
-	randID, _ := id.NewRandom()
-	randUuid, _ := randID.ToUUID()
-	res = sys.InfoApp(ctx, randUuid.String())
+	randID, _ := binid.NewRandom()
+
+	res = sys.InfoApp(ctx, randID.String())
 	if res.ValidationErr == nil {
 		t.Error("expected validation error for missing app")
 	}

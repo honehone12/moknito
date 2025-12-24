@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"moknito/binid"
 	"moknito/challenge"
-	"moknito/id"
 	"moknito/token"
 	"net/http"
 	"net/url"
@@ -18,8 +18,7 @@ import (
 
 func TestAuthorization_TokenEndpoint_Validation(t *testing.T) {
 	client := newTestClient()
-	appUUID, _ := id.NewSequential()
-	appUUIDStr, _ := appUUID.ToUUID()
+	appID, _ := binid.NewSequential()
 
 	testCases := []struct {
 		name       string
@@ -30,25 +29,25 @@ func TestAuthorization_TokenEndpoint_Validation(t *testing.T) {
 		{
 			name:       "Invalid Grant",
 			data:       url.Values{"grant": {"invalid_grant"}},
-			pathParam:  appUUIDStr.String(),
+			pathParam:  appID.String(),
 			expectCode: http.StatusBadRequest,
 		},
 		{
 			name:       "Short Code",
 			data:       url.Values{"grant": {"code"}, "code": {"short"}},
-			pathParam:  appUUIDStr.String(),
+			pathParam:  appID.String(),
 			expectCode: http.StatusBadRequest,
 		},
 		{
 			name:       "Short Verifier",
 			data:       url.Values{"grant": {"code"}, "verifier": {"short"}},
-			pathParam:  appUUIDStr.String(),
+			pathParam:  appID.String(),
 			expectCode: http.StatusBadRequest,
 		},
 		{
 			name:       "Invalid Redirect URL",
 			data:       url.Values{"grant": {"code"}, "redirect": {"not-a-url"}},
-			pathParam:  appUUIDStr.String(),
+			pathParam:  appID.String(),
 			expectCode: http.StatusBadRequest,
 		},
 		{
@@ -60,7 +59,7 @@ func TestAuthorization_TokenEndpoint_Validation(t *testing.T) {
 		{
 			name:       "Missing Fields",
 			data:       url.Values{"grant": {"code"}},
-			pathParam:  appUUIDStr.String(),
+			pathParam:  appID.String(),
 			expectCode: http.StatusBadRequest,
 		},
 	}
@@ -96,12 +95,12 @@ func TestAuthorization_TokenEndpoint_Flow(t *testing.T) {
 	verifierRaw := []byte("a-long-verifier-string-to-be-hashed")
 	verifierStr := base64.RawURLEncoding.EncodeToString(verifierRaw)
 	challengeHashed := sha256.Sum256(verifierRaw)
-	authID, _ := id.NewSequential()
+	authID, _ := binid.NewSequential()
 
 	_, err := testSystem.Ent().Authorization.Create().
-		SetID(string(authID)).
-		SetUserID(string(ids.UserID)).
-		SetApplicationID(string(ids.AppID)).
+		SetID(authID).
+		SetUserID(ids.UserID).
+		SetApplicationID(ids.AppID).
 		SetCode(codeRaw).
 		SetChallenge(challengeHashed[:]).
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
@@ -185,14 +184,14 @@ func TestAuthorization_TokenEndpoint_InvalidLogic(t *testing.T) {
 	verifierStr := base64.RawURLEncoding.EncodeToString(verifierRaw)
 	wrongVerifierStr := base64.RawURLEncoding.EncodeToString([]byte("this-is-the-wrong-verifier"))
 	challengeHashed := sha256.Sum256(verifierRaw)
-	authID, _ := id.NewSequential()
-	expiredAuthID, _ := id.NewSequential()
+	authID, _ := binid.NewSequential()
+	expiredAuthID, _ := binid.NewSequential()
 
 	// Create a valid authorization record
 	_, err := testSystem.Ent().Authorization.Create().
-		SetID(string(authID)).
-		SetUserID(string(ids.UserID)).
-		SetApplicationID(string(ids.AppID)).
+		SetID(authID).
+		SetUserID(ids.UserID).
+		SetApplicationID(ids.AppID).
 		SetCode(codeRaw).
 		SetChallenge(challengeHashed[:]).
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
@@ -204,9 +203,9 @@ func TestAuthorization_TokenEndpoint_InvalidLogic(t *testing.T) {
 	}
 	// Create an expired authorization record
 	_, err = testSystem.Ent().Authorization.Create().
-		SetID(string(expiredAuthID)).
-		SetUserID(string(ids.UserID)).
-		SetApplicationID(string(ids.AppID)).
+		SetID(expiredAuthID).
+		SetUserID(ids.UserID).
+		SetApplicationID(ids.AppID).
 		SetCode(expiredCodeRaw).
 		SetChallenge(challengeHashed[:]).
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).

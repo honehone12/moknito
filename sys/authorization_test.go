@@ -4,8 +4,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"moknito/binid"
 	"moknito/challenge"
-	"moknito/id"
 	"moknito/token"
 	"testing"
 	"time"
@@ -19,9 +19,9 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. Setup Data
-	appID, _ := id.NewRandom()
-	authID, _ := id.NewRandom()
-	userID, _ := id.NewRandom()
+	appID, _ := binid.NewRandom()
+	authID, _ := binid.NewRandom()
+	userID, _ := binid.NewRandom()
 
 	// Challenge/Verifier logic:
 	// Verifier: "secret".
@@ -40,7 +40,7 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 
 	// Create App
 	_, err := sys.ent.Application.Create().
-		SetID(string(appID)).
+		SetID(appID).
 		SetDomain("example.com").
 		SetRedirect("https://example.com/cb").
 		SetName("Test App").
@@ -51,7 +51,7 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 
 	// Create User
 	_, err = sys.ent.User.Create().
-		SetID(string(userID)).
+		SetID(userID).
 		SetName("Test User").
 		SetEmail("test@example.com").
 		SetPwhash("hash").
@@ -62,10 +62,9 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 
 	// Create Authorization
 	_, err = sys.ent.Authorization.Create().
-		SetID(string(authID)).
-		SetUserID(string(userID)).
-		SetApplicationID(string(appID)).
-		SetCode(codeRaw).
+		SetID(authID).
+		SetUserID(userID).
+		SetApplicationID(appID).SetCode(codeRaw).
 		SetChallenge(challengeBytes).
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 		SetExpireAt(time.Now().Add(time.Minute)).

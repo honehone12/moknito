@@ -97,7 +97,7 @@ func TestApp_Flow_Success(t *testing.T) {
 
 	// Verify in DB
 	exists, err := testSystem.Ent().AuthorizedApp.Query().
-		Where(authorizedapp.UserID(string(ids.UserID)), authorizedapp.ApplicationID(string(ids.AppID))).
+		Where(authorizedapp.UserID(ids.UserID), authorizedapp.ApplicationID(ids.AppID)).
 		Exist(ctx)
 	if err != nil || !exists {
 		t.Fatal("authorized app was not created in db")
@@ -105,7 +105,7 @@ func TestApp_Flow_Success(t *testing.T) {
 
 	// 2. Authorize the app
 	// The AppAuthorize sys call needs a challenge in Redis.
-	auth, err := testSystem.Ent().Authentication.Query().Where(authentication.UserID(string(ids.UserID))).Only(ctx)
+	auth, err := testSystem.Ent().Authentication.Query().Where(authentication.UserID(ids.UserID)).Only(ctx)
 	if err != nil {
 		t.Fatalf("could not find authentication for user: %v", err)
 	}

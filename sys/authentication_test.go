@@ -2,7 +2,7 @@ package sys
 
 import (
 	"context"
-	"moknito/id"
+	"moknito/binid"
 	"moknito/token"
 	"net/http"
 	"testing"
@@ -17,17 +17,17 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 	ctx := context.Background()
 
 	// 1. Setup Data
-	userID, _ := id.NewRandom()
-	authID, _ := id.NewRandom()
+	userID, _ := binid.NewRandom()
+	authID, _ := binid.NewRandom()
 
 	sys.ent.User.Create().
-		SetID(string(userID)).
+		SetID(userID).
 		SetName("u").SetEmail("e").SetPwhash("p").
 		Save(ctx)
 
 	_, err := sys.ent.Authentication.Create().
-		SetID(string(authID)).
-		SetUserID(string(userID)).
+		SetID(authID).
+		SetUserID(userID).
 		SetExpireAt(time.Now().Add(time.Hour)).
 		SetIP("127.0.0.1").
 		SetUserAgent("test-agent").
@@ -36,15 +36,12 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	authUuid, _ := authID.ToUUID()
-	userUuid, _ := userID.ToUUID()
-
 	// 2. Create Valid Token
 	tokenStr, err := sys.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
 		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
-		AuthUuid:  authUuid,
-		UserUuid:  userUuid,
+		AuthId:    authID,
+		UserId:    userID,
 		Ttl:       time.Hour,
 	})
 	if err != nil {
@@ -73,12 +70,11 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 
 	// 4. Test missing/expired Auth in DB
 	// Create Expired Auth
-	expiredAuthID, _ := id.NewRandom()
-	expiredUuid, _ := expiredAuthID.ToUUID()
+	expiredAuthID, _ := binid.NewRandom()
 
 	sys.ent.Authentication.Create().
-		SetID(string(expiredAuthID)).
-		SetUserID(string(userID)).
+		SetID(expiredAuthID).
+		SetUserID(userID).
 		SetExpireAt(time.Now().Add(-time.Hour)). // expired
 		SetIP("127.0.0.1").
 		SetUserAgent("test").
@@ -88,8 +84,8 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 	expiredTokenStr, _ := sys.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
 		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
-		AuthUuid:  expiredUuid,
-		UserUuid:  userUuid,
+		AuthId:    expiredAuthID,
+		UserId:    userID,
 		Ttl:       time.Hour,
 	})
 	expiredCookie := &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: expiredTokenStr}
@@ -100,13 +96,13 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 	}
 
 	// 5. Test wrong UserID in token
-	wrongUser, _ := id.NewRandom()
-	wrongUserUuid, _ := wrongUser.ToUUID()
+	wrongUser, _ := binid.NewRandom()
+
 	wrongTokenStr, _ := sys.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
 		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
-		AuthUuid:  authUuid,      // points to valid auth
-		UserUuid:  wrongUserUuid, // but mismatch user
+		AuthId:    authID,    // points to valid auth
+		UserId:    wrongUser, // but mismatch user
 		Ttl:       time.Hour,
 	})
 	wrongCookie := &http.Cookie{Name: AUTHENTICATED_COOKIE_KEY, Value: wrongTokenStr}
@@ -123,8 +119,8 @@ func TestAuthentication_CreateAuthentication(t *testing.T) {
 	sys, _ := setupSys(t)
 	defer sys.Close()
 
-	userID, _ := id.NewRandom()
-	authID, _ := id.NewRandom()
+	userID, _ := binid.NewRandom()
+	authID, _ := binid.NewRandom()
 
 	cookie, err := sys.createAuthentication(authID, userID)
 	if err != nil {
@@ -142,15 +138,7 @@ func TestAuthentication_CreateAuthentication(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to parse generated token: %v", err)
 	}
-	if claims.Subject != string(userID) {
-		// Wait, claims.Subject is string(uuid).
-		// userId is id.Id (raw bytes).
-		// In createAuthentication: userUuid, err := userId.ToUUID(). Subject := userUuid.String()
-		// So claims.Subject should be UUID string.
-
-		u, _ := userID.ToUUID()
-		if claims.Subject != u.String() {
-			t.Errorf("expected subject %s, got %s", u.String(), claims.Subject)
-		}
+	if claims.Subject != userID.String() {
+		t.Errorf("expected subject %s, got %s", userID.String(), claims.Subject)
 	}
 }

@@ -7,11 +7,11 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
+	"moknito/binid"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
 var _ jwt.ClaimsValidator = &AuthClaims{}
@@ -164,11 +164,13 @@ func testAuthTokenSignerFlow(t *testing.T, method jwt.SigningMethod) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
+	authID, _ := binid.NewRandom()
+	userID, _ := binid.NewRandom()
 	params := CreateAuthTokenParams{
 		Method:    method,
 		TokenType: TOKEN_TYPE_AUTHENTICATION,
-		AuthUuid:  uuid.New(),
-		UserUuid:  uuid.New(),
+		AuthId:    authID,
+		UserId:    userID,
 		Ttl:       time.Hour,
 	}
 
@@ -186,11 +188,11 @@ func testAuthTokenSignerFlow(t *testing.T, method jwt.SigningMethod) {
 		if claims.Type != params.TokenType {
 			t.Errorf("expected type %s, got %s", params.TokenType, claims.Type)
 		}
-		if claims.Subject != params.UserUuid.String() {
-			t.Errorf("expected subject %s, got %s", params.UserUuid.String(), claims.Subject)
+		if claims.Subject != params.UserId.String() {
+			t.Errorf("expected subject %s, got %s", params.UserId.String(), claims.Subject)
 		}
-		if claims.ID != params.AuthUuid.String() {
-			t.Errorf("expected ID %s, got %s", params.AuthUuid.String(), claims.ID)
+		if claims.ID != params.AuthId.String() {
+			t.Errorf("expected ID %s, got %s", params.AuthId.String(), claims.ID)
 		}
 		if claims.Version != AUTHENTICATED_TOKEN_VERSION {
 			t.Errorf("expected version %s, got %s", AUTHENTICATED_TOKEN_VERSION, claims.Version)
@@ -230,4 +232,3 @@ func TestAuthTokenSigner_Flow_HS256(t *testing.T) {
 func TestAuthTokenSigner_Flow_RS256(t *testing.T) {
 	testAuthTokenSignerFlow(t, jwt.SigningMethodRS256)
 }
-

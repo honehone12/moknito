@@ -3,7 +3,7 @@ package moknito
 import (
 	"context"
 	"fmt"
-	"moknito/id"
+	"moknito/binid"
 	"moknito/token"
 	"net/http"
 	"net/url"
@@ -68,27 +68,24 @@ func TestAuthentication_InvalidAuthCookie_Expired(t *testing.T) {
 	client := newTestClient()
 	ctx := context.Background()
 
-	userID, _ := id.NewSequential()
-	authID, _ := id.NewSequential()
+	userID, _ := binid.NewSequential()
+	authID, _ := binid.NewSequential()
 	userEmail := fmt.Sprintf("expired-%s@example.com", uuid.NewString())
-	testSystem.Ent().User.Create().SetID(string(userID)).SetName("u").SetEmail(userEmail).SetPwhash("p").SaveX(ctx)
+	testSystem.Ent().User.Create().SetID(userID).SetName("u").SetEmail(userEmail).SetPwhash("p").SaveX(ctx)
 	// Create an expired authentication
 	testSystem.Ent().Authentication.Create().
-		SetID(string(authID)).
-		SetUserID(string(userID)).
+		SetID(authID).
+		SetUserID(userID).
 		SetExpireAt(time.Now().Add(-time.Hour)).
 		SetIP("127.0.0.1").SetUserAgent("test").
 		SaveX(ctx)
-
-	authUUID, _ := authID.ToUUID()
-	userUUID, _ := userID.ToUUID()
 
 	// Create a token that points to the expired auth record. The token itself is not expired yet.
 	expiredToken, err := testSystem.AuthSigner().CreateAuthToken(token.CreateAuthTokenParams{
 		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
-		AuthUuid:  authUUID,
-		UserUuid:  userUUID,
+		AuthId:    authID,
+		UserId:    userID,
 		Ttl:       time.Hour,
 	})
 	if err != nil {
@@ -114,16 +111,14 @@ func TestAuthentication_InvalidAuthCookie_NoAuthRecord(t *testing.T) {
 	client := newTestClient()
 
 	// Create a token for an authentication ID that does not exist in the database.
-	userID, _ := id.NewSequential()
-	authID, _ := id.NewSequential() // This ID is not saved to the DB
-	authUUID, _ := authID.ToUUID()
-	userUUID, _ := userID.ToUUID()
+	userID, _ := binid.NewSequential()
+	authID, _ := binid.NewSequential() // This ID is not saved to the DB
 
 	nonExistentToken, err := testSystem.AuthSigner().CreateAuthToken(token.CreateAuthTokenParams{
 		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
-		AuthUuid:  authUUID,
-		UserUuid:  userUUID,
+		AuthId:    authID,
+		UserId:    userID,
 		Ttl:       time.Hour,
 	})
 	if err != nil {
