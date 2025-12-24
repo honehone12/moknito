@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"moknito/binid"
 	"moknito/ent/application"
 	"moknito/ent/authorizedapp"
 	"moknito/ent/predicate"
@@ -130,8 +131,8 @@ func (_q *AuthorizedAppQuery) FirstX(ctx context.Context) *AuthorizedApp {
 
 // FirstID returns the first AuthorizedApp ID from the query.
 // Returns a *NotFoundError when no AuthorizedApp ID was found.
-func (_q *AuthorizedAppQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (_q *AuthorizedAppQuery) FirstID(ctx context.Context) (id binid.BinId, err error) {
+	var ids []binid.BinId
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -143,7 +144,7 @@ func (_q *AuthorizedAppQuery) FirstID(ctx context.Context) (id string, err error
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *AuthorizedAppQuery) FirstIDX(ctx context.Context) string {
+func (_q *AuthorizedAppQuery) FirstIDX(ctx context.Context) binid.BinId {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -181,8 +182,8 @@ func (_q *AuthorizedAppQuery) OnlyX(ctx context.Context) *AuthorizedApp {
 // OnlyID is like Only, but returns the only AuthorizedApp ID in the query.
 // Returns a *NotSingularError when more than one AuthorizedApp ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *AuthorizedAppQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (_q *AuthorizedAppQuery) OnlyID(ctx context.Context) (id binid.BinId, err error) {
+	var ids []binid.BinId
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -198,7 +199,7 @@ func (_q *AuthorizedAppQuery) OnlyID(ctx context.Context) (id string, err error)
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *AuthorizedAppQuery) OnlyIDX(ctx context.Context) string {
+func (_q *AuthorizedAppQuery) OnlyIDX(ctx context.Context) binid.BinId {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -226,7 +227,7 @@ func (_q *AuthorizedAppQuery) AllX(ctx context.Context) []*AuthorizedApp {
 }
 
 // IDs executes the query and returns a list of AuthorizedApp IDs.
-func (_q *AuthorizedAppQuery) IDs(ctx context.Context) (ids []string, err error) {
+func (_q *AuthorizedAppQuery) IDs(ctx context.Context) (ids []binid.BinId, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -238,7 +239,7 @@ func (_q *AuthorizedAppQuery) IDs(ctx context.Context) (ids []string, err error)
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *AuthorizedAppQuery) IDsX(ctx context.Context) []string {
+func (_q *AuthorizedAppQuery) IDsX(ctx context.Context) []binid.BinId {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -445,8 +446,8 @@ func (_q *AuthorizedAppQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 }
 
 func (_q *AuthorizedAppQuery) loadApplication(ctx context.Context, query *ApplicationQuery, nodes []*AuthorizedApp, init func(*AuthorizedApp), assign func(*AuthorizedApp, *Application)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*AuthorizedApp)
+	ids := make([]binid.BinId, 0, len(nodes))
+	nodeids := make(map[binid.BinId][]*AuthorizedApp)
 	for i := range nodes {
 		fk := nodes[i].ApplicationID
 		if _, ok := nodeids[fk]; !ok {
@@ -474,8 +475,8 @@ func (_q *AuthorizedAppQuery) loadApplication(ctx context.Context, query *Applic
 	return nil
 }
 func (_q *AuthorizedAppQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*AuthorizedApp, init func(*AuthorizedApp), assign func(*AuthorizedApp, *User)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*AuthorizedApp)
+	ids := make([]binid.BinId, 0, len(nodes))
+	nodeids := make(map[binid.BinId][]*AuthorizedApp)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -513,7 +514,7 @@ func (_q *AuthorizedAppQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *AuthorizedAppQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(authorizedapp.Table, authorizedapp.Columns, sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString))
+	_spec := sqlgraph.NewQuerySpec(authorizedapp.Table, authorizedapp.Columns, sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/application"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
@@ -40,7 +41,7 @@ type ApplicationMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *string
+	id                *binid.BinId
 	created_at        *time.Time
 	updated_at        *time.Time
 	deleted_at        *time.Time
@@ -48,11 +49,11 @@ type ApplicationMutation struct {
 	domain            *string
 	redirect          *string
 	clearedFields     map[string]struct{}
-	authorized        map[string]struct{}
-	removedauthorized map[string]struct{}
+	authorized        map[binid.BinId]struct{}
+	removedauthorized map[binid.BinId]struct{}
 	clearedauthorized bool
-	logined           map[string]struct{}
-	removedlogined    map[string]struct{}
+	logined           map[binid.BinId]struct{}
+	removedlogined    map[binid.BinId]struct{}
 	clearedlogined    bool
 	done              bool
 	oldValue          func(context.Context) (*Application, error)
@@ -79,7 +80,7 @@ func newApplicationMutation(c config, op Op, opts ...applicationOption) *Applica
 }
 
 // withApplicationID sets the ID field of the mutation.
-func withApplicationID(id string) applicationOption {
+func withApplicationID(id binid.BinId) applicationOption {
 	return func(m *ApplicationMutation) {
 		var (
 			err   error
@@ -131,13 +132,13 @@ func (m ApplicationMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Application entities.
-func (m *ApplicationMutation) SetID(id string) {
+func (m *ApplicationMutation) SetID(id binid.BinId) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ApplicationMutation) ID() (id string, exists bool) {
+func (m *ApplicationMutation) ID() (id binid.BinId, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -148,12 +149,12 @@ func (m *ApplicationMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *ApplicationMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *ApplicationMutation) IDs(ctx context.Context) ([]binid.BinId, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []binid.BinId{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -393,9 +394,9 @@ func (m *ApplicationMutation) ResetRedirect() {
 }
 
 // AddAuthorizedIDs adds the "authorized" edge to the AuthorizedApp entity by ids.
-func (m *ApplicationMutation) AddAuthorizedIDs(ids ...string) {
+func (m *ApplicationMutation) AddAuthorizedIDs(ids ...binid.BinId) {
 	if m.authorized == nil {
-		m.authorized = make(map[string]struct{})
+		m.authorized = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		m.authorized[ids[i]] = struct{}{}
@@ -413,9 +414,9 @@ func (m *ApplicationMutation) AuthorizedCleared() bool {
 }
 
 // RemoveAuthorizedIDs removes the "authorized" edge to the AuthorizedApp entity by IDs.
-func (m *ApplicationMutation) RemoveAuthorizedIDs(ids ...string) {
+func (m *ApplicationMutation) RemoveAuthorizedIDs(ids ...binid.BinId) {
 	if m.removedauthorized == nil {
-		m.removedauthorized = make(map[string]struct{})
+		m.removedauthorized = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		delete(m.authorized, ids[i])
@@ -424,7 +425,7 @@ func (m *ApplicationMutation) RemoveAuthorizedIDs(ids ...string) {
 }
 
 // RemovedAuthorized returns the removed IDs of the "authorized" edge to the AuthorizedApp entity.
-func (m *ApplicationMutation) RemovedAuthorizedIDs() (ids []string) {
+func (m *ApplicationMutation) RemovedAuthorizedIDs() (ids []binid.BinId) {
 	for id := range m.removedauthorized {
 		ids = append(ids, id)
 	}
@@ -432,7 +433,7 @@ func (m *ApplicationMutation) RemovedAuthorizedIDs() (ids []string) {
 }
 
 // AuthorizedIDs returns the "authorized" edge IDs in the mutation.
-func (m *ApplicationMutation) AuthorizedIDs() (ids []string) {
+func (m *ApplicationMutation) AuthorizedIDs() (ids []binid.BinId) {
 	for id := range m.authorized {
 		ids = append(ids, id)
 	}
@@ -447,9 +448,9 @@ func (m *ApplicationMutation) ResetAuthorized() {
 }
 
 // AddLoginedIDs adds the "logined" edge to the Authorization entity by ids.
-func (m *ApplicationMutation) AddLoginedIDs(ids ...string) {
+func (m *ApplicationMutation) AddLoginedIDs(ids ...binid.BinId) {
 	if m.logined == nil {
-		m.logined = make(map[string]struct{})
+		m.logined = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		m.logined[ids[i]] = struct{}{}
@@ -467,9 +468,9 @@ func (m *ApplicationMutation) LoginedCleared() bool {
 }
 
 // RemoveLoginedIDs removes the "logined" edge to the Authorization entity by IDs.
-func (m *ApplicationMutation) RemoveLoginedIDs(ids ...string) {
+func (m *ApplicationMutation) RemoveLoginedIDs(ids ...binid.BinId) {
 	if m.removedlogined == nil {
-		m.removedlogined = make(map[string]struct{})
+		m.removedlogined = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		delete(m.logined, ids[i])
@@ -478,7 +479,7 @@ func (m *ApplicationMutation) RemoveLoginedIDs(ids ...string) {
 }
 
 // RemovedLogined returns the removed IDs of the "logined" edge to the Authorization entity.
-func (m *ApplicationMutation) RemovedLoginedIDs() (ids []string) {
+func (m *ApplicationMutation) RemovedLoginedIDs() (ids []binid.BinId) {
 	for id := range m.removedlogined {
 		ids = append(ids, id)
 	}
@@ -486,7 +487,7 @@ func (m *ApplicationMutation) RemovedLoginedIDs() (ids []string) {
 }
 
 // LoginedIDs returns the "logined" edge IDs in the mutation.
-func (m *ApplicationMutation) LoginedIDs() (ids []string) {
+func (m *ApplicationMutation) LoginedIDs() (ids []binid.BinId) {
 	for id := range m.logined {
 		ids = append(ids, id)
 	}
@@ -840,7 +841,7 @@ type AuthenticationMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *binid.BinId
 	created_at    *time.Time
 	updated_at    *time.Time
 	deleted_at    *time.Time
@@ -849,7 +850,7 @@ type AuthenticationMutation struct {
 	expire_at     *time.Time
 	logout_at     *time.Time
 	clearedFields map[string]struct{}
-	user          *string
+	user          *binid.BinId
 	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Authentication, error)
@@ -876,7 +877,7 @@ func newAuthenticationMutation(c config, op Op, opts ...authenticationOption) *A
 }
 
 // withAuthenticationID sets the ID field of the mutation.
-func withAuthenticationID(id string) authenticationOption {
+func withAuthenticationID(id binid.BinId) authenticationOption {
 	return func(m *AuthenticationMutation) {
 		var (
 			err   error
@@ -928,13 +929,13 @@ func (m AuthenticationMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Authentication entities.
-func (m *AuthenticationMutation) SetID(id string) {
+func (m *AuthenticationMutation) SetID(id binid.BinId) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AuthenticationMutation) ID() (id string, exists bool) {
+func (m *AuthenticationMutation) ID() (id binid.BinId, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -945,12 +946,12 @@ func (m *AuthenticationMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AuthenticationMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *AuthenticationMutation) IDs(ctx context.Context) ([]binid.BinId, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []binid.BinId{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -1265,12 +1266,12 @@ func (m *AuthenticationMutation) ResetLogoutAt() {
 }
 
 // SetUserID sets the "user_id" field.
-func (m *AuthenticationMutation) SetUserID(s string) {
-	m.user = &s
+func (m *AuthenticationMutation) SetUserID(bi binid.BinId) {
+	m.user = &bi
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
-func (m *AuthenticationMutation) UserID() (r string, exists bool) {
+func (m *AuthenticationMutation) UserID() (r binid.BinId, exists bool) {
 	v := m.user
 	if v == nil {
 		return
@@ -1281,7 +1282,7 @@ func (m *AuthenticationMutation) UserID() (r string, exists bool) {
 // OldUserID returns the old "user_id" field's value of the Authentication entity.
 // If the Authentication object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthenticationMutation) OldUserID(ctx context.Context) (v string, err error) {
+func (m *AuthenticationMutation) OldUserID(ctx context.Context) (v binid.BinId, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -1314,7 +1315,7 @@ func (m *AuthenticationMutation) UserCleared() bool {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *AuthenticationMutation) UserIDs() (ids []string) {
+func (m *AuthenticationMutation) UserIDs() (ids []binid.BinId) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1494,7 +1495,7 @@ func (m *AuthenticationMutation) SetField(name string, value ent.Value) error {
 		m.SetLogoutAt(v)
 		return nil
 	case authentication.FieldUserID:
-		v, ok := value.(string)
+		v, ok := value.(binid.BinId)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1683,7 +1684,7 @@ type AuthorizationMutation struct {
 	config
 	op                 Op
 	typ                string
-	id                 *string
+	id                 *binid.BinId
 	created_at         *time.Time
 	updated_at         *time.Time
 	deleted_at         *time.Time
@@ -1694,9 +1695,9 @@ type AuthorizationMutation struct {
 	code_consumed_at   *time.Time
 	expire_at          *time.Time
 	clearedFields      map[string]struct{}
-	application        *string
+	application        *binid.BinId
 	clearedapplication bool
-	user               *string
+	user               *binid.BinId
 	cleareduser        bool
 	done               bool
 	oldValue           func(context.Context) (*Authorization, error)
@@ -1723,7 +1724,7 @@ func newAuthorizationMutation(c config, op Op, opts ...authorizationOption) *Aut
 }
 
 // withAuthorizationID sets the ID field of the mutation.
-func withAuthorizationID(id string) authorizationOption {
+func withAuthorizationID(id binid.BinId) authorizationOption {
 	return func(m *AuthorizationMutation) {
 		var (
 			err   error
@@ -1775,13 +1776,13 @@ func (m AuthorizationMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Authorization entities.
-func (m *AuthorizationMutation) SetID(id string) {
+func (m *AuthorizationMutation) SetID(id binid.BinId) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AuthorizationMutation) ID() (id string, exists bool) {
+func (m *AuthorizationMutation) ID() (id binid.BinId, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1792,12 +1793,12 @@ func (m *AuthorizationMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AuthorizationMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *AuthorizationMutation) IDs(ctx context.Context) ([]binid.BinId, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []binid.BinId{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -2158,12 +2159,12 @@ func (m *AuthorizationMutation) ResetExpireAt() {
 }
 
 // SetApplicationID sets the "application_id" field.
-func (m *AuthorizationMutation) SetApplicationID(s string) {
-	m.application = &s
+func (m *AuthorizationMutation) SetApplicationID(bi binid.BinId) {
+	m.application = &bi
 }
 
 // ApplicationID returns the value of the "application_id" field in the mutation.
-func (m *AuthorizationMutation) ApplicationID() (r string, exists bool) {
+func (m *AuthorizationMutation) ApplicationID() (r binid.BinId, exists bool) {
 	v := m.application
 	if v == nil {
 		return
@@ -2174,7 +2175,7 @@ func (m *AuthorizationMutation) ApplicationID() (r string, exists bool) {
 // OldApplicationID returns the old "application_id" field's value of the Authorization entity.
 // If the Authorization object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizationMutation) OldApplicationID(ctx context.Context) (v string, err error) {
+func (m *AuthorizationMutation) OldApplicationID(ctx context.Context) (v binid.BinId, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldApplicationID is only allowed on UpdateOne operations")
 	}
@@ -2194,12 +2195,12 @@ func (m *AuthorizationMutation) ResetApplicationID() {
 }
 
 // SetUserID sets the "user_id" field.
-func (m *AuthorizationMutation) SetUserID(s string) {
-	m.user = &s
+func (m *AuthorizationMutation) SetUserID(bi binid.BinId) {
+	m.user = &bi
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
-func (m *AuthorizationMutation) UserID() (r string, exists bool) {
+func (m *AuthorizationMutation) UserID() (r binid.BinId, exists bool) {
 	v := m.user
 	if v == nil {
 		return
@@ -2210,7 +2211,7 @@ func (m *AuthorizationMutation) UserID() (r string, exists bool) {
 // OldUserID returns the old "user_id" field's value of the Authorization entity.
 // If the Authorization object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizationMutation) OldUserID(ctx context.Context) (v string, err error) {
+func (m *AuthorizationMutation) OldUserID(ctx context.Context) (v binid.BinId, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -2243,7 +2244,7 @@ func (m *AuthorizationMutation) ApplicationCleared() bool {
 // ApplicationIDs returns the "application" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ApplicationID instead. It exists only for internal usage by the builders.
-func (m *AuthorizationMutation) ApplicationIDs() (ids []string) {
+func (m *AuthorizationMutation) ApplicationIDs() (ids []binid.BinId) {
 	if id := m.application; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2270,7 +2271,7 @@ func (m *AuthorizationMutation) UserCleared() bool {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *AuthorizationMutation) UserIDs() (ids []string) {
+func (m *AuthorizationMutation) UserIDs() (ids []binid.BinId) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2485,14 +2486,14 @@ func (m *AuthorizationMutation) SetField(name string, value ent.Value) error {
 		m.SetExpireAt(v)
 		return nil
 	case authorization.FieldApplicationID:
-		v, ok := value.(string)
+		v, ok := value.(binid.BinId)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetApplicationID(v)
 		return nil
 	case authorization.FieldUserID:
-		v, ok := value.(string)
+		v, ok := value.(binid.BinId)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2696,14 +2697,14 @@ type AuthorizedAppMutation struct {
 	config
 	op                 Op
 	typ                string
-	id                 *string
+	id                 *binid.BinId
 	created_at         *time.Time
 	updated_at         *time.Time
 	deleted_at         *time.Time
 	clearedFields      map[string]struct{}
-	application        *string
+	application        *binid.BinId
 	clearedapplication bool
-	user               *string
+	user               *binid.BinId
 	cleareduser        bool
 	done               bool
 	oldValue           func(context.Context) (*AuthorizedApp, error)
@@ -2730,7 +2731,7 @@ func newAuthorizedAppMutation(c config, op Op, opts ...authorizedappOption) *Aut
 }
 
 // withAuthorizedAppID sets the ID field of the mutation.
-func withAuthorizedAppID(id string) authorizedappOption {
+func withAuthorizedAppID(id binid.BinId) authorizedappOption {
 	return func(m *AuthorizedAppMutation) {
 		var (
 			err   error
@@ -2782,13 +2783,13 @@ func (m AuthorizedAppMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of AuthorizedApp entities.
-func (m *AuthorizedAppMutation) SetID(id string) {
+func (m *AuthorizedAppMutation) SetID(id binid.BinId) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AuthorizedAppMutation) ID() (id string, exists bool) {
+func (m *AuthorizedAppMutation) ID() (id binid.BinId, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -2799,12 +2800,12 @@ func (m *AuthorizedAppMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AuthorizedAppMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *AuthorizedAppMutation) IDs(ctx context.Context) ([]binid.BinId, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []binid.BinId{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -2936,12 +2937,12 @@ func (m *AuthorizedAppMutation) ResetDeletedAt() {
 }
 
 // SetApplicationID sets the "application_id" field.
-func (m *AuthorizedAppMutation) SetApplicationID(s string) {
-	m.application = &s
+func (m *AuthorizedAppMutation) SetApplicationID(bi binid.BinId) {
+	m.application = &bi
 }
 
 // ApplicationID returns the value of the "application_id" field in the mutation.
-func (m *AuthorizedAppMutation) ApplicationID() (r string, exists bool) {
+func (m *AuthorizedAppMutation) ApplicationID() (r binid.BinId, exists bool) {
 	v := m.application
 	if v == nil {
 		return
@@ -2952,7 +2953,7 @@ func (m *AuthorizedAppMutation) ApplicationID() (r string, exists bool) {
 // OldApplicationID returns the old "application_id" field's value of the AuthorizedApp entity.
 // If the AuthorizedApp object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizedAppMutation) OldApplicationID(ctx context.Context) (v string, err error) {
+func (m *AuthorizedAppMutation) OldApplicationID(ctx context.Context) (v binid.BinId, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldApplicationID is only allowed on UpdateOne operations")
 	}
@@ -2972,12 +2973,12 @@ func (m *AuthorizedAppMutation) ResetApplicationID() {
 }
 
 // SetUserID sets the "user_id" field.
-func (m *AuthorizedAppMutation) SetUserID(s string) {
-	m.user = &s
+func (m *AuthorizedAppMutation) SetUserID(bi binid.BinId) {
+	m.user = &bi
 }
 
 // UserID returns the value of the "user_id" field in the mutation.
-func (m *AuthorizedAppMutation) UserID() (r string, exists bool) {
+func (m *AuthorizedAppMutation) UserID() (r binid.BinId, exists bool) {
 	v := m.user
 	if v == nil {
 		return
@@ -2988,7 +2989,7 @@ func (m *AuthorizedAppMutation) UserID() (r string, exists bool) {
 // OldUserID returns the old "user_id" field's value of the AuthorizedApp entity.
 // If the AuthorizedApp object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizedAppMutation) OldUserID(ctx context.Context) (v string, err error) {
+func (m *AuthorizedAppMutation) OldUserID(ctx context.Context) (v binid.BinId, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
 	}
@@ -3021,7 +3022,7 @@ func (m *AuthorizedAppMutation) ApplicationCleared() bool {
 // ApplicationIDs returns the "application" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // ApplicationID instead. It exists only for internal usage by the builders.
-func (m *AuthorizedAppMutation) ApplicationIDs() (ids []string) {
+func (m *AuthorizedAppMutation) ApplicationIDs() (ids []binid.BinId) {
 	if id := m.application; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3048,7 +3049,7 @@ func (m *AuthorizedAppMutation) UserCleared() bool {
 // UserIDs returns the "user" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // UserID instead. It exists only for internal usage by the builders.
-func (m *AuthorizedAppMutation) UserIDs() (ids []string) {
+func (m *AuthorizedAppMutation) UserIDs() (ids []binid.BinId) {
 	if id := m.user; id != nil {
 		ids = append(ids, *id)
 	}
@@ -3179,14 +3180,14 @@ func (m *AuthorizedAppMutation) SetField(name string, value ent.Value) error {
 		m.SetDeletedAt(v)
 		return nil
 	case authorizedapp.FieldApplicationID:
-		v, ok := value.(string)
+		v, ok := value.(binid.BinId)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetApplicationID(v)
 		return nil
 	case authorizedapp.FieldUserID:
-		v, ok := value.(string)
+		v, ok := value.(binid.BinId)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3366,22 +3367,23 @@ type UserMutation struct {
 	config
 	op                     Op
 	typ                    string
-	id                     *string
+	id                     *binid.BinId
 	created_at             *time.Time
 	updated_at             *time.Time
 	deleted_at             *time.Time
 	name                   *string
 	email                  *string
 	pwhash                 *string
+	login_method           *user.LoginMethod
 	clearedFields          map[string]struct{}
-	authentications        map[string]struct{}
-	removedauthentications map[string]struct{}
+	authentications        map[binid.BinId]struct{}
+	removedauthentications map[binid.BinId]struct{}
 	clearedauthentications bool
-	authorizations         map[string]struct{}
-	removedauthorizations  map[string]struct{}
+	authorizations         map[binid.BinId]struct{}
+	removedauthorizations  map[binid.BinId]struct{}
 	clearedauthorizations  bool
-	authorized_apps        map[string]struct{}
-	removedauthorized_apps map[string]struct{}
+	authorized_apps        map[binid.BinId]struct{}
+	removedauthorized_apps map[binid.BinId]struct{}
 	clearedauthorized_apps bool
 	done                   bool
 	oldValue               func(context.Context) (*User, error)
@@ -3408,7 +3410,7 @@ func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 }
 
 // withUserID sets the ID field of the mutation.
-func withUserID(id string) userOption {
+func withUserID(id binid.BinId) userOption {
 	return func(m *UserMutation) {
 		var (
 			err   error
@@ -3460,13 +3462,13 @@ func (m UserMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of User entities.
-func (m *UserMutation) SetID(id string) {
+func (m *UserMutation) SetID(id binid.BinId) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id string, exists bool) {
+func (m *UserMutation) ID() (id binid.BinId, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3477,12 +3479,12 @@ func (m *UserMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *UserMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *UserMutation) IDs(ctx context.Context) ([]binid.BinId, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []binid.BinId{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -3721,10 +3723,46 @@ func (m *UserMutation) ResetPwhash() {
 	m.pwhash = nil
 }
 
+// SetLoginMethod sets the "login_method" field.
+func (m *UserMutation) SetLoginMethod(um user.LoginMethod) {
+	m.login_method = &um
+}
+
+// LoginMethod returns the value of the "login_method" field in the mutation.
+func (m *UserMutation) LoginMethod() (r user.LoginMethod, exists bool) {
+	v := m.login_method
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLoginMethod returns the old "login_method" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldLoginMethod(ctx context.Context) (v user.LoginMethod, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLoginMethod is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLoginMethod requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLoginMethod: %w", err)
+	}
+	return oldValue.LoginMethod, nil
+}
+
+// ResetLoginMethod resets all changes to the "login_method" field.
+func (m *UserMutation) ResetLoginMethod() {
+	m.login_method = nil
+}
+
 // AddAuthenticationIDs adds the "authentications" edge to the Authentication entity by ids.
-func (m *UserMutation) AddAuthenticationIDs(ids ...string) {
+func (m *UserMutation) AddAuthenticationIDs(ids ...binid.BinId) {
 	if m.authentications == nil {
-		m.authentications = make(map[string]struct{})
+		m.authentications = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		m.authentications[ids[i]] = struct{}{}
@@ -3742,9 +3780,9 @@ func (m *UserMutation) AuthenticationsCleared() bool {
 }
 
 // RemoveAuthenticationIDs removes the "authentications" edge to the Authentication entity by IDs.
-func (m *UserMutation) RemoveAuthenticationIDs(ids ...string) {
+func (m *UserMutation) RemoveAuthenticationIDs(ids ...binid.BinId) {
 	if m.removedauthentications == nil {
-		m.removedauthentications = make(map[string]struct{})
+		m.removedauthentications = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		delete(m.authentications, ids[i])
@@ -3753,7 +3791,7 @@ func (m *UserMutation) RemoveAuthenticationIDs(ids ...string) {
 }
 
 // RemovedAuthentications returns the removed IDs of the "authentications" edge to the Authentication entity.
-func (m *UserMutation) RemovedAuthenticationsIDs() (ids []string) {
+func (m *UserMutation) RemovedAuthenticationsIDs() (ids []binid.BinId) {
 	for id := range m.removedauthentications {
 		ids = append(ids, id)
 	}
@@ -3761,7 +3799,7 @@ func (m *UserMutation) RemovedAuthenticationsIDs() (ids []string) {
 }
 
 // AuthenticationsIDs returns the "authentications" edge IDs in the mutation.
-func (m *UserMutation) AuthenticationsIDs() (ids []string) {
+func (m *UserMutation) AuthenticationsIDs() (ids []binid.BinId) {
 	for id := range m.authentications {
 		ids = append(ids, id)
 	}
@@ -3776,9 +3814,9 @@ func (m *UserMutation) ResetAuthentications() {
 }
 
 // AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by ids.
-func (m *UserMutation) AddAuthorizationIDs(ids ...string) {
+func (m *UserMutation) AddAuthorizationIDs(ids ...binid.BinId) {
 	if m.authorizations == nil {
-		m.authorizations = make(map[string]struct{})
+		m.authorizations = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		m.authorizations[ids[i]] = struct{}{}
@@ -3796,9 +3834,9 @@ func (m *UserMutation) AuthorizationsCleared() bool {
 }
 
 // RemoveAuthorizationIDs removes the "authorizations" edge to the Authorization entity by IDs.
-func (m *UserMutation) RemoveAuthorizationIDs(ids ...string) {
+func (m *UserMutation) RemoveAuthorizationIDs(ids ...binid.BinId) {
 	if m.removedauthorizations == nil {
-		m.removedauthorizations = make(map[string]struct{})
+		m.removedauthorizations = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		delete(m.authorizations, ids[i])
@@ -3807,7 +3845,7 @@ func (m *UserMutation) RemoveAuthorizationIDs(ids ...string) {
 }
 
 // RemovedAuthorizations returns the removed IDs of the "authorizations" edge to the Authorization entity.
-func (m *UserMutation) RemovedAuthorizationsIDs() (ids []string) {
+func (m *UserMutation) RemovedAuthorizationsIDs() (ids []binid.BinId) {
 	for id := range m.removedauthorizations {
 		ids = append(ids, id)
 	}
@@ -3815,7 +3853,7 @@ func (m *UserMutation) RemovedAuthorizationsIDs() (ids []string) {
 }
 
 // AuthorizationsIDs returns the "authorizations" edge IDs in the mutation.
-func (m *UserMutation) AuthorizationsIDs() (ids []string) {
+func (m *UserMutation) AuthorizationsIDs() (ids []binid.BinId) {
 	for id := range m.authorizations {
 		ids = append(ids, id)
 	}
@@ -3830,9 +3868,9 @@ func (m *UserMutation) ResetAuthorizations() {
 }
 
 // AddAuthorizedAppIDs adds the "authorized_apps" edge to the AuthorizedApp entity by ids.
-func (m *UserMutation) AddAuthorizedAppIDs(ids ...string) {
+func (m *UserMutation) AddAuthorizedAppIDs(ids ...binid.BinId) {
 	if m.authorized_apps == nil {
-		m.authorized_apps = make(map[string]struct{})
+		m.authorized_apps = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		m.authorized_apps[ids[i]] = struct{}{}
@@ -3850,9 +3888,9 @@ func (m *UserMutation) AuthorizedAppsCleared() bool {
 }
 
 // RemoveAuthorizedAppIDs removes the "authorized_apps" edge to the AuthorizedApp entity by IDs.
-func (m *UserMutation) RemoveAuthorizedAppIDs(ids ...string) {
+func (m *UserMutation) RemoveAuthorizedAppIDs(ids ...binid.BinId) {
 	if m.removedauthorized_apps == nil {
-		m.removedauthorized_apps = make(map[string]struct{})
+		m.removedauthorized_apps = make(map[binid.BinId]struct{})
 	}
 	for i := range ids {
 		delete(m.authorized_apps, ids[i])
@@ -3861,7 +3899,7 @@ func (m *UserMutation) RemoveAuthorizedAppIDs(ids ...string) {
 }
 
 // RemovedAuthorizedApps returns the removed IDs of the "authorized_apps" edge to the AuthorizedApp entity.
-func (m *UserMutation) RemovedAuthorizedAppsIDs() (ids []string) {
+func (m *UserMutation) RemovedAuthorizedAppsIDs() (ids []binid.BinId) {
 	for id := range m.removedauthorized_apps {
 		ids = append(ids, id)
 	}
@@ -3869,7 +3907,7 @@ func (m *UserMutation) RemovedAuthorizedAppsIDs() (ids []string) {
 }
 
 // AuthorizedAppsIDs returns the "authorized_apps" edge IDs in the mutation.
-func (m *UserMutation) AuthorizedAppsIDs() (ids []string) {
+func (m *UserMutation) AuthorizedAppsIDs() (ids []binid.BinId) {
 	for id := range m.authorized_apps {
 		ids = append(ids, id)
 	}
@@ -3917,7 +3955,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -3935,6 +3973,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.pwhash != nil {
 		fields = append(fields, user.FieldPwhash)
+	}
+	if m.login_method != nil {
+		fields = append(fields, user.FieldLoginMethod)
 	}
 	return fields
 }
@@ -3956,6 +3997,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Email()
 	case user.FieldPwhash:
 		return m.Pwhash()
+	case user.FieldLoginMethod:
+		return m.LoginMethod()
 	}
 	return nil, false
 }
@@ -3977,6 +4020,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldEmail(ctx)
 	case user.FieldPwhash:
 		return m.OldPwhash(ctx)
+	case user.FieldLoginMethod:
+		return m.OldLoginMethod(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -4027,6 +4072,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPwhash(v)
+		return nil
+	case user.FieldLoginMethod:
+		v, ok := value.(user.LoginMethod)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLoginMethod(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -4103,6 +4155,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldPwhash:
 		m.ResetPwhash()
+		return nil
+	case user.FieldLoginMethod:
+		m.ResetLoginMethod()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

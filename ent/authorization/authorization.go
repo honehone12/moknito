@@ -97,12 +97,6 @@ var (
 	ChallengeMethodValidator func(string) error
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	CodeValidator func([]byte) error
-	// ApplicationIDValidator is a validator for the "application_id" field. It is called by the builders before save.
-	ApplicationIDValidator func(string) error
-	// UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
-	UserIDValidator func(string) error
-	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Authorization queries.

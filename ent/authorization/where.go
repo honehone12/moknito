@@ -3,6 +3,7 @@
 package authorization
 
 import (
+	"moknito/binid"
 	"moknito/ent/predicate"
 	"time"
 
@@ -11,58 +12,48 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Authorization {
+func ID(id binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Authorization {
+func IDEQ(id binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Authorization {
+func IDNEQ(id binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Authorization {
+func IDIn(ids ...binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Authorization {
+func IDNotIn(ids ...binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Authorization {
+func IDGT(id binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Authorization {
+func IDGTE(id binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Authorization {
+func IDLT(id binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Authorization {
+func IDLTE(id binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldLTE(FieldID, id))
-}
-
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldContainsFold(FieldID, id))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -111,12 +102,12 @@ func ExpireAt(v time.Time) predicate.Authorization {
 }
 
 // ApplicationID applies equality check predicate on the "application_id" field. It's identical to ApplicationIDEQ.
-func ApplicationID(v string) predicate.Authorization {
+func ApplicationID(v binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldApplicationID, v))
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v string) predicate.Authorization {
+func UserID(v binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -526,133 +517,43 @@ func ExpireAtLTE(v time.Time) predicate.Authorization {
 }
 
 // ApplicationIDEQ applies the EQ predicate on the "application_id" field.
-func ApplicationIDEQ(v string) predicate.Authorization {
+func ApplicationIDEQ(v binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldApplicationID, v))
 }
 
 // ApplicationIDNEQ applies the NEQ predicate on the "application_id" field.
-func ApplicationIDNEQ(v string) predicate.Authorization {
+func ApplicationIDNEQ(v binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldNEQ(FieldApplicationID, v))
 }
 
 // ApplicationIDIn applies the In predicate on the "application_id" field.
-func ApplicationIDIn(vs ...string) predicate.Authorization {
+func ApplicationIDIn(vs ...binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldIn(FieldApplicationID, vs...))
 }
 
 // ApplicationIDNotIn applies the NotIn predicate on the "application_id" field.
-func ApplicationIDNotIn(vs ...string) predicate.Authorization {
+func ApplicationIDNotIn(vs ...binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldNotIn(FieldApplicationID, vs...))
 }
 
-// ApplicationIDGT applies the GT predicate on the "application_id" field.
-func ApplicationIDGT(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldGT(FieldApplicationID, v))
-}
-
-// ApplicationIDGTE applies the GTE predicate on the "application_id" field.
-func ApplicationIDGTE(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldGTE(FieldApplicationID, v))
-}
-
-// ApplicationIDLT applies the LT predicate on the "application_id" field.
-func ApplicationIDLT(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldLT(FieldApplicationID, v))
-}
-
-// ApplicationIDLTE applies the LTE predicate on the "application_id" field.
-func ApplicationIDLTE(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldLTE(FieldApplicationID, v))
-}
-
-// ApplicationIDContains applies the Contains predicate on the "application_id" field.
-func ApplicationIDContains(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldContains(FieldApplicationID, v))
-}
-
-// ApplicationIDHasPrefix applies the HasPrefix predicate on the "application_id" field.
-func ApplicationIDHasPrefix(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldHasPrefix(FieldApplicationID, v))
-}
-
-// ApplicationIDHasSuffix applies the HasSuffix predicate on the "application_id" field.
-func ApplicationIDHasSuffix(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldHasSuffix(FieldApplicationID, v))
-}
-
-// ApplicationIDEqualFold applies the EqualFold predicate on the "application_id" field.
-func ApplicationIDEqualFold(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldEqualFold(FieldApplicationID, v))
-}
-
-// ApplicationIDContainsFold applies the ContainsFold predicate on the "application_id" field.
-func ApplicationIDContainsFold(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldContainsFold(FieldApplicationID, v))
-}
-
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v string) predicate.Authorization {
+func UserIDEQ(v binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v string) predicate.Authorization {
+func UserIDNEQ(v binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...string) predicate.Authorization {
+func UserIDIn(vs ...binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...string) predicate.Authorization {
+func UserIDNotIn(vs ...binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldNotIn(FieldUserID, vs...))
-}
-
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldGT(FieldUserID, v))
-}
-
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldGTE(FieldUserID, v))
-}
-
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldLT(FieldUserID, v))
-}
-
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldLTE(FieldUserID, v))
-}
-
-// UserIDContains applies the Contains predicate on the "user_id" field.
-func UserIDContains(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldContains(FieldUserID, v))
-}
-
-// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
-func UserIDHasPrefix(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldHasPrefix(FieldUserID, v))
-}
-
-// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
-func UserIDHasSuffix(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldHasSuffix(FieldUserID, v))
-}
-
-// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
-func UserIDEqualFold(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldEqualFold(FieldUserID, v))
-}
-
-// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
-func UserIDContainsFold(v string) predicate.Authorization {
-	return predicate.Authorization(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // HasApplication applies the HasEdge predicate on the "application" edge.

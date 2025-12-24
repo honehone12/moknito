@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/application"
 	"moknito/ent/authorization"
 	"moknito/ent/authorizedapp"
@@ -83,20 +84,20 @@ func (_c *ApplicationCreate) SetRedirect(v string) *ApplicationCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *ApplicationCreate) SetID(v string) *ApplicationCreate {
+func (_c *ApplicationCreate) SetID(v binid.BinId) *ApplicationCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
 // AddAuthorizedIDs adds the "authorized" edge to the AuthorizedApp entity by IDs.
-func (_c *ApplicationCreate) AddAuthorizedIDs(ids ...string) *ApplicationCreate {
+func (_c *ApplicationCreate) AddAuthorizedIDs(ids ...binid.BinId) *ApplicationCreate {
 	_c.mutation.AddAuthorizedIDs(ids...)
 	return _c
 }
 
 // AddAuthorized adds the "authorized" edges to the AuthorizedApp entity.
 func (_c *ApplicationCreate) AddAuthorized(v ...*AuthorizedApp) *ApplicationCreate {
-	ids := make([]string, len(v))
+	ids := make([]binid.BinId, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -104,14 +105,14 @@ func (_c *ApplicationCreate) AddAuthorized(v ...*AuthorizedApp) *ApplicationCrea
 }
 
 // AddLoginedIDs adds the "logined" edge to the Authorization entity by IDs.
-func (_c *ApplicationCreate) AddLoginedIDs(ids ...string) *ApplicationCreate {
+func (_c *ApplicationCreate) AddLoginedIDs(ids ...binid.BinId) *ApplicationCreate {
 	_c.mutation.AddLoginedIDs(ids...)
 	return _c
 }
 
 // AddLogined adds the "logined" edges to the Authorization entity.
 func (_c *ApplicationCreate) AddLogined(v ...*Authorization) *ApplicationCreate {
-	ids := make([]string, len(v))
+	ids := make([]binid.BinId, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -195,11 +196,6 @@ func (_c *ApplicationCreate) check() error {
 			return &ValidationError{Name: "redirect", err: fmt.Errorf(`ent: validator failed for field "Application.redirect": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.ID(); ok {
-		if err := application.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Application.id": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -215,10 +211,10 @@ func (_c *ApplicationCreate) sqlSave(ctx context.Context) (*Application, error) 
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Application.ID type: %T", _spec.ID.Value)
+		if id, ok := _spec.ID.Value.(*binid.BinId); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
 		}
 	}
 	_c.mutation.id = &_node.ID
@@ -229,11 +225,11 @@ func (_c *ApplicationCreate) sqlSave(ctx context.Context) (*Application, error) 
 func (_c *ApplicationCreate) createSpec() (*Application, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Application{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(application.Table, sqlgraph.NewFieldSpec(application.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(application.Table, sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(application.FieldCreatedAt, field.TypeTime, value)
@@ -267,7 +263,7 @@ func (_c *ApplicationCreate) createSpec() (*Application, *sqlgraph.CreateSpec) {
 			Columns: []string{application.AuthorizedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -283,7 +279,7 @@ func (_c *ApplicationCreate) createSpec() (*Application, *sqlgraph.CreateSpec) {
 			Columns: []string{application.LoginedColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -4,11 +4,11 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"errors"
+	"moknito/binid"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
 type AuthTokenBundle struct {
@@ -117,8 +117,8 @@ func NewAuthTokenSigner() (*AuthTokenSigner, error) {
 type CreateAuthTokenParams struct {
 	Method       jwt.SigningMethod
 	TokenType    string
-	AuthUuid     uuid.UUID
-	UserUuid     uuid.UUID
+	AuthId       binid.BinId
+	UserId       binid.BinId
 	Ttl          time.Duration
 	Applications []string
 }
@@ -157,12 +157,12 @@ func (a *AuthTokenSigner) CreateAuthToken(p CreateAuthTokenParams) (string, erro
 			Type:    p.TokenType,
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    a.host,
-				Subject:   p.UserUuid.String(),
+				Subject:   p.UserId.String(),
 				Audience:  p.Applications,
 				ExpiresAt: jwt.NewNumericDate(now.Add(p.Ttl)),
 				NotBefore: jwt.NewNumericDate(now),
 				IssuedAt:  jwt.NewNumericDate(now),
-				ID:        p.AuthUuid.String(),
+				ID:        p.AuthId.String(),
 			},
 		},
 	)

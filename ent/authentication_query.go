@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"moknito/binid"
 	"moknito/ent/authentication"
 	"moknito/ent/predicate"
 	"moknito/ent/user"
@@ -106,8 +107,8 @@ func (_q *AuthenticationQuery) FirstX(ctx context.Context) *Authentication {
 
 // FirstID returns the first Authentication ID from the query.
 // Returns a *NotFoundError when no Authentication ID was found.
-func (_q *AuthenticationQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (_q *AuthenticationQuery) FirstID(ctx context.Context) (id binid.BinId, err error) {
+	var ids []binid.BinId
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -119,7 +120,7 @@ func (_q *AuthenticationQuery) FirstID(ctx context.Context) (id string, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *AuthenticationQuery) FirstIDX(ctx context.Context) string {
+func (_q *AuthenticationQuery) FirstIDX(ctx context.Context) binid.BinId {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -157,8 +158,8 @@ func (_q *AuthenticationQuery) OnlyX(ctx context.Context) *Authentication {
 // OnlyID is like Only, but returns the only Authentication ID in the query.
 // Returns a *NotSingularError when more than one Authentication ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *AuthenticationQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (_q *AuthenticationQuery) OnlyID(ctx context.Context) (id binid.BinId, err error) {
+	var ids []binid.BinId
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -174,7 +175,7 @@ func (_q *AuthenticationQuery) OnlyID(ctx context.Context) (id string, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *AuthenticationQuery) OnlyIDX(ctx context.Context) string {
+func (_q *AuthenticationQuery) OnlyIDX(ctx context.Context) binid.BinId {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -202,7 +203,7 @@ func (_q *AuthenticationQuery) AllX(ctx context.Context) []*Authentication {
 }
 
 // IDs executes the query and returns a list of Authentication IDs.
-func (_q *AuthenticationQuery) IDs(ctx context.Context) (ids []string, err error) {
+func (_q *AuthenticationQuery) IDs(ctx context.Context) (ids []binid.BinId, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -214,7 +215,7 @@ func (_q *AuthenticationQuery) IDs(ctx context.Context) (ids []string, err error
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *AuthenticationQuery) IDsX(ctx context.Context) []string {
+func (_q *AuthenticationQuery) IDsX(ctx context.Context) []binid.BinId {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -402,8 +403,8 @@ func (_q *AuthenticationQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 }
 
 func (_q *AuthenticationQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Authentication, init func(*Authentication), assign func(*Authentication, *User)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Authentication)
+	ids := make([]binid.BinId, 0, len(nodes))
+	nodeids := make(map[binid.BinId][]*Authentication)
 	for i := range nodes {
 		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
@@ -441,7 +442,7 @@ func (_q *AuthenticationQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *AuthenticationQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(authentication.Table, authentication.Columns, sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString))
+	_spec := sqlgraph.NewQuerySpec(authentication.Table, authentication.Columns, sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

@@ -4,8 +4,8 @@ import (
 	"context"
 	"flag"
 	"log"
+	"moknito/binid"
 	"moknito/ent"
-	"moknito/id"
 	"os"
 
 	"github.com/go-playground/validator/v10"
@@ -51,14 +51,14 @@ func main() {
 	}
 	defer client.Close()
 
-	id, err := id.NewSequential()
+	id, err := binid.NewSequential()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	ctx := context.Background()
 	app, err := client.Application.Create().
-		SetID(string(id)).
+		SetID(id).
 		SetName(args.Name).
 		SetDomain(args.Domain).
 		SetRedirect(args.Redirect).
@@ -67,14 +67,9 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	uuid, err := id.ToUUID()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	log.Printf(
 		"created application id: %s name: %s domain: %s redirect: %s\n",
-		uuid.String(),
+		id.String(),
 		app.Name,
 		app.Domain,
 		app.Redirect,

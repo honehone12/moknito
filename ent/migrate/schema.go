@@ -10,7 +10,7 @@ import (
 var (
 	// ApplicationsColumns holds the columns for the "applications" table.
 	ApplicationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "id", Type: field.TypeUUID, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
@@ -26,7 +26,7 @@ var (
 	}
 	// AuthenticationsColumns holds the columns for the "authentications" table.
 	AuthenticationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "id", Type: field.TypeUUID, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
@@ -34,7 +34,7 @@ var (
 		{Name: "user_agent", Type: field.TypeString, Nullable: true, Size: 256},
 		{Name: "expire_at", Type: field.TypeTime},
 		{Name: "logout_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_id", Type: field.TypeUUID, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthenticationsTable holds the schema information for the "authentications" table.
 	AuthenticationsTable = &schema.Table{
@@ -52,7 +52,7 @@ var (
 	}
 	// AuthorizationsColumns holds the columns for the "authorizations" table.
 	AuthorizationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "id", Type: field.TypeUUID, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
@@ -62,8 +62,8 @@ var (
 		{Name: "code_expire_at", Type: field.TypeTime},
 		{Name: "code_consumed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "expire_at", Type: field.TypeTime},
-		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
-		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "application_id", Type: field.TypeUUID, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_id", Type: field.TypeUUID, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthorizationsTable holds the schema information for the "authorizations" table.
 	AuthorizationsTable = &schema.Table{
@@ -94,12 +94,12 @@ var (
 	}
 	// AuthorizedAppsColumns holds the columns for the "authorized_apps" table.
 	AuthorizedAppsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "id", Type: field.TypeUUID, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "application_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
-		{Name: "user_id", Type: field.TypeString, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "application_id", Type: field.TypeUUID, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "user_id", Type: field.TypeUUID, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
 	// AuthorizedAppsTable holds the schema information for the "authorized_apps" table.
 	AuthorizedAppsTable = &schema.Table{
@@ -123,13 +123,14 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
+		{Name: "id", Type: field.TypeUUID, Unique: true, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Size: 256},
 		{Name: "email", Type: field.TypeString, Unique: true, Size: 256},
 		{Name: "pwhash", Type: field.TypeString, Size: 512},
+		{Name: "login_method", Type: field.TypeEnum, Enums: []string{"password", "mfa-qr", "passkey"}, Default: "password"},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

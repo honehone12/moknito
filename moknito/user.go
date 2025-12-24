@@ -1,8 +1,8 @@
 package moknito
 
 import (
+	"moknito/binid"
 	"moknito/challenge"
-	"moknito/id"
 	"moknito/sys"
 	"net/http"
 
@@ -68,7 +68,7 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	appId, err := id.FromUUIDString(form.Id)
+	appId, err := binid.FromUUIDString(form.Id)
 	if err != nil {
 		ctx.Logger().Warn(err)
 		return echo.ErrBadRequest
@@ -113,7 +113,7 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	appId, err := id.FromUUIDString(form.Id)
+	appId, err := binid.FromUUIDString(form.Id)
 	if err != nil {
 		ctx.Logger().Warn(err)
 		return echo.ErrBadRequest

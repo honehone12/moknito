@@ -3,6 +3,7 @@
 package user
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -26,6 +27,8 @@ const (
 	FieldEmail = "email"
 	// FieldPwhash holds the string denoting the pwhash field in the database.
 	FieldPwhash = "pwhash"
+	// FieldLoginMethod holds the string denoting the login_method field in the database.
+	FieldLoginMethod = "login_method"
 	// EdgeAuthentications holds the string denoting the authentications edge name in mutations.
 	EdgeAuthentications = "authentications"
 	// EdgeAuthorizations holds the string denoting the authorizations edge name in mutations.
@@ -66,6 +69,7 @@ var Columns = []string{
 	FieldName,
 	FieldEmail,
 	FieldPwhash,
+	FieldLoginMethod,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -91,9 +95,34 @@ var (
 	EmailValidator func(string) error
 	// PwhashValidator is a validator for the "pwhash" field. It is called by the builders before save.
 	PwhashValidator func(string) error
-	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(string) error
 )
+
+// LoginMethod defines the type for the "login_method" enum field.
+type LoginMethod string
+
+// LoginMethodPassword is the default value of the LoginMethod enum.
+const DefaultLoginMethod = LoginMethodPassword
+
+// LoginMethod values.
+const (
+	LoginMethodPassword LoginMethod = "password"
+	LoginMethodMfaQr    LoginMethod = "mfa-qr"
+	LoginMethodPasskey  LoginMethod = "passkey"
+)
+
+func (lm LoginMethod) String() string {
+	return string(lm)
+}
+
+// LoginMethodValidator is a validator for the "login_method" field enum values. It is called by the builders before save.
+func LoginMethodValidator(lm LoginMethod) error {
+	switch lm {
+	case LoginMethodPassword, LoginMethodMfaQr, LoginMethodPasskey:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for login_method field: %q", lm)
+	}
+}
 
 // OrderOption defines the ordering options for the User queries.
 type OrderOption func(*sql.Selector)
@@ -131,6 +160,11 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 // ByPwhash orders the results by the pwhash field.
 func ByPwhash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPwhash, opts...).ToFunc()
+}
+
+// ByLoginMethod orders the results by the login_method field.
+func ByLoginMethod(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLoginMethod, opts...).ToFunc()
 }
 
 // ByAuthenticationsCount orders the results by authentications count.

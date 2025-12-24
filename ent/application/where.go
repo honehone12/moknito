@@ -3,6 +3,7 @@
 package application
 
 import (
+	"moknito/binid"
 	"moknito/ent/predicate"
 	"time"
 
@@ -11,58 +12,48 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Application {
+func ID(id binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Application {
+func IDEQ(id binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Application {
+func IDNEQ(id binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Application {
+func IDIn(ids ...binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Application {
+func IDNotIn(ids ...binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Application {
+func IDGT(id binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Application {
+func IDGTE(id binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Application {
+func IDLT(id binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Application {
+func IDLTE(id binid.BinId) predicate.Application {
 	return predicate.Application(sql.FieldLTE(FieldID, id))
-}
-
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.Application {
-	return predicate.Application(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.Application {
-	return predicate.Application(sql.FieldContainsFold(FieldID, id))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.

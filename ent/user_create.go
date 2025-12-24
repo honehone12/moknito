@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
 	"moknito/ent/authorizedapp"
@@ -83,21 +84,35 @@ func (_c *UserCreate) SetPwhash(v string) *UserCreate {
 	return _c
 }
 
+// SetLoginMethod sets the "login_method" field.
+func (_c *UserCreate) SetLoginMethod(v user.LoginMethod) *UserCreate {
+	_c.mutation.SetLoginMethod(v)
+	return _c
+}
+
+// SetNillableLoginMethod sets the "login_method" field if the given value is not nil.
+func (_c *UserCreate) SetNillableLoginMethod(v *user.LoginMethod) *UserCreate {
+	if v != nil {
+		_c.SetLoginMethod(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
-func (_c *UserCreate) SetID(v string) *UserCreate {
+func (_c *UserCreate) SetID(v binid.BinId) *UserCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
 
 // AddAuthenticationIDs adds the "authentications" edge to the Authentication entity by IDs.
-func (_c *UserCreate) AddAuthenticationIDs(ids ...string) *UserCreate {
+func (_c *UserCreate) AddAuthenticationIDs(ids ...binid.BinId) *UserCreate {
 	_c.mutation.AddAuthenticationIDs(ids...)
 	return _c
 }
 
 // AddAuthentications adds the "authentications" edges to the Authentication entity.
 func (_c *UserCreate) AddAuthentications(v ...*Authentication) *UserCreate {
-	ids := make([]string, len(v))
+	ids := make([]binid.BinId, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -105,14 +120,14 @@ func (_c *UserCreate) AddAuthentications(v ...*Authentication) *UserCreate {
 }
 
 // AddAuthorizationIDs adds the "authorizations" edge to the Authorization entity by IDs.
-func (_c *UserCreate) AddAuthorizationIDs(ids ...string) *UserCreate {
+func (_c *UserCreate) AddAuthorizationIDs(ids ...binid.BinId) *UserCreate {
 	_c.mutation.AddAuthorizationIDs(ids...)
 	return _c
 }
 
 // AddAuthorizations adds the "authorizations" edges to the Authorization entity.
 func (_c *UserCreate) AddAuthorizations(v ...*Authorization) *UserCreate {
-	ids := make([]string, len(v))
+	ids := make([]binid.BinId, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -120,14 +135,14 @@ func (_c *UserCreate) AddAuthorizations(v ...*Authorization) *UserCreate {
 }
 
 // AddAuthorizedAppIDs adds the "authorized_apps" edge to the AuthorizedApp entity by IDs.
-func (_c *UserCreate) AddAuthorizedAppIDs(ids ...string) *UserCreate {
+func (_c *UserCreate) AddAuthorizedAppIDs(ids ...binid.BinId) *UserCreate {
 	_c.mutation.AddAuthorizedAppIDs(ids...)
 	return _c
 }
 
 // AddAuthorizedApps adds the "authorized_apps" edges to the AuthorizedApp entity.
 func (_c *UserCreate) AddAuthorizedApps(v ...*AuthorizedApp) *UserCreate {
-	ids := make([]string, len(v))
+	ids := make([]binid.BinId, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
 	}
@@ -177,6 +192,10 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.LoginMethod(); !ok {
+		v := user.DefaultLoginMethod
+		_c.mutation.SetLoginMethod(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -211,9 +230,12 @@ func (_c *UserCreate) check() error {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.ID(); ok {
-		if err := user.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "User.id": %w`, err)}
+	if _, ok := _c.mutation.LoginMethod(); !ok {
+		return &ValidationError{Name: "login_method", err: errors.New(`ent: missing required field "User.login_method"`)}
+	}
+	if v, ok := _c.mutation.LoginMethod(); ok {
+		if err := user.LoginMethodValidator(v); err != nil {
+			return &ValidationError{Name: "login_method", err: fmt.Errorf(`ent: validator failed for field "User.login_method": %w`, err)}
 		}
 	}
 	return nil
@@ -231,10 +253,10 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected User.ID type: %T", _spec.ID.Value)
+		if id, ok := _spec.ID.Value.(*binid.BinId); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
 		}
 	}
 	_c.mutation.id = &_node.ID
@@ -245,11 +267,11 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
@@ -275,6 +297,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldPwhash, field.TypeString, value)
 		_node.Pwhash = value
 	}
+	if value, ok := _c.mutation.LoginMethod(); ok {
+		_spec.SetField(user.FieldLoginMethod, field.TypeEnum, value)
+		_node.LoginMethod = value
+	}
 	if nodes := _c.mutation.AuthenticationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -283,7 +309,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.AuthenticationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -299,7 +325,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.AuthorizationsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -315,7 +341,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: []string{user.AuthorizedAppsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

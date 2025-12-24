@@ -96,6 +96,20 @@ func (_u *UserUpdate) SetNillablePwhash(v *string) *UserUpdate {
 	return _u
 }
 
+// SetLoginMethod sets the "login_method" field.
+func (_u *UserUpdate) SetLoginMethod(v user.LoginMethod) *UserUpdate {
+	_u.mutation.SetLoginMethod(v)
+	return _u
+}
+
+// SetNillableLoginMethod sets the "login_method" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableLoginMethod(v *user.LoginMethod) *UserUpdate {
+	if v != nil {
+		_u.SetLoginMethod(*v)
+	}
+	return _u
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdate) Mutation() *UserMutation {
 	return _u.mutation
@@ -154,6 +168,11 @@ func (_u *UserUpdate) check() error {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.LoginMethod(); ok {
+		if err := user.LoginMethodValidator(v); err != nil {
+			return &ValidationError{Name: "login_method", err: fmt.Errorf(`ent: validator failed for field "User.login_method": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -161,7 +180,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -186,6 +205,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Pwhash(); ok {
 		_spec.SetField(user.FieldPwhash, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.LoginMethod(); ok {
+		_spec.SetField(user.FieldLoginMethod, field.TypeEnum, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -275,6 +297,20 @@ func (_u *UserUpdateOne) SetNillablePwhash(v *string) *UserUpdateOne {
 	return _u
 }
 
+// SetLoginMethod sets the "login_method" field.
+func (_u *UserUpdateOne) SetLoginMethod(v user.LoginMethod) *UserUpdateOne {
+	_u.mutation.SetLoginMethod(v)
+	return _u
+}
+
+// SetNillableLoginMethod sets the "login_method" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableLoginMethod(v *user.LoginMethod) *UserUpdateOne {
+	if v != nil {
+		_u.SetLoginMethod(*v)
+	}
+	return _u
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (_u *UserUpdateOne) Mutation() *UserMutation {
 	return _u.mutation
@@ -346,6 +382,11 @@ func (_u *UserUpdateOne) check() error {
 			return &ValidationError{Name: "pwhash", err: fmt.Errorf(`ent: validator failed for field "User.pwhash": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.LoginMethod(); ok {
+		if err := user.LoginMethodValidator(v); err != nil {
+			return &ValidationError{Name: "login_method", err: fmt.Errorf(`ent: validator failed for field "User.login_method": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -353,7 +394,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
@@ -395,6 +436,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Pwhash(); ok {
 		_spec.SetField(user.FieldPwhash, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.LoginMethod(); ok {
+		_spec.SetField(user.FieldLoginMethod, field.TypeEnum, value)
 	}
 	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues

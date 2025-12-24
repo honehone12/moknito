@@ -2,9 +2,9 @@ package sys
 
 import (
 	"context"
+	"moknito/binid"
 	"moknito/ent"
 	"moknito/ent/application"
-	"moknito/id"
 )
 
 type InfoSys interface {
@@ -26,7 +26,7 @@ func (s *EntRdsSys) InfoApp(
 ) *InfoAppResult {
 	r := &InfoAppResult{}
 
-	id, err := id.FromUUIDString(appUiid)
+	id, err := binid.FromUUIDString(appUiid)
 	if err != nil {
 		r.ValidationErr = err
 		return r
@@ -34,7 +34,7 @@ func (s *EntRdsSys) InfoApp(
 
 	app, err := s.ent.Application.Query().
 		Where(
-			application.ID(string(id)),
+			application.ID(id),
 			application.DeletedAtIsNil(),
 		).
 		Select(

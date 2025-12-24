@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/application"
 	"moknito/ent/authorization"
 	"moknito/ent/user"
@@ -18,7 +19,7 @@ import (
 type Authorization struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID binid.BinId `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -38,9 +39,9 @@ type Authorization struct {
 	// ExpireAt holds the value of the "expire_at" field.
 	ExpireAt time.Time `json:"expire_at,omitempty"`
 	// ApplicationID holds the value of the "application_id" field.
-	ApplicationID string `json:"application_id,omitempty"`
+	ApplicationID binid.BinId `json:"application_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID string `json:"user_id,omitempty"`
+	UserID binid.BinId `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthorizationQuery when eager-loading is set.
 	Edges        AuthorizationEdges `json:"edges"`
@@ -87,7 +88,9 @@ func (*Authorization) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case authorization.FieldChallenge, authorization.FieldCode:
 			values[i] = new([]byte)
-		case authorization.FieldID, authorization.FieldChallengeMethod, authorization.FieldApplicationID, authorization.FieldUserID:
+		case authorization.FieldID, authorization.FieldApplicationID, authorization.FieldUserID:
+			values[i] = new(binid.BinId)
+		case authorization.FieldChallengeMethod:
 			values[i] = new(sql.NullString)
 		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldCodeExpireAt, authorization.FieldCodeConsumedAt, authorization.FieldExpireAt:
 			values[i] = new(sql.NullTime)
@@ -107,10 +110,10 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case authorization.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
+			} else if value != nil {
+				_m.ID = *value
 			}
 		case authorization.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -169,16 +172,16 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 				_m.ExpireAt = value.Time
 			}
 		case authorization.FieldApplicationID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field application_id", values[i])
-			} else if value.Valid {
-				_m.ApplicationID = value.String
+			} else if value != nil {
+				_m.ApplicationID = *value
 			}
 		case authorization.FieldUserID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value.Valid {
-				_m.UserID = value.String
+			} else if value != nil {
+				_m.UserID = *value
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -258,10 +261,10 @@ func (_m *Authorization) String() string {
 	builder.WriteString(_m.ExpireAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("application_id=")
-	builder.WriteString(_m.ApplicationID)
+	builder.WriteString(fmt.Sprintf("%v", _m.ApplicationID))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(_m.UserID)
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteByte(')')
 	return builder.String()
 }

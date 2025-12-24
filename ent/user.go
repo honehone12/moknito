@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/user"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ import (
 type User struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID binid.BinId `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -29,6 +30,8 @@ type User struct {
 	Email string `json:"email,omitempty"`
 	// Pwhash holds the value of the "pwhash" field.
 	Pwhash string `json:"pwhash,omitempty"`
+	// LoginMethod holds the value of the "login_method" field.
+	LoginMethod user.LoginMethod `json:"login_method,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -80,7 +83,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldName, user.FieldEmail, user.FieldPwhash:
+		case user.FieldID:
+			values[i] = new(binid.BinId)
+		case user.FieldName, user.FieldEmail, user.FieldPwhash, user.FieldLoginMethod:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -100,10 +105,10 @@ func (_m *User) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
+			} else if value != nil {
+				_m.ID = *value
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -141,6 +146,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field pwhash", values[i])
 			} else if value.Valid {
 				_m.Pwhash = value.String
+			}
+		case user.FieldLoginMethod:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field login_method", values[i])
+			} else if value.Valid {
+				_m.LoginMethod = user.LoginMethod(value.String)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -212,6 +223,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("pwhash=")
 	builder.WriteString(_m.Pwhash)
+	builder.WriteString(", ")
+	builder.WriteString("login_method=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LoginMethod))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -5,12 +5,13 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"moknito/binid"
 	"moknito/challenge"
 	"moknito/code"
 	"moknito/ent"
 	"moknito/ent/application"
 	"moknito/ent/authorizedapp"
-	"moknito/id"
+
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -19,7 +20,7 @@ import (
 type AppSys interface {
 	AppAllow(
 		ctx context.Context,
-		userId id.Id,
+		userId binid.BinId,
 		appUuid string,
 	) *AppAllowResult
 	AppAuthorize(
@@ -29,8 +30,8 @@ type AppSys interface {
 }
 
 type AppAuthorizeParams struct {
-	UserId  id.Id
-	AuthId  id.Id
+	UserId  binid.BinId
+	AuthId  binid.BinId
 	AppUuid string
 }
 
@@ -44,12 +45,12 @@ type AppAuthorizeResult struct {
 
 func (s *EntRdsSys) AppAllow(
 	ctx context.Context,
-	userId id.Id,
+	userId binid.BinId,
 	appUuid string,
 ) *AppAllowResult {
 	r := &AppAllowResult{}
 
-	appId, err := id.FromUUIDString(appUuid)
+	appId, err := binid.FromUUIDString(appUuid)
 	if err != nil {
 		r.ValidationErr = err
 		return r
@@ -57,8 +58,8 @@ func (s *EntRdsSys) AppAllow(
 
 	exist, err := s.ent.AuthorizedApp.Query().
 		Where(
-			authorizedapp.UserID(string(userId)),
-			authorizedapp.ApplicationID(string(appId)),
+			authorizedapp.UserID(userId),
+			authorizedapp.ApplicationID(appId),
 			authorizedapp.DeletedAtIsNil(),
 		).
 		Exist(ctx)
@@ -70,16 +71,16 @@ func (s *EntRdsSys) AppAllow(
 		return r
 	}
 
-	id, err := id.NewSequential()
+	id, err := binid.NewSequential()
 	if err != nil {
 		r.SystemErr = err
 		return r
 	}
 
 	err = s.ent.AuthorizedApp.Create().
-		SetID(string(id)).
-		SetApplicationID(string(appId)).
-		SetUserID(string(userId)).
+		SetID(id).
+		SetApplicationID(appId).
+		SetUserID(userId).
 		Exec(ctx)
 	if ent.IsConstraintError(err) {
 		r.ValidationErr = err
@@ -98,7 +99,7 @@ func (s *EntRdsSys) AppAuthorize(
 ) *AppAuthorizeResult {
 	r := &AppAuthorizeResult{}
 
-	appId, err := id.FromUUIDString(p.AppUuid)
+	appId, err := binid.FromUUIDString(p.AppUuid)
 	if err != nil {
 		r.ValidationErr = err
 		return r
@@ -128,8 +129,8 @@ func (s *EntRdsSys) AppAuthorize(
 	app, err := s.ent.AuthorizedApp.Query().
 		Select(authorizedapp.FieldID).
 		Where(
-			authorizedapp.UserID(string(p.UserId)),
-			authorizedapp.ApplicationID(string(appId)),
+			authorizedapp.UserID(p.UserId),
+			authorizedapp.ApplicationID(appId),
 			authorizedapp.DeletedAtIsNil(),
 		).
 		WithApplication(func(q *ent.ApplicationQuery) {
@@ -153,7 +154,7 @@ func (s *EntRdsSys) AppAuthorize(
 		return r
 	}
 
-	id, err := id.NewSequential()
+	id, err := binid.NewSequential()
 	if err != nil {
 		r.SystemErr = err
 		return r
@@ -162,14 +163,14 @@ func (s *EntRdsSys) AppAuthorize(
 	now := time.Now()
 
 	err = s.ent.Authorization.Create().
-		SetID(string(id)).
+		SetID(id).
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 		SetChallenge(chall).
 		SetCode(code).
 		SetCodeExpireAt(now.Add(s.ttl.CodeTtl)).
 		SetExpireAt(now.Add(s.ttl.TokenTtl)).
-		SetApplicationID(string(appId)).
-		SetUserID(string(p.UserId)).
+		SetApplicationID(appId).
+		SetUserID(p.UserId).
 		Exec(ctx)
 	if ent.IsConstraintError(err) {
 		r.ValidationErr = err

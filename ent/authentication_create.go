@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/authentication"
 	"moknito/ent/user"
 	"time"
@@ -112,13 +113,13 @@ func (_c *AuthenticationCreate) SetNillableLogoutAt(v *time.Time) *Authenticatio
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *AuthenticationCreate) SetUserID(v string) *AuthenticationCreate {
+func (_c *AuthenticationCreate) SetUserID(v binid.BinId) *AuthenticationCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *AuthenticationCreate) SetID(v string) *AuthenticationCreate {
+func (_c *AuthenticationCreate) SetID(v binid.BinId) *AuthenticationCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -197,16 +198,6 @@ func (_c *AuthenticationCreate) check() error {
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Authentication.user_id"`)}
 	}
-	if v, ok := _c.mutation.UserID(); ok {
-		if err := authentication.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "Authentication.user_id": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.ID(); ok {
-		if err := authentication.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Authentication.id": %w`, err)}
-		}
-	}
 	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Authentication.user"`)}
 	}
@@ -225,10 +216,10 @@ func (_c *AuthenticationCreate) sqlSave(ctx context.Context) (*Authentication, e
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Authentication.ID type: %T", _spec.ID.Value)
+		if id, ok := _spec.ID.Value.(*binid.BinId); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
 		}
 	}
 	_c.mutation.id = &_node.ID
@@ -239,11 +230,11 @@ func (_c *AuthenticationCreate) sqlSave(ctx context.Context) (*Authentication, e
 func (_c *AuthenticationCreate) createSpec() (*Authentication, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Authentication{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(authentication.Table, sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(authentication.Table, sqlgraph.NewFieldSpec(authentication.FieldID, field.TypeUUID))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(authentication.FieldCreatedAt, field.TypeTime, value)
@@ -281,7 +272,7 @@ func (_c *AuthenticationCreate) createSpec() (*Authentication, *sqlgraph.CreateS
 			Columns: []string{authentication.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

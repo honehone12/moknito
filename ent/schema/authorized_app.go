@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"moknito/binid"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/edge"
@@ -14,17 +16,14 @@ type AuthorizedApp struct {
 
 func (AuthorizedApp) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").
-			NotEmpty().
+		field.UUID("id", binid.BinId{}).
 			Immutable().
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.String("application_id").
-			NotEmpty().
+		field.UUID("application_id", binid.BinId{}).
 			Immutable().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
-		field.String("user_id").
-			NotEmpty().
+		field.UUID("user_id", binid.BinId{}).
 			Immutable().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 	}

@@ -110,7 +110,7 @@ func (_u *AuthorizedAppUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(authorizedapp.Table, authorizedapp.Columns, sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(authorizedapp.Table, authorizedapp.Columns, sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -242,7 +242,7 @@ func (_u *AuthorizedAppUpdateOne) sqlSave(ctx context.Context) (_node *Authorize
 	if err := _u.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(authorizedapp.Table, authorizedapp.Columns, sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(authorizedapp.Table, authorizedapp.Columns, sqlgraph.NewFieldSpec(authorizedapp.FieldID, field.TypeUUID))
 	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "AuthorizedApp.id" for update`)}

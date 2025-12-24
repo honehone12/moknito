@@ -4,20 +4,20 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"moknito/binid"
 	"moknito/challenge"
 	"moknito/ent"
 	"moknito/ent/application"
 	"moknito/ent/authorization"
-	"moknito/id"
+
 	"moknito/token"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
 type AuthTokenParams struct {
-	ApplicationId id.Id
+	ApplicationId binid.BinId
 }
 
 type AuthTokenCodeParams struct {
@@ -67,7 +67,7 @@ func (s *EntRdsSys) AuthTokenCode(
 			authorization.Code(c),
 			authorization.CodeExpireAtGT(now),
 			authorization.CodeConsumedAtIsNil(),
-			authorization.ApplicationID(string(p.ApplicationId)),
+			authorization.ApplicationID(p.ApplicationId),
 		).
 		WithApplication(func(q *ent.ApplicationQuery) {
 			q.Select(
@@ -107,23 +107,11 @@ func (s *EntRdsSys) AuthTokenCode(
 		return r
 	}
 
-	authUuid, err := uuid.FromBytes([]byte(auth.ID))
-	if err != nil {
-		r.SystemErr = err
-		return r
-	}
-
-	userUuid, err := uuid.FromBytes([]byte(auth.UserID))
-	if err != nil {
-		r.SystemErr = err
-		return r
-	}
-
 	authTkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
 		Method:       jwt.SigningMethodRS256,
 		TokenType:    token.TOKEN_TYPE_AUTHORIZATION,
-		AuthUuid:     authUuid,
-		UserUuid:     userUuid,
+		AuthId:       auth.ID,
+		UserId:       auth.UserID,
 		Ttl:          s.ttl.TokenTtl,
 		Applications: []string{auth.Edges.Application.Domain},
 	})

@@ -2,7 +2,7 @@ package moknito
 
 import (
 	"fmt"
-	"moknito/id"
+	"moknito/binid"
 	"moknito/sys"
 	"net/http"
 
@@ -25,7 +25,7 @@ func (m *Moknito) AuthToken(ctx echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	appId, err := id.FromUUIDString(form.Id)
+	appId, err := binid.FromUUIDString(form.Id)
 	if err != nil {
 		ctx.Logger().Warn(err)
 		return echo.ErrBadRequest

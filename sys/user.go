@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"moknito/binid"
 	"moknito/ent"
 	"moknito/ent/application"
 	"moknito/ent/user"
 	"moknito/hash"
-	"moknito/id"
 	"net/http"
 	"strconv"
 	"time"
@@ -39,7 +39,7 @@ type UserRegisterParams struct {
 }
 
 type UserLoginParams struct {
-	ApplicationId id.Id
+	ApplicationId binid.BinId
 	Email         string
 	Password      string
 	Challenge     string
@@ -159,12 +159,12 @@ func (s *EntRdsSys) incrErrCount(
 
 func (s *EntRdsSys) checkRedirect(
 	ctx context.Context,
-	appId id.Id,
+	appId binid.BinId,
 	redirect string,
 ) (bool, error) {
 	app, err := s.ent.Application.Query().
 		Select(application.FieldRedirect).
-		Where(application.ID(string(appId))).
+		Where(application.ID(appId)).
 		Only(ctx)
 	if ent.IsNotFound(err) {
 		return false, nil
@@ -235,12 +235,12 @@ func (s *EntRdsSys) UserJoin(
 		return r
 	}
 
-	userId, err := id.NewSequential()
+	userId, err := binid.NewSequential()
 	if err != nil {
 		r.SystemErr = err
 		return r
 	}
-	authId, err := id.NewSequential()
+	authId, err := binid.NewSequential()
 	if err != nil {
 		r.SystemErr = err
 		return r
@@ -248,7 +248,7 @@ func (s *EntRdsSys) UserJoin(
 
 	tx, err := s.ent.Tx(ctx)
 	err = tx.User.Create().
-		SetID(string(userId)).
+		SetID(userId).
 		SetName(register.Name).
 		SetEmail(register.Email).
 		SetPwhash(register.PwHash).
@@ -259,11 +259,11 @@ func (s *EntRdsSys) UserJoin(
 		return r
 	}
 	err = tx.Authentication.Create().
-		SetID(string(authId)).
+		SetID(authId).
 		SetIP(p.Ip).
 		SetUserAgent(p.UserAgent).
 		SetExpireAt(time.Now().Add(s.ttl.TokenTtl)).
-		SetUserID(string(userId)).
+		SetUserID(userId).
 		Exec(ctx)
 	if err != nil {
 		err := s.rollback(tx, err)
@@ -358,14 +358,14 @@ func (s *EntRdsSys) UserAuthenticate(
 		return r
 	}
 
-	authId, err := id.NewSequential()
+	authId, err := binid.NewSequential()
 	if err != nil {
 		r.SystemErr = err
 		return r
 	}
 
 	err = s.ent.Authentication.Create().
-		SetID(string(authId)).
+		SetID(authId).
 		SetIP(p.Ip).
 		SetUserAgent(p.UserAgent).
 		SetExpireAt(time.Now().Add(s.ttl.TokenTtl)).
@@ -387,7 +387,7 @@ func (s *EntRdsSys) UserAuthenticate(
 		return r
 	}
 
-	cookie, err := s.createAuthentication(authId, id.Id(user.ID))
+	cookie, err := s.createAuthentication(authId, user.ID)
 	if err != nil {
 		r.SystemErr = err
 		return r

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/application"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ import (
 type Application struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID binid.BinId `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -69,7 +70,9 @@ func (*Application) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case application.FieldID, application.FieldName, application.FieldDomain, application.FieldRedirect:
+		case application.FieldID:
+			values[i] = new(binid.BinId)
+		case application.FieldName, application.FieldDomain, application.FieldRedirect:
 			values[i] = new(sql.NullString)
 		case application.FieldCreatedAt, application.FieldUpdatedAt, application.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -89,10 +92,10 @@ func (_m *Application) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case application.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
+			} else if value != nil {
+				_m.ID = *value
 			}
 		case application.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {

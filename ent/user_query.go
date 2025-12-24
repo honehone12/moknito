@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
+	"moknito/binid"
 	"moknito/ent/authentication"
 	"moknito/ent/authorization"
 	"moknito/ent/authorizedapp"
@@ -155,8 +156,8 @@ func (_q *UserQuery) FirstX(ctx context.Context) *User {
 
 // FirstID returns the first User ID from the query.
 // Returns a *NotFoundError when no User ID was found.
-func (_q *UserQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (_q *UserQuery) FirstID(ctx context.Context) (id binid.BinId, err error) {
+	var ids []binid.BinId
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -168,7 +169,7 @@ func (_q *UserQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *UserQuery) FirstIDX(ctx context.Context) string {
+func (_q *UserQuery) FirstIDX(ctx context.Context) binid.BinId {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -206,8 +207,8 @@ func (_q *UserQuery) OnlyX(ctx context.Context) *User {
 // OnlyID is like Only, but returns the only User ID in the query.
 // Returns a *NotSingularError when more than one User ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (_q *UserQuery) OnlyID(ctx context.Context) (id binid.BinId, err error) {
+	var ids []binid.BinId
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -223,7 +224,7 @@ func (_q *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *UserQuery) OnlyIDX(ctx context.Context) string {
+func (_q *UserQuery) OnlyIDX(ctx context.Context) binid.BinId {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -251,7 +252,7 @@ func (_q *UserQuery) AllX(ctx context.Context) []*User {
 }
 
 // IDs executes the query and returns a list of User IDs.
-func (_q *UserQuery) IDs(ctx context.Context) (ids []string, err error) {
+func (_q *UserQuery) IDs(ctx context.Context) (ids []binid.BinId, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
@@ -263,7 +264,7 @@ func (_q *UserQuery) IDs(ctx context.Context) (ids []string, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *UserQuery) IDsX(ctx context.Context) []string {
+func (_q *UserQuery) IDsX(ctx context.Context) []binid.BinId {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -493,7 +494,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 
 func (_q *UserQuery) loadAuthentications(ctx context.Context, query *AuthenticationQuery, nodes []*User, init func(*User), assign func(*User, *Authentication)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*User)
+	nodeids := make(map[binid.BinId]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -523,7 +524,7 @@ func (_q *UserQuery) loadAuthentications(ctx context.Context, query *Authenticat
 }
 func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *AuthorizationQuery, nodes []*User, init func(*User), assign func(*User, *Authorization)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*User)
+	nodeids := make(map[binid.BinId]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -553,7 +554,7 @@ func (_q *UserQuery) loadAuthorizations(ctx context.Context, query *Authorizatio
 }
 func (_q *UserQuery) loadAuthorizedApps(ctx context.Context, query *AuthorizedAppQuery, nodes []*User, init func(*User), assign func(*User, *AuthorizedApp)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*User)
+	nodeids := make(map[binid.BinId]*User)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -592,7 +593,7 @@ func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
+	_spec := sqlgraph.NewQuerySpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

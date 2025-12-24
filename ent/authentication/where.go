@@ -3,6 +3,7 @@
 package authentication
 
 import (
+	"moknito/binid"
 	"moknito/ent/predicate"
 	"time"
 
@@ -11,58 +12,48 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Authentication {
+func ID(id binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Authentication {
+func IDEQ(id binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Authentication {
+func IDNEQ(id binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Authentication {
+func IDIn(ids ...binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Authentication {
+func IDNotIn(ids ...binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Authentication {
+func IDGT(id binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Authentication {
+func IDGTE(id binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Authentication {
+func IDLT(id binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Authentication {
+func IDLTE(id binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldLTE(FieldID, id))
-}
-
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldContainsFold(FieldID, id))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -101,7 +92,7 @@ func LogoutAt(v time.Time) predicate.Authentication {
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v string) predicate.Authentication {
+func UserID(v binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldEQ(FieldUserID, v))
 }
 
@@ -476,68 +467,23 @@ func LogoutAtNotNil() predicate.Authentication {
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v string) predicate.Authentication {
+func UserIDEQ(v binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldEQ(FieldUserID, v))
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v string) predicate.Authentication {
+func UserIDNEQ(v binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldNEQ(FieldUserID, v))
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...string) predicate.Authentication {
+func UserIDIn(vs ...binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldIn(FieldUserID, vs...))
 }
 
 // UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...string) predicate.Authentication {
+func UserIDNotIn(vs ...binid.BinId) predicate.Authentication {
 	return predicate.Authentication(sql.FieldNotIn(FieldUserID, vs...))
-}
-
-// UserIDGT applies the GT predicate on the "user_id" field.
-func UserIDGT(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldGT(FieldUserID, v))
-}
-
-// UserIDGTE applies the GTE predicate on the "user_id" field.
-func UserIDGTE(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldGTE(FieldUserID, v))
-}
-
-// UserIDLT applies the LT predicate on the "user_id" field.
-func UserIDLT(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldLT(FieldUserID, v))
-}
-
-// UserIDLTE applies the LTE predicate on the "user_id" field.
-func UserIDLTE(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldLTE(FieldUserID, v))
-}
-
-// UserIDContains applies the Contains predicate on the "user_id" field.
-func UserIDContains(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldContains(FieldUserID, v))
-}
-
-// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
-func UserIDHasPrefix(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldHasPrefix(FieldUserID, v))
-}
-
-// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
-func UserIDHasSuffix(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldHasSuffix(FieldUserID, v))
-}
-
-// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
-func UserIDEqualFold(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldEqualFold(FieldUserID, v))
-}
-
-// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
-func UserIDContainsFold(v string) predicate.Authentication {
-	return predicate.Authentication(sql.FieldContainsFold(FieldUserID, v))
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/authentication"
 	"moknito/ent/user"
 	"strings"
@@ -17,7 +18,7 @@ import (
 type Authentication struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID binid.BinId `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -33,7 +34,7 @@ type Authentication struct {
 	// LogoutAt holds the value of the "logout_at" field.
 	LogoutAt *time.Time `json:"logout_at,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID string `json:"user_id,omitempty"`
+	UserID binid.BinId `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthenticationQuery when eager-loading is set.
 	Edges        AuthenticationEdges `json:"edges"`
@@ -65,7 +66,9 @@ func (*Authentication) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case authentication.FieldID, authentication.FieldIP, authentication.FieldUserAgent, authentication.FieldUserID:
+		case authentication.FieldID, authentication.FieldUserID:
+			values[i] = new(binid.BinId)
+		case authentication.FieldIP, authentication.FieldUserAgent:
 			values[i] = new(sql.NullString)
 		case authentication.FieldCreatedAt, authentication.FieldUpdatedAt, authentication.FieldDeletedAt, authentication.FieldExpireAt, authentication.FieldLogoutAt:
 			values[i] = new(sql.NullTime)
@@ -85,10 +88,10 @@ func (_m *Authentication) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case authentication.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
+			} else if value != nil {
+				_m.ID = *value
 			}
 		case authentication.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -135,10 +138,10 @@ func (_m *Authentication) assignValues(columns []string, values []any) error {
 				*_m.LogoutAt = value.Time
 			}
 		case authentication.FieldUserID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value.Valid {
-				_m.UserID = value.String
+			} else if value != nil {
+				_m.UserID = *value
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -207,7 +210,7 @@ func (_m *Authentication) String() string {
 	}
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(_m.UserID)
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteByte(')')
 	return builder.String()
 }

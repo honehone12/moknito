@@ -82,8 +82,6 @@ var (
 	DomainValidator func(string) error
 	// RedirectValidator is a validator for the "redirect" field. It is called by the builders before save.
 	RedirectValidator func(string) error
-	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Application queries.

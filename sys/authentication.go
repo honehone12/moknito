@@ -3,8 +3,9 @@ package sys
 import (
 	"context"
 	"errors"
+	"moknito/binid"
 	"moknito/ent/authentication"
-	"moknito/id"
+
 	"moknito/token"
 	"net/http"
 	"time"
@@ -20,8 +21,8 @@ type AuthenticationSys interface {
 }
 
 type VerifyAuthenticationResult struct {
-	UserId id.Id
-	AuthId id.Id
+	UserId binid.BinId
+	AuthId binid.BinId
 	E
 }
 
@@ -40,12 +41,12 @@ func (s *EntRdsSys) VerifyAuthentication(
 		return r
 	}
 
-	authId, err := id.FromUUIDString(claim.ID)
+	authId, err := binid.FromUUIDString(claim.ID)
 	if err != nil {
 		r.ValidationErr = err
 		return r
 	}
-	userId, err := id.FromUUIDString(claim.Subject)
+	userId, err := binid.FromUUIDString(claim.Subject)
 	if err != nil {
 		r.ValidationErr = err
 		return r
@@ -57,11 +58,11 @@ func (s *EntRdsSys) VerifyAuthentication(
 		// 	authentication.FieldUserAgent,
 		// ).
 		Where(
-			authentication.ID(string(authId)),
+			authentication.ID(authId),
 			authentication.ExpireAtGT(time.Now()),
 			authentication.LogoutAtIsNil(),
 			authentication.DeletedAtIsNil(),
-			authentication.UserID(string(userId)),
+			authentication.UserID(userId),
 		).
 		Exist(ctx)
 	if err != nil {
@@ -85,22 +86,13 @@ func (s *EntRdsSys) VerifyAuthentication(
 }
 
 func (s *EntRdsSys) createAuthentication(
-	authId, userId id.Id,
+	authId, userId binid.BinId,
 ) (*http.Cookie, error) {
-	authUuid, err := authId.ToUUID()
-	if err != nil {
-		return nil, err
-	}
-	userUuid, err := userId.ToUUID()
-	if err != nil {
-		return nil, err
-	}
-
 	tkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
 		Method:    jwt.SigningMethodHS256,
 		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
-		AuthUuid:  authUuid,
-		UserUuid:  userUuid,
+		AuthId:    authId,
+		UserId:    userId,
 		Ttl:       s.ttl.TokenTtl,
 	})
 	if err != nil {

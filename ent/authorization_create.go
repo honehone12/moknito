@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/application"
 	"moknito/ent/authorization"
 	"moknito/ent/user"
@@ -109,19 +110,19 @@ func (_c *AuthorizationCreate) SetExpireAt(v time.Time) *AuthorizationCreate {
 }
 
 // SetApplicationID sets the "application_id" field.
-func (_c *AuthorizationCreate) SetApplicationID(v string) *AuthorizationCreate {
+func (_c *AuthorizationCreate) SetApplicationID(v binid.BinId) *AuthorizationCreate {
 	_c.mutation.SetApplicationID(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *AuthorizationCreate) SetUserID(v string) *AuthorizationCreate {
+func (_c *AuthorizationCreate) SetUserID(v binid.BinId) *AuthorizationCreate {
 	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *AuthorizationCreate) SetID(v string) *AuthorizationCreate {
+func (_c *AuthorizationCreate) SetID(v binid.BinId) *AuthorizationCreate {
 	_c.mutation.SetID(v)
 	return _c
 }
@@ -222,23 +223,8 @@ func (_c *AuthorizationCreate) check() error {
 	if _, ok := _c.mutation.ApplicationID(); !ok {
 		return &ValidationError{Name: "application_id", err: errors.New(`ent: missing required field "Authorization.application_id"`)}
 	}
-	if v, ok := _c.mutation.ApplicationID(); ok {
-		if err := authorization.ApplicationIDValidator(v); err != nil {
-			return &ValidationError{Name: "application_id", err: fmt.Errorf(`ent: validator failed for field "Authorization.application_id": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Authorization.user_id"`)}
-	}
-	if v, ok := _c.mutation.UserID(); ok {
-		if err := authorization.UserIDValidator(v); err != nil {
-			return &ValidationError{Name: "user_id", err: fmt.Errorf(`ent: validator failed for field "Authorization.user_id": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.ID(); ok {
-		if err := authorization.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Authorization.id": %w`, err)}
-		}
 	}
 	if len(_c.mutation.ApplicationIDs()) == 0 {
 		return &ValidationError{Name: "application", err: errors.New(`ent: missing required edge "Authorization.application"`)}
@@ -261,10 +247,10 @@ func (_c *AuthorizationCreate) sqlSave(ctx context.Context) (*Authorization, err
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Authorization.ID type: %T", _spec.ID.Value)
+		if id, ok := _spec.ID.Value.(*binid.BinId); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
 		}
 	}
 	_c.mutation.id = &_node.ID
@@ -275,11 +261,11 @@ func (_c *AuthorizationCreate) sqlSave(ctx context.Context) (*Authorization, err
 func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Authorization{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(authorization.Table, sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(authorization.Table, sqlgraph.NewFieldSpec(authorization.FieldID, field.TypeUUID))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(authorization.FieldCreatedAt, field.TypeTime, value)
@@ -325,7 +311,7 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 			Columns: []string{authorization.ApplicationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(application.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -342,7 +328,7 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 			Columns: []string{authorization.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

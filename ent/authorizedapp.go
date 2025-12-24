@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"moknito/binid"
 	"moknito/ent/application"
 	"moknito/ent/authorizedapp"
 	"moknito/ent/user"
@@ -18,7 +19,7 @@ import (
 type AuthorizedApp struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID binid.BinId `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -26,9 +27,9 @@ type AuthorizedApp struct {
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// ApplicationID holds the value of the "application_id" field.
-	ApplicationID string `json:"application_id,omitempty"`
+	ApplicationID binid.BinId `json:"application_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
-	UserID string `json:"user_id,omitempty"`
+	UserID binid.BinId `json:"user_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AuthorizedAppQuery when eager-loading is set.
 	Edges        AuthorizedAppEdges `json:"edges"`
@@ -74,7 +75,7 @@ func (*AuthorizedApp) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case authorizedapp.FieldID, authorizedapp.FieldApplicationID, authorizedapp.FieldUserID:
-			values[i] = new(sql.NullString)
+			values[i] = new(binid.BinId)
 		case authorizedapp.FieldCreatedAt, authorizedapp.FieldUpdatedAt, authorizedapp.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
@@ -93,10 +94,10 @@ func (_m *AuthorizedApp) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case authorizedapp.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
+			} else if value != nil {
+				_m.ID = *value
 			}
 		case authorizedapp.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -118,16 +119,16 @@ func (_m *AuthorizedApp) assignValues(columns []string, values []any) error {
 				*_m.DeletedAt = value.Time
 			}
 		case authorizedapp.FieldApplicationID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field application_id", values[i])
-			} else if value.Valid {
-				_m.ApplicationID = value.String
+			} else if value != nil {
+				_m.ApplicationID = *value
 			}
 		case authorizedapp.FieldUserID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*binid.BinId); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value.Valid {
-				_m.UserID = value.String
+			} else if value != nil {
+				_m.UserID = *value
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -187,10 +188,10 @@ func (_m *AuthorizedApp) String() string {
 	}
 	builder.WriteString(", ")
 	builder.WriteString("application_id=")
-	builder.WriteString(_m.ApplicationID)
+	builder.WriteString(fmt.Sprintf("%v", _m.ApplicationID))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(_m.UserID)
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -3,6 +3,7 @@
 package user
 
 import (
+	"moknito/binid"
 	"moknito/ent/predicate"
 	"time"
 
@@ -11,58 +12,48 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.User {
+func ID(id binid.BinId) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.User {
+func IDEQ(id binid.BinId) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.User {
+func IDNEQ(id binid.BinId) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.User {
+func IDIn(ids ...binid.BinId) predicate.User {
 	return predicate.User(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.User {
+func IDNotIn(ids ...binid.BinId) predicate.User {
 	return predicate.User(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.User {
+func IDGT(id binid.BinId) predicate.User {
 	return predicate.User(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.User {
+func IDGTE(id binid.BinId) predicate.User {
 	return predicate.User(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.User {
+func IDLT(id binid.BinId) predicate.User {
 	return predicate.User(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.User {
+func IDLTE(id binid.BinId) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
-}
-
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldID, id))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -418,6 +409,26 @@ func PwhashEqualFold(v string) predicate.User {
 // PwhashContainsFold applies the ContainsFold predicate on the "pwhash" field.
 func PwhashContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldPwhash, v))
+}
+
+// LoginMethodEQ applies the EQ predicate on the "login_method" field.
+func LoginMethodEQ(v LoginMethod) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldLoginMethod, v))
+}
+
+// LoginMethodNEQ applies the NEQ predicate on the "login_method" field.
+func LoginMethodNEQ(v LoginMethod) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldLoginMethod, v))
+}
+
+// LoginMethodIn applies the In predicate on the "login_method" field.
+func LoginMethodIn(vs ...LoginMethod) predicate.User {
+	return predicate.User(sql.FieldIn(FieldLoginMethod, vs...))
+}
+
+// LoginMethodNotIn applies the NotIn predicate on the "login_method" field.
+func LoginMethodNotIn(vs ...LoginMethod) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldLoginMethod, vs...))
 }
 
 // HasAuthentications applies the HasEdge predicate on the "authentications" edge.
