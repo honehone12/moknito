@@ -3,7 +3,6 @@ package moknito
 import (
 	"moknito/challenge"
 	"moknito/id"
-	"moknito/res"
 	"moknito/sys"
 	"net/http"
 
@@ -33,7 +32,7 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 
 	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	r := m.system.UserRegister(
@@ -45,11 +44,12 @@ func (m *Moknito) UserRegister(ctx echo.Context) error {
 		},
 	)
 	if r.SystemErr != nil {
-		return r.SystemErr
+		ctx.Logger().Error(r.SystemErr)
+		return echo.ErrInternalServerError
 	}
 	if r.ValidationErr != nil {
 		ctx.Logger().Warn(r.ValidationErr)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	return ctx.NoContent(http.StatusOK)
@@ -60,18 +60,18 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 
 	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	if form.ChallengeMethod != challenge.CHALLENGE_METHOD_S256 {
 		ctx.Logger().Warn("unsupported challenge method")
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	appId, err := id.FromUUIDString(form.Id)
 	if err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	req := ctx.Request()
@@ -88,11 +88,12 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 		},
 	)
 	if r.SystemErr != nil {
-		return r.SystemErr
+		ctx.Logger().Error(r.SystemErr)
+		return echo.ErrInternalServerError
 	}
 	if r.ValidationErr != nil {
 		ctx.Logger().Warn(r.ValidationErr)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	ctx.SetCookie(r.Cookie)
@@ -104,18 +105,18 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 
 	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	if form.ChallengeMethod != challenge.CHALLENGE_METHOD_S256 {
 		ctx.Logger().Warn("unsupported challenge method")
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	appId, err := id.FromUUIDString(form.Id)
 	if err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	req := ctx.Request()
@@ -132,11 +133,12 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 		},
 	)
 	if r.SystemErr != nil {
-		return r.SystemErr
+		ctx.Logger().Error(r.SystemErr)
+		return echo.ErrInternalServerError
 	}
 	if r.ValidationErr != nil {
 		ctx.Logger().Warn(r.ValidationErr)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	ctx.SetCookie(r.Cookie)

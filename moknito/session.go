@@ -2,7 +2,6 @@ package moknito
 
 import (
 	"errors"
-	"moknito/res"
 	"moknito/sys"
 	"net/http"
 
@@ -31,7 +30,8 @@ func (m *Moknito) setSession(next echo.HandlerFunc) echo.HandlerFunc {
 			m.setNewSession(ctx)
 			return next(ctx)
 		} else if err != nil {
-			return err
+			ctx.Logger().Error(err)
+			return echo.ErrInternalServerError
 		}
 
 		if err := m.validator.Var(cookie.Value, "min=44,base64rawurl"); err != nil {
@@ -43,7 +43,8 @@ func (m *Moknito) setSession(next echo.HandlerFunc) echo.HandlerFunc {
 		c := ctx.Request().Context()
 		r := m.system.VerifySession(c, cookie)
 		if r.SystemErr != nil {
-			return r.SystemErr
+			ctx.Logger().Error(r.SystemErr)
+			return echo.ErrInternalServerError
 		}
 		if r.ValidationErr != nil {
 			ctx.Logger().Debug(r.ValidationErr)
@@ -53,7 +54,8 @@ func (m *Moknito) setSession(next echo.HandlerFunc) echo.HandlerFunc {
 
 		incrCookie, err := m.system.IncrSession(c, r.SessionKey)
 		if err != nil {
-			return err
+			ctx.Logger().Error(err)
+			return echo.ErrInternalServerError
 		}
 		ctx.SetCookie(incrCookie)
 		return next(ctx)
@@ -73,30 +75,33 @@ func (m *Moknito) verifySession(next echo.HandlerFunc) echo.HandlerFunc {
 			// here might have to be Unauthorized response code,
 			// but i user Forbidden because i don't want to rerun
 			// WWW-Authenticate header
-			return res.Forbidden(ctx)
+			return echo.ErrForbidden
 		} else if err != nil {
-			return err
+			ctx.Logger().Error(err)
+			return echo.ErrInternalServerError
 		}
 
 		// at least encoded signature 43byte+1
 		if err := m.validator.Var(cookie.Value, "min=44,base64rawurl"); err != nil {
 			ctx.Logger().Warn(err)
-			return res.BadRequest(ctx)
+			return echo.ErrBadRequest
 		}
 
 		c := ctx.Request().Context()
 		r := m.system.VerifySession(c, cookie)
 		if r.SystemErr != nil {
-			return r.SystemErr
+			ctx.Logger().Error(r.SystemErr)
+			return echo.ErrInternalServerError
 		}
 		if r.ValidationErr != nil {
 			ctx.Logger().Warn(r.ValidationErr)
-			return res.BadRequest(ctx)
+			return echo.ErrBadRequest
 		}
 
 		incrCookie, err := m.system.IncrSession(c, r.SessionKey)
 		if err != nil {
-			return err
+			ctx.Logger().Error(err)
+			return echo.ErrInternalServerError
 		}
 		ctx.SetCookie(incrCookie)
 

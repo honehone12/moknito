@@ -14,10 +14,6 @@ func Run() {
 	echo.Use(echo4middleware.Logger())
 	echo.Logger.SetLevel(log.INFO)
 	echo.Logger.SetPrefix("MOKNITO")
-	echo.HTTPErrorHandler = func(err error, ctx echo4.Context) {
-		ctx.Logger().Error(err)
-		echo.DefaultHTTPErrorHandler(err, ctx)
-	}
 
 	// pepper is still loaded in runtime
 	// so check on initialize

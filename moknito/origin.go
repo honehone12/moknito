@@ -1,8 +1,6 @@
 package moknito
 
 import (
-	"moknito/res"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,11 +13,11 @@ func (m *Moknito) originGuard(next echo.HandlerFunc) echo.HandlerFunc {
 		reqOrigin := ctx.Request().Header.Get("Origin")
 		if len(reqOrigin) == 0 {
 			ctx.Logger().Warn("empty origin header")
-			return res.BadRequest(ctx)
+			return echo.ErrBadRequest
 		}
 		if reqOrigin != m.origin {
 			ctx.Logger().Warnf("invalid origin header: %s", reqOrigin)
-			return res.BadRequest(ctx)
+			return echo.ErrBadRequest
 		}
 
 		return next(ctx)

@@ -3,7 +3,6 @@ package moknito
 import (
 	"fmt"
 	"moknito/id"
-	"moknito/res"
 	"moknito/sys"
 	"net/http"
 
@@ -23,13 +22,13 @@ func (m *Moknito) AuthToken(ctx echo.Context) error {
 
 	if err := m.bind(ctx, &form); err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	appId, err := id.FromUUIDString(form.Id)
 	if err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	var r *sys.AuthTokenResult
@@ -49,14 +48,15 @@ func (m *Moknito) AuthToken(ctx echo.Context) error {
 	case "refresh":
 	default:
 		ctx.Logger().Warn("unknown grant type")
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 	if r.SystemErr != nil {
-		return r.SystemErr
+		ctx.Logger().Error(r.SystemErr)
+		return echo.ErrInternalServerError
 	}
 	if r.ValidationErr != nil {
 		ctx.Logger().Warn(r.ValidationErr)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	origin := fmt.Sprintf("%s://%s", __ORIGIN_SCHEME, r.Domain)

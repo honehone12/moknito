@@ -2,7 +2,6 @@ package moknito
 
 import (
 	"errors"
-	"moknito/res"
 	"moknito/sys"
 	"net/http"
 
@@ -21,15 +20,16 @@ func (m *Moknito) verifyAuthentication(next echo.HandlerFunc) echo.HandlerFunc {
 			// here might have to be Unauthorized response code,
 			// but i user Forbidden because i don't want to rerun
 			// WWW-Authenticate header
-			return res.Forbidden(ctx)
+			return echo.ErrForbidden
 		} else if err != nil {
-			return err
+			ctx.Logger().Error(err)
+			return echo.ErrInternalServerError
 		}
 
 		// at least encoded signature 43byte+1
 		if err := m.validator.Var(cookie.Value, "min=44,jwt"); err != nil {
 			ctx.Logger().Warn(err)
-			return res.BadRequest(ctx)
+			return echo.ErrBadRequest
 		}
 
 		r := m.system.VerifyAuthentication(
@@ -37,11 +37,12 @@ func (m *Moknito) verifyAuthentication(next echo.HandlerFunc) echo.HandlerFunc {
 			cookie,
 		)
 		if r.SystemErr != nil {
-			return r.SystemErr
+			ctx.Logger().Error(r.SystemErr)
+			return echo.ErrInternalServerError
 		}
 		if r.ValidationErr != nil {
 			ctx.Logger().Warn(r.ValidationErr)
-			return res.BadRequest(ctx)
+			return echo.ErrBadRequest
 		}
 
 		ctx.Set(__CTX_KEY_AUTHED_USER_ID, r.UserId)

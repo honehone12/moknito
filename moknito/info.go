@@ -1,7 +1,6 @@
 package moknito
 
 import (
-	"moknito/res"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -19,7 +18,7 @@ func (m *Moknito) InfoApp(ctx echo.Context) error {
 
 	if err := m.bind(ctx, &params); err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	r := m.system.InfoApp(
@@ -27,11 +26,12 @@ func (m *Moknito) InfoApp(ctx echo.Context) error {
 		params.Id,
 	)
 	if r.SystemErr != nil {
-		return r.SystemErr
+		ctx.Logger().Error(r.SystemErr)
+		return echo.ErrInternalServerError
 	}
 	if r.ValidationErr != nil {
 		ctx.Logger().Warn(r.ValidationErr)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	return ctx.JSON(http.StatusOK, InfoResponse{

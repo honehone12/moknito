@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"moknito/id"
-	"moknito/res"
 	"moknito/sys"
 	"net/http"
 
@@ -20,7 +19,7 @@ func (m *Moknito) AppAllow(ctx echo.Context) error {
 
 	if err := m.bind(ctx, &params); err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	rawUser := ctx.Get(__CTX_KEY_AUTHED_USER_ID)
@@ -39,7 +38,7 @@ func (m *Moknito) AppAllow(ctx echo.Context) error {
 	}
 	if r.ValidationErr != nil {
 		ctx.Logger().Warn(r.ValidationErr)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	return ctx.NoContent(http.StatusOK)
@@ -50,7 +49,7 @@ func (m *Moknito) AppAuthorize(ctx echo.Context) error {
 
 	if err := m.bind(ctx, &params); err != nil {
 		ctx.Logger().Warn(err)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	rawUser := ctx.Get(__CTX_KEY_AUTHED_USER_ID)
@@ -79,7 +78,7 @@ func (m *Moknito) AppAuthorize(ctx echo.Context) error {
 	}
 	if r.ValidationErr != nil {
 		ctx.Logger().Warn(r.ValidationErr)
-		return res.BadRequest(ctx)
+		return echo.ErrBadRequest
 	}
 
 	redirect := fmt.Sprintf(
