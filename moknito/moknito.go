@@ -22,7 +22,7 @@ const __REGEX_NAME = `^[a-zA-Z0-9\s\.\-']+$`
 const __REGEX_PASSWORD = `^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{}|;:'",./<>?~` + "`" + `]+$`
 
 type ApiRequest struct {
-	Id string `param:"id" validate:"len=36,uuid7"`
+	Id string `param:"id" validate:"required,len=36,uuid7"`
 }
 
 type Moknito struct {

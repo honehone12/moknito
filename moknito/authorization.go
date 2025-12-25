@@ -11,10 +11,10 @@ import (
 
 type AuthTokenRequest struct {
 	ApiRequest
-	Grant    string `form:"grant" validate:"oneof=code refresh"`
-	Code     string `form:"code" validate:"len=22,base64rawurl"`
-	Verifier string `form:"verifier" validate:"min=43,max=256,base64rawurl"`
-	Redirect string `form:"redirect" validate:"url,max=256"`
+	Grant    string `form:"grant" validate:"required,oneof=code refresh"`
+	Code     string `form:"code" validate:"required,len=22,base64rawurl"`
+	Verifier string `form:"verifier" validate:"required,min=43,max=256,base64rawurl"`
+	Redirect string `form:"redirect" validate:"required,url,max=256"`
 }
 
 func (m *Moknito) AuthToken(ctx echo.Context) error {

@@ -11,18 +11,18 @@ import (
 
 type UserRegisterRequest struct {
 	ApiRequest
-	Name     string `form:"name" validate:"name,min=1,max=256"`
-	Email    string `form:"email" validate:"email,max=128"`
-	Password string `form:"password" validate:"password,min=8,max=128"`
+	Name     string `form:"name" validate:"required,name,min=1,max=256"`
+	Email    string `form:"email" validate:"required,email,max=128"`
+	Password string `form:"password" validate:"required,password,min=8,max=128"`
 }
 
 type UserAuthenticationRequest struct {
 	ApiRequest
-	Email           string `form:"email" validate:"email,max=128"`
-	Password        string `form:"password" validate:"password,min=8,max=128"`
-	Challenge       string `form:"challenge" validate:"len=43,base64rawurl"`
-	ChallengeMethod string `form:"challenge_method" validate:"oneof=plain S256"`
-	Redirect        string `form:"redirect" validate:"url,max=256"`
+	Email           string `form:"email" validate:"required,email,max=128"`
+	Password        string `form:"password" validate:"required,password,min=8,max=128"`
+	Challenge       string `form:"challenge" validate:"required,len=43,base64rawurl"`
+	ChallengeMethod string `form:"challenge_method" validate:"required,oneof=plain S256"`
+	Redirect        string `form:"redirect" validate:"required,url,max=256"`
 }
 
 type UserJoinRequest = UserAuthenticationRequest
