@@ -34,7 +34,7 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 	challengeBytes := h[:]
 
 	// Code: "code"
-	codeRaw := []byte("my-auth-code")
+	codeRaw := []byte("1234567890123456")
 	// Params.Code is base64 encoded
 	codeStr := base64.RawURLEncoding.EncodeToString(codeRaw)
 
@@ -54,7 +54,7 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 		SetID(userID).
 		SetName("Test User").
 		SetEmail("test@example.com").
-		SetPwhash("hash").
+		SetPwhash("$argon2id$v=19$m=65536,t=3,p=4$c7hrnUi3++uWTtJSwBfSxDcwESau71I56hC0oAKRF24$v86Hcvlo78MVJauZisUQH5qXUs7QjXzvduNw7l73njA").
 		Save(ctx)
 	if err != nil {
 		t.Fatal(err)
@@ -147,7 +147,7 @@ func TestAuthorization_AuthRefresh(t *testing.T) {
 		SetID(userID).
 		SetName("Test User").
 		SetEmail("test@example.com").
-		SetPwhash("hash").
+		SetPwhash("$argon2id$v=19$m=65536,t=3,p=4$c7hrnUi3++uWTtJSwBfSxDcwESau71I56hC0oAKRF24$v86Hcvlo78MVJauZisUQH5qXUs7QjXzvduNw7l73njA").
 		Save(ctx)
 	if err != nil {
 		t.Fatal(err)
@@ -159,8 +159,8 @@ func TestAuthorization_AuthRefresh(t *testing.T) {
 		SetID(authID).
 		SetUserID(user.ID).
 		SetApplicationID(app.ID).
-		SetCode([]byte("some-code")).
-		SetChallenge([]byte("some-challenge")).
+		SetCode([]byte("aaaaaaaaaaaaaaaa")).
+		SetChallenge([]byte("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")).
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 		SetExpireAt(time.Now().Add(time.Minute)).
 		SetCodeExpireAt(time.Now().Add(time.Minute)).
@@ -252,8 +252,8 @@ func TestAuthorization_AuthRefresh(t *testing.T) {
 			SetID(expiredAuthID).
 			SetUserID(user.ID).
 			SetApplicationID(app.ID).
-			SetCode([]byte("expired-code")).
-			SetChallenge([]byte("some-challenge")).
+			SetCode([]byte("bbbbbbbbbbbbbbbb")).
+			SetChallenge([]byte("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")).
 			SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 			SetExpireAt(time.Now().Add(-time.Minute)).
 			SetCodeExpireAt(time.Now().Add(-time.Minute)).

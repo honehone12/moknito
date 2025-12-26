@@ -28,7 +28,7 @@ func (User) Fields() []ent.Field {
 			MaxLen(256),
 		field.String("email").
 			NotEmpty().
-			MinLen(5).
+			MinLen(6).
 			MaxLen(256).
 			Unique(),
 		field.String("pwhash").

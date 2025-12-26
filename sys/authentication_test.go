@@ -22,7 +22,7 @@ func TestAuthentication_VerifyAuthentication(t *testing.T) {
 
 	sys.ent.User.Create().
 		SetID(userID).
-		SetName("u").SetEmail("e").SetPwhash("p").
+		SetName("TestUser").SetEmail("g@a.co").SetPwhash("aaaaaaaaaabbbbbbbbbbccccccccccddaaaaaaaaaabbbbbbbbbbccccccccccdde").
 		Save(ctx)
 
 	_, err := sys.ent.Authentication.Create().

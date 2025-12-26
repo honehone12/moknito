@@ -17,7 +17,7 @@ func TestInfo_InfoApp(t *testing.T) {
 	sys.ent.Application.Create().
 		SetID(appID).
 		SetDomain("example.com").
-		SetRedirect("sub").
+		SetRedirect("sub.com").
 		SetName("Test App").
 		Save(ctx)
 

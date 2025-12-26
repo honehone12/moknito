@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"moknito/binid"
-	"moknito/ent"
 	"moknito/ent/user"
 	"moknito/sys"
 	"net/http"
@@ -53,7 +52,7 @@ func TestMain(m *testing.M) {
 			CodeTtl:         time.Minute * 5,
 			RefreshTtl:      time.Hour * 24,
 		},
-		ent.Debug(),
+		//ent.Debug(),
 	)
 	if err != nil {
 		panic("failed to create sys.EntRdsSys: " + err.Error())

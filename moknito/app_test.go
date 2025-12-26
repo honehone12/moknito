@@ -111,7 +111,7 @@ func TestApp_Flow_Success(t *testing.T) {
 	}
 	challengeKey := fmt.Sprintf("CHALL:%x:%x", ids.UserID, auth.ID)
 	// The value stored in redis must be base64 encoded, as AppAuthorize decodes it.
-	challengeStr := base64.RawURLEncoding.EncodeToString([]byte("a-valid-challenge-string"))
+	challengeStr := base64.RawURLEncoding.EncodeToString([]byte("dddddddddddddddddddddddddddddddd"))
 	err = testSystem.Redis().Set(ctx, challengeKey, challengeStr, time.Minute).Err()
 	if err != nil {
 		t.Fatalf("failed to set challenge in redis: %v", err)

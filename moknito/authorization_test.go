@@ -185,7 +185,7 @@ func TestAuthorization_TokenEndpoint_InvalidLogic(t *testing.T) {
 
 	verifierRaw := []byte("a-long-verifier-string-to-be-hashed")
 	verifierStr := base64.RawURLEncoding.EncodeToString(verifierRaw)
-	wrongVerifierStr := base64.RawURLEncoding.EncodeToString([]byte("this-is-the-wrong-verifier"))
+	wrongVerifierStr := base64.RawURLEncoding.EncodeToString([]byte("cccccccccccccccccccccccccccccccc"))
 	challengeHashed := sha256.Sum256(verifierRaw)
 	authID, _ := binid.NewSequential()
 	expiredAuthID, _ := binid.NewSequential()
@@ -246,7 +246,7 @@ func TestAuthorization_TokenEndpoint_InvalidLogic(t *testing.T) {
 		{
 			name: "Non-existent Code",
 			data: url.Values{
-				"grant": {"code"}, "code": {base64.RawURLEncoding.EncodeToString([]byte("fake-code-16-byte"))}, "verifier": {verifierStr}, "redirect": {ids.AppRedirect},
+				"grant": {"code"}, "code": {base64.RawURLEncoding.EncodeToString([]byte("fake-code-16byte"))}, "verifier": {verifierStr}, "redirect": {ids.AppRedirect},
 			},
 		},
 	}
@@ -425,8 +425,8 @@ func TestAuthorization_RefreshEndpoint_Flow(t *testing.T) {
 			SetID(expiredAuthID).
 			SetUserID(ids.UserID).
 			SetApplicationID(ids.AppID).
-			SetCode([]byte("expired-code")).
-			SetChallenge([]byte("expired-challenge")).
+			SetCode([]byte("1234567890123456")).
+			SetChallenge([]byte("01234567890123456789012345678901")).
 			SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 			SetExpireAt(time.Now().Add(-time.Minute)).
 			SetCodeExpireAt(time.Now().Add(-time.Minute)).

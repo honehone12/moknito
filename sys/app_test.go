@@ -18,21 +18,26 @@ func TestApp_AppAllow(t *testing.T) {
 	appID, _ := binid.NewRandom()
 
 	// Create App
-	sys.ent.Application.Create().
+	_, err := sys.ent.Application.Create().
 		SetID(appID).
-		SetDomain("dom").
-		SetRedirect("sub").
+		SetDomain("a.co").
+		SetRedirect("b.co").
 		SetName("name").
 		Save(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// Create User
-	sys.ent.User.Create().
+	_, err = sys.ent.User.Create().
 		SetID(userID).
 		SetName("Test User").
 		SetEmail("test@example.com").
-		SetPwhash("hash").
+		SetPwhash("aaaaaaaaaabbbbbbbbbbccccccccccaaaaaaaaaabbbbbbbbbbccccccccccddddd").
 		Save(ctx)
-
+	if err != nil {
+		t.Fatal(err)
+	}
 	// Call Allow
 	res := sys.AppAllow(ctx, userID, appID.String())
 	if res.ValidationErr != nil {
@@ -59,22 +64,26 @@ func TestApp_AppAuthorize(t *testing.T) {
 	appID, _ := binid.NewRandom()
 
 	// 1. Setup Data
-	sys.ent.Application.Create().
+	_, err := sys.ent.Application.Create().
 		SetID(appID).
-		SetDomain("dom").
+		SetDomain("dom.com").
 		SetRedirect("http://redirect.com"). // match redirect
 		SetName("name").
 		Save(ctx)
-
+	if err != nil {
+		t.Fatal(err)
+	}
 	// Create User
-	sys.ent.User.Create().
+	_, err = sys.ent.User.Create().
 		SetID(userID).
-		SetName("u").SetEmail("e").SetPwhash("hash").
+		SetName("TestUser").SetEmail("c@c.co").SetPwhash("aaaaaaaaaabbbbbbbbbbccccccccccaaaaaaaaaabbbbbbbbbbccccccccccddddd").
 		Save(ctx)
-
+	if err != nil {
+		t.Fatal(err)
+	}
 	// Create AuthorizedApp (Must allow first)
 	authAppID, _ := binid.NewRandom()
-	_, err := sys.ent.AuthorizedApp.Create().
+	_, err = sys.ent.AuthorizedApp.Create().
 		SetID(authAppID).
 		SetUserID(userID).
 		SetApplicationID(appID).
@@ -87,7 +96,7 @@ func TestApp_AppAuthorize(t *testing.T) {
 	// Key: __CHALLENGE_REDIS_KEY:UserId:AuthId
 	// Note: system.go uses %x for IDs in Sprintf.
 	challKey := fmt.Sprintf("%s:%x:%x", __CHALLENGE_REDIS_KEY, userID, authID)
-	challengeRaw := []byte("challenge_bytes")
+	challengeRaw := []byte("aaaaaaaaaabbbbbbbbbbccccccccccdd")
 	challengeStr := base64.RawURLEncoding.EncodeToString(challengeRaw) // Stored in redis as string (from UserAuthenticate)
 	// Actually UserAuthenticate stores p.Challenge which is string.
 	// But AppAuthorize does: clg, _ := redis.Get(). chall, _ := base64.DecodeString(clg).
