@@ -132,8 +132,9 @@ func TestAuthentication_CreateAuthentication(t *testing.T) {
 
 	// Parse back
 	claims, err := sys.authSigner.Parse(token.ParseParams{
-		Raw:    cookie.Value,
-		Method: jwt.SigningMethodHS256,
+		Raw:       cookie.Value,
+		Method:    jwt.SigningMethodHS256,
+		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
 	})
 	if err != nil {
 		t.Errorf("failed to parse generated token: %v", err)

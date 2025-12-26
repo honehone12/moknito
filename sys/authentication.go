@@ -33,8 +33,9 @@ func (s *System) VerifyAuthentication(
 	r := &VerifyAuthenticationResult{}
 
 	claim, err := s.authSigner.Parse(token.ParseParams{
-		Raw:    cookie.Value,
-		Method: jwt.SigningMethodHS256,
+		Raw:       cookie.Value,
+		Method:    jwt.SigningMethodHS256,
+		TokenType: token.TOKEN_TYPE_AUTHENTICATION,
 	})
 	if err != nil {
 		r.ValidationErr = err

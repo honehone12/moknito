@@ -180,7 +180,7 @@ func testAuthTokenSignerFlow(t *testing.T, method jwt.SigningMethod) {
 			t.Fatalf("create failed: %v", err)
 		}
 
-		claims, err := signer.Parse(ParseParams{Raw: tokenStr, Method: method})
+		claims, err := signer.Parse(ParseParams{Raw: tokenStr, Method: method, TokenType: params.TokenType})
 		if err != nil {
 			t.Fatalf("parse failed: %v", err)
 		}

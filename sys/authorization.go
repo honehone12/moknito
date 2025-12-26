@@ -179,6 +179,7 @@ func (s *System) AuthRefresh(ctx context.Context, p AuthRefreshParams) *AuthResu
 	claim, err := s.authSigner.Parse(token.ParseParams{
 		Raw:          p.Token,
 		Method:       jwt.SigningMethodRS256,
+		TokenType:    token.TOKEN_TYPE_REFRESH,
 		Applications: apps,
 	})
 	if err != nil {
@@ -213,7 +214,7 @@ func (s *System) AuthRefresh(ctx context.Context, p AuthRefreshParams) *AuthResu
 		return r
 	}
 	if !ok {
-		r.ValidationErr = err
+		r.ValidationErr = errors.New("authorization not found")
 		return r
 	}
 

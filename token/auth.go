@@ -171,6 +171,7 @@ func (a *AuthTokenSigner) CreateAuthToken(p CreateAuthTokenParams) (string, erro
 }
 
 type ParseParams struct {
+	TokenType    string
 	Raw          string
 	Method       jwt.SigningMethod
 	Applications []string
@@ -205,6 +206,10 @@ func (a *AuthTokenSigner) Parse(p ParseParams) (*AuthClaims, error) {
 	c, ok := tkn.Claims.(*AuthClaims)
 	if !ok {
 		return nil, errors.New("failed to cast claims to authclaims")
+	}
+
+	if c.Type != p.TokenType {
+		return nil, errors.New("wrong token type")
 	}
 
 	return c, nil

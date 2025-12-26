@@ -51,6 +51,7 @@ func TestMain(m *testing.M) {
 			SessionTtl:      time.Hour,
 			TokenTtl:        time.Hour * 12,
 			CodeTtl:         time.Minute * 5,
+			RefreshTtl:      time.Hour * 24,
 		},
 		ent.Debug(),
 	)
@@ -102,6 +103,7 @@ func setupRoutes(e *echo.Echo, moknito *Moknito) {
 	// Auth routes (public)
 	authGroup := e.Group("/auth")
 	authGroup.POST("/:id/token", moknito.AuthToken)
+	authGroup.POST("/:id/refresh", moknito.AuthRefresh)
 
 	// API routes
 	api := e.Group("/api")

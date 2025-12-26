@@ -138,6 +138,7 @@ func setupSys(t *testing.T) (*System, *miniredis.Miniredis) {
 			SessionTtl:      time.Minute,
 			TokenTtl:        time.Minute,
 			CodeTtl:         time.Minute,
+			RefreshTtl:      time.Minute,
 		},
 		sessionSigner: sessionSigner,
 		authSigner:    authSigner,
