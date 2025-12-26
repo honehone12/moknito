@@ -106,6 +106,7 @@ func TestAuthorization_TokenEndpoint_Flow(t *testing.T) {
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 		SetExpireAt(time.Now().Add(time.Minute)).
 		SetCodeExpireAt(time.Now().Add(time.Minute)).
+		SetRefreshExpireAt(time.Now().Add(time.Minute)).
 		Save(ctx)
 	if err != nil {
 		t.Fatalf("failed to create authorization record: %v", err)
@@ -197,6 +198,7 @@ func TestAuthorization_TokenEndpoint_InvalidLogic(t *testing.T) {
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 		SetExpireAt(time.Now().Add(time.Minute)).
 		SetCodeExpireAt(time.Now().Add(time.Minute)).
+		SetRefreshExpireAt(time.Now().Add(time.Minute)).
 		Save(ctx)
 	if err != nil {
 		t.Fatalf("failed to create authorization record: %v", err)
@@ -211,6 +213,7 @@ func TestAuthorization_TokenEndpoint_InvalidLogic(t *testing.T) {
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 		SetExpireAt(time.Now().Add(time.Minute)).
 		SetCodeExpireAt(time.Now().Add(-time.Minute)). // Expired
+		SetRefreshExpireAt(time.Now().Add(time.Minute)).
 		Save(ctx)
 	if err != nil {
 		t.Fatalf("failed to create expired authorization record: %v", err)

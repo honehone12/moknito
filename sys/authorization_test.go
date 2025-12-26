@@ -69,6 +69,7 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
 		SetExpireAt(time.Now().Add(time.Minute)).
 		SetCodeExpireAt(time.Now().Add(time.Minute)).
+		SetRefreshExpireAt(time.Now().Add(time.Minute)).
 		Save(ctx)
 	if err != nil {
 		t.Fatal(err)
