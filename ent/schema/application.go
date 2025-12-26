@@ -21,15 +21,18 @@ func (Application) Fields() []ent.Field {
 			Unique().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		field.String("name").
+			MinLen(1).
 			MaxLen(256).
 			NotEmpty().
 			Unique(),
 		field.String("domain").
+			MinLen(4).
 			MaxLen(256).
 			NotEmpty().
 			Immutable().
 			Unique(),
 		field.String("redirect").
+			MinLen(4).
 			MaxLen(512).
 			NotEmpty().
 			Immutable().

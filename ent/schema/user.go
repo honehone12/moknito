@@ -24,13 +24,16 @@ func (User) Fields() []ent.Field {
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),
 		field.String("name").
 			NotEmpty().
+			MinLen(1).
 			MaxLen(256),
 		field.String("email").
 			NotEmpty().
+			MinLen(6).
 			MaxLen(256).
 			Unique(),
 		field.String("pwhash").
 			NotEmpty().
+			MinLen(8).
 			MaxLen(512),
 		field.Enum("login_method").
 			Values("password", "mfa-qr", "passkey").

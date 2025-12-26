@@ -71,7 +71,7 @@ func TestAuthentication_InvalidAuthCookie_Expired(t *testing.T) {
 	userID, _ := binid.NewSequential()
 	authID, _ := binid.NewSequential()
 	userEmail := fmt.Sprintf("expired-%s@example.com", uuid.NewString())
-	testSystem.Ent().User.Create().SetID(userID).SetName("u").SetEmail(userEmail).SetPwhash("p").SaveX(ctx)
+	testSystem.Ent().User.Create().SetID(userID).SetName("TestUser").SetEmail(userEmail).SetPwhash("TestPassword").SaveX(ctx)
 	// Create an expired authentication
 	testSystem.Ent().Authentication.Create().
 		SetID(authID).
