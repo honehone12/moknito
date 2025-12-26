@@ -33,7 +33,7 @@ func (User) Fields() []ent.Field {
 			Unique(),
 		field.String("pwhash").
 			NotEmpty().
-			MinLen(8).
+			MinLen(65).
 			MaxLen(512),
 		field.Enum("login_method").
 			Values("password", "mfa-qr", "passkey").
