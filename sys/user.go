@@ -69,7 +69,7 @@ type userRegistration struct {
 	PwHash string `json:"pwhash"`
 }
 
-func (s *EntRdsSys) UserRegister(
+func (s *System) UserRegister(
 	ctx context.Context,
 	p UserRegisterParams,
 ) *UserRegsterResult {
@@ -122,7 +122,7 @@ func (s *EntRdsSys) UserRegister(
 	return r
 }
 
-func (s *EntRdsSys) checkErrorCount(
+func (s *System) checkErrorCount(
 	ctx context.Context,
 	email string,
 ) (bool, error) {
@@ -142,7 +142,7 @@ func (s *EntRdsSys) checkErrorCount(
 	return eCount <= AUTHENTICATION_MAX_ERROR, nil
 }
 
-func (s *EntRdsSys) incrErrCount(
+func (s *System) incrErrCount(
 	ctx context.Context,
 	email string,
 ) error {
@@ -157,7 +157,7 @@ func (s *EntRdsSys) incrErrCount(
 	return nil
 }
 
-func (s *EntRdsSys) checkRedirect(
+func (s *System) checkRedirect(
 	ctx context.Context,
 	appId binid.BinId,
 	redirect string,
@@ -175,7 +175,7 @@ func (s *EntRdsSys) checkRedirect(
 	return app.Redirect == redirect, nil
 }
 
-func (s *EntRdsSys) UserJoin(
+func (s *System) UserJoin(
 	ctx context.Context,
 	p UserJoinParams,
 ) *UserJoinResult {
@@ -301,7 +301,7 @@ func (s *EntRdsSys) UserJoin(
 	return r
 }
 
-func (s *EntRdsSys) UserAuthenticate(
+func (s *System) UserAuthenticate(
 	ctx context.Context,
 	p UserAuthenticateParams,
 ) *UserAuthenticateResult {

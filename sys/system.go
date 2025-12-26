@@ -44,10 +44,11 @@ type TtlParams struct {
 	RegistrationTtl time.Duration
 	SessionTtl      time.Duration
 	TokenTtl        time.Duration
+	RefreshTtl      time.Duration
 	CodeTtl         time.Duration
 }
 
-type EntRdsSys struct {
+type System struct {
 	ent   *ent.Client
 	redis *redis.Client
 
@@ -57,10 +58,10 @@ type EntRdsSys struct {
 	authSigner    *token.AuthTokenSigner
 }
 
-func NewEntRdsSys(
+func NewSystem(
 	ttl TtlParams,
 	entOptions ...ent.Option,
-) (*EntRdsSys, error) {
+) (*System, error) {
 	// don't inject other than env
 	// to prevent exposing sensitive info
 	// just write within module for testing
@@ -105,7 +106,7 @@ func NewEntRdsSys(
 		return nil, err
 	}
 
-	return &EntRdsSys{
+	return &System{
 		ent,
 		redis,
 		ttl,
@@ -114,27 +115,27 @@ func NewEntRdsSys(
 	}, nil
 }
 
-func (s *EntRdsSys) Close() error {
+func (s *System) Close() error {
 	return s.ent.Close()
 }
 
-func (s *EntRdsSys) Ent() *ent.Client {
+func (s *System) Ent() *ent.Client {
 	return s.ent
 }
 
-func (s *EntRdsSys) Redis() *redis.Client {
+func (s *System) Redis() *redis.Client {
 	return s.redis
 }
 
-func (s *EntRdsSys) SessionSinger() *token.SessionTokenSigner {
+func (s *System) SessionSinger() *token.SessionTokenSigner {
 	return s.sessionSigner
 }
 
-func (s *EntRdsSys) AuthSigner() *token.AuthTokenSigner {
+func (s *System) AuthSigner() *token.AuthTokenSigner {
 	return s.authSigner
 }
 
-func (*EntRdsSys) rollback(tx *ent.Tx, original error) error {
+func (*System) rollback(tx *ent.Tx, original error) error {
 	if err := tx.Rollback(); err != nil {
 		return errors.Join(original, err)
 	}

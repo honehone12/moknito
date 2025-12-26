@@ -30,7 +30,7 @@ type VerifySessionResult struct {
 	E
 }
 
-func (s *EntRdsSys) VerifySession(
+func (s *System) VerifySession(
 	ctx context.Context,
 	cookie *http.Cookie,
 ) *VerifySessionResult {
@@ -76,7 +76,7 @@ func (s *EntRdsSys) VerifySession(
 	return r
 }
 
-func (s *EntRdsSys) CreateSession(ctx context.Context) (*http.Cookie, error) {
+func (s *System) CreateSession(ctx context.Context) (*http.Cookie, error) {
 	sessKey := make([]byte, SESSION_KEY_LEN)
 	if _, err := rand.Read(sessKey); err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func (s *EntRdsSys) CreateSession(ctx context.Context) (*http.Cookie, error) {
 	return s.createSessionCookie(value)
 }
 
-func (s *EntRdsSys) IncrSession(
+func (s *System) IncrSession(
 	ctx context.Context,
 	sessKey []byte,
 ) (*http.Cookie, error) {
@@ -119,7 +119,7 @@ func (s *EntRdsSys) IncrSession(
 	return s.createSessionCookie(value)
 }
 
-func (s *EntRdsSys) createSessionCookie(value string) (*http.Cookie, error) {
+func (s *System) createSessionCookie(value string) (*http.Cookie, error) {
 	cookie := &http.Cookie{
 		Name:     SESSION_COOKIE_KEY,
 		Value:    value,

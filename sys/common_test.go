@@ -18,7 +18,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func setupSys(t *testing.T) (*EntRdsSys, *miniredis.Miniredis) {
+func setupSys(t *testing.T) (*System, *miniredis.Miniredis) {
 	// Set up Env
 	// HMAC key
 	hmacKey := make([]byte, 32)
@@ -130,7 +130,7 @@ func setupSys(t *testing.T) (*EntRdsSys, *miniredis.Miniredis) {
 	// Ent
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 
-	sys := &EntRdsSys{
+	sys := &System{
 		ent:   client,
 		redis: rdb,
 		ttl: TtlParams{

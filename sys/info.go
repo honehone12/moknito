@@ -20,7 +20,7 @@ type InfoAppResult struct {
 	E
 }
 
-func (s *EntRdsSys) InfoApp(
+func (s *System) InfoApp(
 	ctx context.Context,
 	appUiid string,
 ) *InfoAppResult {

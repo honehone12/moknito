@@ -38,6 +38,8 @@ type Authorization struct {
 	CodeConsumedAt *time.Time `json:"code_consumed_at,omitempty"`
 	// ExpireAt holds the value of the "expire_at" field.
 	ExpireAt time.Time `json:"expire_at,omitempty"`
+	// RefreshExpireAt holds the value of the "refresh_expire_at" field.
+	RefreshExpireAt time.Time `json:"refresh_expire_at,omitempty"`
 	// ApplicationID holds the value of the "application_id" field.
 	ApplicationID binid.BinId `json:"application_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
@@ -92,7 +94,7 @@ func (*Authorization) scanValues(columns []string) ([]any, error) {
 			values[i] = new(binid.BinId)
 		case authorization.FieldChallengeMethod:
 			values[i] = new(sql.NullString)
-		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldCodeExpireAt, authorization.FieldCodeConsumedAt, authorization.FieldExpireAt:
+		case authorization.FieldCreatedAt, authorization.FieldUpdatedAt, authorization.FieldDeletedAt, authorization.FieldCodeExpireAt, authorization.FieldCodeConsumedAt, authorization.FieldExpireAt, authorization.FieldRefreshExpireAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -170,6 +172,12 @@ func (_m *Authorization) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field expire_at", values[i])
 			} else if value.Valid {
 				_m.ExpireAt = value.Time
+			}
+		case authorization.FieldRefreshExpireAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field refresh_expire_at", values[i])
+			} else if value.Valid {
+				_m.RefreshExpireAt = value.Time
 			}
 		case authorization.FieldApplicationID:
 			if value, ok := values[i].(*binid.BinId); !ok {
@@ -259,6 +267,9 @@ func (_m *Authorization) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("expire_at=")
 	builder.WriteString(_m.ExpireAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("refresh_expire_at=")
+	builder.WriteString(_m.RefreshExpireAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("application_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ApplicationID))

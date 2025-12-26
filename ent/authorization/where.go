@@ -101,6 +101,11 @@ func ExpireAt(v time.Time) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldExpireAt, v))
 }
 
+// RefreshExpireAt applies equality check predicate on the "refresh_expire_at" field. It's identical to RefreshExpireAtEQ.
+func RefreshExpireAt(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldRefreshExpireAt, v))
+}
+
 // ApplicationID applies equality check predicate on the "application_id" field. It's identical to ApplicationIDEQ.
 func ApplicationID(v binid.BinId) predicate.Authorization {
 	return predicate.Authorization(sql.FieldEQ(FieldApplicationID, v))
@@ -514,6 +519,46 @@ func ExpireAtLT(v time.Time) predicate.Authorization {
 // ExpireAtLTE applies the LTE predicate on the "expire_at" field.
 func ExpireAtLTE(v time.Time) predicate.Authorization {
 	return predicate.Authorization(sql.FieldLTE(FieldExpireAt, v))
+}
+
+// RefreshExpireAtEQ applies the EQ predicate on the "refresh_expire_at" field.
+func RefreshExpireAtEQ(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldEQ(FieldRefreshExpireAt, v))
+}
+
+// RefreshExpireAtNEQ applies the NEQ predicate on the "refresh_expire_at" field.
+func RefreshExpireAtNEQ(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNEQ(FieldRefreshExpireAt, v))
+}
+
+// RefreshExpireAtIn applies the In predicate on the "refresh_expire_at" field.
+func RefreshExpireAtIn(vs ...time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldIn(FieldRefreshExpireAt, vs...))
+}
+
+// RefreshExpireAtNotIn applies the NotIn predicate on the "refresh_expire_at" field.
+func RefreshExpireAtNotIn(vs ...time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldNotIn(FieldRefreshExpireAt, vs...))
+}
+
+// RefreshExpireAtGT applies the GT predicate on the "refresh_expire_at" field.
+func RefreshExpireAtGT(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGT(FieldRefreshExpireAt, v))
+}
+
+// RefreshExpireAtGTE applies the GTE predicate on the "refresh_expire_at" field.
+func RefreshExpireAtGTE(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldGTE(FieldRefreshExpireAt, v))
+}
+
+// RefreshExpireAtLT applies the LT predicate on the "refresh_expire_at" field.
+func RefreshExpireAtLT(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLT(FieldRefreshExpireAt, v))
+}
+
+// RefreshExpireAtLTE applies the LTE predicate on the "refresh_expire_at" field.
+func RefreshExpireAtLTE(v time.Time) predicate.Authorization {
+	return predicate.Authorization(sql.FieldLTE(FieldRefreshExpireAt, v))
 }
 
 // ApplicationIDEQ applies the EQ predicate on the "application_id" field.

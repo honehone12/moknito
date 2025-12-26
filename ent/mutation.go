@@ -1694,6 +1694,7 @@ type AuthorizationMutation struct {
 	code_expire_at     *time.Time
 	code_consumed_at   *time.Time
 	expire_at          *time.Time
+	refresh_expire_at  *time.Time
 	clearedFields      map[string]struct{}
 	application        *binid.BinId
 	clearedapplication bool
@@ -2158,6 +2159,42 @@ func (m *AuthorizationMutation) ResetExpireAt() {
 	m.expire_at = nil
 }
 
+// SetRefreshExpireAt sets the "refresh_expire_at" field.
+func (m *AuthorizationMutation) SetRefreshExpireAt(t time.Time) {
+	m.refresh_expire_at = &t
+}
+
+// RefreshExpireAt returns the value of the "refresh_expire_at" field in the mutation.
+func (m *AuthorizationMutation) RefreshExpireAt() (r time.Time, exists bool) {
+	v := m.refresh_expire_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRefreshExpireAt returns the old "refresh_expire_at" field's value of the Authorization entity.
+// If the Authorization object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AuthorizationMutation) OldRefreshExpireAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRefreshExpireAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRefreshExpireAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRefreshExpireAt: %w", err)
+	}
+	return oldValue.RefreshExpireAt, nil
+}
+
+// ResetRefreshExpireAt resets all changes to the "refresh_expire_at" field.
+func (m *AuthorizationMutation) ResetRefreshExpireAt() {
+	m.refresh_expire_at = nil
+}
+
 // SetApplicationID sets the "application_id" field.
 func (m *AuthorizationMutation) SetApplicationID(bi binid.BinId) {
 	m.application = &bi
@@ -2318,7 +2355,7 @@ func (m *AuthorizationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthorizationMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.created_at != nil {
 		fields = append(fields, authorization.FieldCreatedAt)
 	}
@@ -2345,6 +2382,9 @@ func (m *AuthorizationMutation) Fields() []string {
 	}
 	if m.expire_at != nil {
 		fields = append(fields, authorization.FieldExpireAt)
+	}
+	if m.refresh_expire_at != nil {
+		fields = append(fields, authorization.FieldRefreshExpireAt)
 	}
 	if m.application != nil {
 		fields = append(fields, authorization.FieldApplicationID)
@@ -2378,6 +2418,8 @@ func (m *AuthorizationMutation) Field(name string) (ent.Value, bool) {
 		return m.CodeConsumedAt()
 	case authorization.FieldExpireAt:
 		return m.ExpireAt()
+	case authorization.FieldRefreshExpireAt:
+		return m.RefreshExpireAt()
 	case authorization.FieldApplicationID:
 		return m.ApplicationID()
 	case authorization.FieldUserID:
@@ -2409,6 +2451,8 @@ func (m *AuthorizationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCodeConsumedAt(ctx)
 	case authorization.FieldExpireAt:
 		return m.OldExpireAt(ctx)
+	case authorization.FieldRefreshExpireAt:
+		return m.OldRefreshExpireAt(ctx)
 	case authorization.FieldApplicationID:
 		return m.OldApplicationID(ctx)
 	case authorization.FieldUserID:
@@ -2484,6 +2528,13 @@ func (m *AuthorizationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetExpireAt(v)
+		return nil
+	case authorization.FieldRefreshExpireAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRefreshExpireAt(v)
 		return nil
 	case authorization.FieldApplicationID:
 		v, ok := value.(binid.BinId)
@@ -2589,6 +2640,9 @@ func (m *AuthorizationMutation) ResetField(name string) error {
 		return nil
 	case authorization.FieldExpireAt:
 		m.ResetExpireAt()
+		return nil
+	case authorization.FieldRefreshExpireAt:
+		m.ResetRefreshExpireAt()
 		return nil
 	case authorization.FieldApplicationID:
 		m.ResetApplicationID()

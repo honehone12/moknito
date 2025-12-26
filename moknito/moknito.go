@@ -22,6 +22,7 @@ const __REGEX_NAME = `^[a-zA-Z0-9\s\.\-']+$`
 const __REGEX_PASSWORD = `^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{}|;:'",./<>?~` + "`" + `]+$`
 
 type ApiRequest struct {
+	// client application id
 	Id string `param:"id" validate:"required,len=36,uuid7"`
 }
 
@@ -88,11 +89,12 @@ func NewMocknito() (*Moknito, error) {
 		return nil, err
 	}
 
-	system, err := sys.NewEntRdsSys(
+	system, err := sys.NewSystem(
 		sys.TtlParams{
 			RegistrationTtl: time.Minute * 5,
 			SessionTtl:      time.Hour,
 			TokenTtl:        time.Hour * 12,
+			RefreshTtl:      time.Hour * 72,
 			CodeTtl:         time.Minute * 5,
 		},
 		ent.Debug(),

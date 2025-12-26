@@ -32,6 +32,8 @@ const (
 	FieldCodeConsumedAt = "code_consumed_at"
 	// FieldExpireAt holds the string denoting the expire_at field in the database.
 	FieldExpireAt = "expire_at"
+	// FieldRefreshExpireAt holds the string denoting the refresh_expire_at field in the database.
+	FieldRefreshExpireAt = "refresh_expire_at"
 	// FieldApplicationID holds the string denoting the application_id field in the database.
 	FieldApplicationID = "application_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
@@ -70,6 +72,7 @@ var Columns = []string{
 	FieldCodeExpireAt,
 	FieldCodeConsumedAt,
 	FieldExpireAt,
+	FieldRefreshExpireAt,
 	FieldApplicationID,
 	FieldUserID,
 }
@@ -140,6 +143,11 @@ func ByCodeConsumedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByExpireAt orders the results by the expire_at field.
 func ByExpireAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpireAt, opts...).ToFunc()
+}
+
+// ByRefreshExpireAt orders the results by the refresh_expire_at field.
+func ByRefreshExpireAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRefreshExpireAt, opts...).ToFunc()
 }
 
 // ByApplicationID orders the results by the application_id field.

@@ -17,6 +17,12 @@ type AuthTokenRequest struct {
 	Redirect string `form:"redirect" validate:"required,url,max=256"`
 }
 
+type AuthRefreshRequest struct {
+	ApiRequest
+	Grant string `form:"grant" validate:"required,oneof=code refresh"`
+	Token string `form:"token" validate:"min=44,jwt"`
+}
+
 func (m *Moknito) AuthToken(ctx echo.Context) error {
 	form := AuthTokenRequest{}
 
@@ -31,25 +37,67 @@ func (m *Moknito) AuthToken(ctx echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	var r *sys.AuthTokenResult
-	switch form.Grant {
-	case "code":
-		r = m.system.AuthTokenCode(
-			ctx.Request().Context(),
-			sys.AuthTokenCodeParams{
-				AuthTokenParams: sys.AuthTokenParams{
-					ApplicationId: appId,
-				},
-				Code:     form.Code,
-				Verifier: form.Verifier,
-				Redirect: form.Redirect,
-			},
-		)
-	case "refresh":
-	default:
-		ctx.Logger().Warn("unknown grant type")
+	if form.Grant != "code" {
+		ctx.Logger().Warn("unsupported grant type")
 		return echo.ErrBadRequest
 	}
+
+	r := m.system.AuthToken(
+		ctx.Request().Context(),
+		sys.AuthTokenParams{
+			AuthParams: sys.AuthParams{
+				ApplicationId: appId,
+			},
+			Code:     form.Code,
+			Verifier: form.Verifier,
+			Redirect: form.Redirect,
+		},
+	)
+	if r.SystemErr != nil {
+		ctx.Logger().Error(r.SystemErr)
+		return echo.ErrInternalServerError
+	}
+	if r.ValidationErr != nil {
+		ctx.Logger().Warn(r.ValidationErr)
+		return echo.ErrBadRequest
+	}
+
+	origin := fmt.Sprintf("%s://%s", __ORIGIN_SCHEME, r.Domain)
+
+	h := ctx.Response().Header()
+	h.Set("Access-Control-Allow-Origin", origin)
+	h.Add("Vary", "Origin")
+	return ctx.JSON(http.StatusOK, r.Token)
+}
+
+func (m *Moknito) AuthRefresh(ctx echo.Context) error {
+	form := AuthRefreshRequest{}
+
+	if err := m.bind(ctx, &form); err != nil {
+		ctx.Logger().Warn(err)
+		return echo.ErrBadRequest
+	}
+
+	appId, err := binid.FromUUIDString(form.Id)
+	if err != nil {
+		ctx.Logger().Warn(err)
+		return echo.ErrBadRequest
+	}
+
+	if form.Grant != "refresh" {
+		ctx.Logger().Warn("unsupported grant type")
+		return echo.ErrBadRequest
+	}
+
+	r := m.system.AuthRefresh(
+		ctx.Request().Context(),
+		sys.AuthRefreshParams{
+			AuthParams: sys.AuthParams{
+				ApplicationId: appId,
+			},
+			Token: form.Token,
+		},
+	)
 	if r.SystemErr != nil {
 		ctx.Logger().Error(r.SystemErr)
 		return echo.ErrInternalServerError

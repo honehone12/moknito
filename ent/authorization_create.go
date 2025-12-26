@@ -109,6 +109,12 @@ func (_c *AuthorizationCreate) SetExpireAt(v time.Time) *AuthorizationCreate {
 	return _c
 }
 
+// SetRefreshExpireAt sets the "refresh_expire_at" field.
+func (_c *AuthorizationCreate) SetRefreshExpireAt(v time.Time) *AuthorizationCreate {
+	_c.mutation.SetRefreshExpireAt(v)
+	return _c
+}
+
 // SetApplicationID sets the "application_id" field.
 func (_c *AuthorizationCreate) SetApplicationID(v binid.BinId) *AuthorizationCreate {
 	_c.mutation.SetApplicationID(v)
@@ -220,6 +226,9 @@ func (_c *AuthorizationCreate) check() error {
 	if _, ok := _c.mutation.ExpireAt(); !ok {
 		return &ValidationError{Name: "expire_at", err: errors.New(`ent: missing required field "Authorization.expire_at"`)}
 	}
+	if _, ok := _c.mutation.RefreshExpireAt(); !ok {
+		return &ValidationError{Name: "refresh_expire_at", err: errors.New(`ent: missing required field "Authorization.refresh_expire_at"`)}
+	}
 	if _, ok := _c.mutation.ApplicationID(); !ok {
 		return &ValidationError{Name: "application_id", err: errors.New(`ent: missing required field "Authorization.application_id"`)}
 	}
@@ -302,6 +311,10 @@ func (_c *AuthorizationCreate) createSpec() (*Authorization, *sqlgraph.CreateSpe
 	if value, ok := _c.mutation.ExpireAt(); ok {
 		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
 		_node.ExpireAt = value
+	}
+	if value, ok := _c.mutation.RefreshExpireAt(); ok {
+		_spec.SetField(authorization.FieldRefreshExpireAt, field.TypeTime, value)
+		_node.RefreshExpireAt = value
 	}
 	if nodes := _c.mutation.ApplicationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -16,35 +16,35 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type AuthTokenParams struct {
+type AuthParams struct {
 	ApplicationId binid.BinId
 }
 
-type AuthTokenCodeParams struct {
-	AuthTokenParams
+type AuthTokenParams struct {
+	AuthParams
 	Code     string
 	Verifier string
 	Redirect string
 }
 
-type AuthTokenResult struct {
+type AuthRefreshParams struct {
+	AuthParams
+	Token string
+}
+
+type AuthResult struct {
 	Token  *token.AuthTokenBundle
 	Domain string
 	E
 }
 
 type AuthorizationSys interface {
-	AuthTokenCode(
-		ctx context.Context,
-		p AuthTokenCodeParams,
-	) *AuthTokenResult
+	AuthToken(ctx context.Context, p AuthTokenParams) *AuthResult
+	AuthRefresh(ctx context.Context, p AuthRefreshParams) *AuthResult
 }
 
-func (s *EntRdsSys) AuthTokenCode(
-	ctx context.Context,
-	p AuthTokenCodeParams,
-) *AuthTokenResult {
-	r := &AuthTokenResult{}
+func (s *System) AuthToken(ctx context.Context, p AuthTokenParams) *AuthResult {
+	r := &AuthResult{}
 
 	c, err := base64.RawURLEncoding.DecodeString(p.Code)
 	if err != nil {
@@ -68,6 +68,7 @@ func (s *EntRdsSys) AuthTokenCode(
 			authorization.CodeExpireAtGT(now),
 			authorization.CodeConsumedAtIsNil(),
 			authorization.ApplicationID(p.ApplicationId),
+			authorization.DeletedAtIsNil(),
 		).
 		WithApplication(func(q *ent.ApplicationQuery) {
 			q.Select(
@@ -107,25 +108,39 @@ func (s *EntRdsSys) AuthTokenCode(
 		return r
 	}
 
+	apps := []string{auth.Edges.Application.Domain}
+
 	authTkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
 		Method:       jwt.SigningMethodRS256,
 		TokenType:    token.TOKEN_TYPE_AUTHORIZATION,
 		AuthId:       auth.ID,
 		UserId:       auth.UserID,
 		Ttl:          s.ttl.TokenTtl,
-		Applications: []string{auth.Edges.Application.Domain},
+		Applications: apps,
 	})
 	if err != nil {
 		r.SystemErr = err
 		return r
 	}
 
-	expiredIn := auth.ExpireAt.Sub(now).Milliseconds() / 1000
+	refTkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		Method:       jwt.SigningMethodRS256,
+		TokenType:    token.TOKEN_TYPE_REFRESH,
+		AuthId:       auth.ID,
+		UserId:       auth.UserID,
+		Ttl:          s.ttl.RefreshTtl,
+		Applications: apps,
+	})
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
 
 	bundle := &token.AuthTokenBundle{
 		AccessToken:     authTkn,
+		RefreshToken:    refTkn,
 		BundleTokenType: token.BUNDLE_TOKEN_TYPE_BEARER,
-		ExpiresIn:       expiredIn,
+		ExpiresIn:       auth.ExpireAt.Sub(now).Milliseconds() / 1000,
 	}
 
 	err = s.ent.Authorization.UpdateOne(auth).
@@ -138,5 +153,113 @@ func (s *EntRdsSys) AuthTokenCode(
 
 	r.Token = bundle
 	r.Domain = auth.Edges.Application.Domain
+	return r
+}
+
+func (s *System) AuthRefresh(ctx context.Context, p AuthRefreshParams) *AuthResult {
+	r := &AuthResult{}
+
+	app, err := s.ent.Application.Query().
+		Select(application.FieldDomain).
+		Where(
+			application.ID(p.ApplicationId),
+			application.DeletedAtIsNil(),
+		).
+		Only(ctx)
+	if ent.IsNotFound(err) {
+		r.ValidationErr = err
+		return r
+	} else if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
+	apps := []string{app.Domain}
+
+	claim, err := s.authSigner.Parse(token.ParseParams{
+		Raw:          p.Token,
+		Method:       jwt.SigningMethodRS256,
+		Applications: apps,
+	})
+	if err != nil {
+		r.ValidationErr = err
+		return r
+	}
+
+	authId, err := binid.FromUUIDString(claim.ID)
+	if err != nil {
+		r.ValidationErr = err
+		return r
+	}
+	userId, err := binid.FromUUIDString(claim.Subject)
+	if err != nil {
+		r.ValidationErr = err
+		return r
+	}
+
+	now := time.Now()
+
+	ok, err := s.ent.Authorization.Query().
+		Where(
+			authorization.ID(authId),
+			authorization.RefreshExpireAtGT(now),
+			authorization.DeletedAtIsNil(),
+			authorization.ApplicationID(app.ID),
+			authorization.UserID(userId),
+		).
+		Exist(ctx)
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+	if !ok {
+		r.ValidationErr = err
+		return r
+	}
+
+	authTkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		Method:       jwt.SigningMethodRS256,
+		TokenType:    token.TOKEN_TYPE_AUTHORIZATION,
+		AuthId:       authId,
+		UserId:       userId,
+		Ttl:          s.ttl.TokenTtl,
+		Applications: apps,
+	})
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
+	refTkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{
+		Method:       jwt.SigningMethodRS256,
+		TokenType:    token.TOKEN_TYPE_REFRESH,
+		AuthId:       authId,
+		UserId:       userId,
+		Ttl:          s.ttl.RefreshTtl,
+		Applications: apps,
+	})
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
+	bundle := &token.AuthTokenBundle{
+		AccessToken:     authTkn,
+		RefreshToken:    refTkn,
+		BundleTokenType: token.BUNDLE_TOKEN_TYPE_BEARER,
+		ExpiresIn:       s.ttl.TokenTtl.Milliseconds() / 1000,
+	}
+
+	err = s.ent.Authorization.UpdateOneID(authId).
+		SetExpireAt(now.Add(s.ttl.TokenTtl)).
+		SetRefreshExpireAt(now.Add(s.ttl.RefreshTtl)).
+		Exec(ctx)
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
+	r.Token = bundle
+	r.Domain = app.Domain
 	return r
 }

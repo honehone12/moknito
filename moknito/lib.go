@@ -41,6 +41,7 @@ func Run() {
 	// route for public POSTs
 	authGroup := echo.Group("/auth")
 	authGroup.POST("/:id/token", moknito.AuthToken)
+	authGroup.POST("/:id/refresh", moknito.AuthRefresh)
 
 	// routes for POSTs
 	api := echo.Group("/api")

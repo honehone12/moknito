@@ -26,7 +26,7 @@ type VerifyAuthenticationResult struct {
 	E
 }
 
-func (s *EntRdsSys) VerifyAuthentication(
+func (s *System) VerifyAuthentication(
 	ctx context.Context,
 	cookie *http.Cookie,
 ) *VerifyAuthenticationResult {
@@ -85,7 +85,7 @@ func (s *EntRdsSys) VerifyAuthentication(
 	return r
 }
 
-func (s *EntRdsSys) createAuthentication(
+func (s *System) createAuthentication(
 	authId, userId binid.BinId,
 ) (*http.Cookie, error) {
 	tkn, err := s.authSigner.CreateAuthToken(token.CreateAuthTokenParams{

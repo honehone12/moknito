@@ -42,8 +42,8 @@ func (Authorization) Fields() []ent.Field {
 		field.Time("code_consumed_at").
 			Optional().
 			Nillable(),
-		field.Time("expire_at").
-			Immutable(),
+		field.Time("expire_at"),
+		field.Time("refresh_expire_at"),
 		field.UUID("application_id", binid.BinId{}).
 			Immutable().
 			SchemaType(map[string]string{dialect.MySQL: "binary(16)"}),

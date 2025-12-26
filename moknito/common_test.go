@@ -25,7 +25,7 @@ import (
 
 var testServer *httptest.Server
 var testMoknito *Moknito
-var testSystem *sys.EntRdsSys
+var testSystem *sys.System
 
 type testClientIDs struct {
 	UserID      binid.BinId
@@ -45,7 +45,7 @@ func TestMain(m *testing.M) {
 	os.Setenv("ORIGIN", "http://127.0.0.1")
 
 	// Instantiate sys.EntRdsSys directly
-	system, err := sys.NewEntRdsSys(
+	system, err := sys.NewSystem(
 		sys.TtlParams{
 			RegistrationTtl: time.Minute * 5,
 			SessionTtl:      time.Hour,

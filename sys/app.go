@@ -43,7 +43,7 @@ type AppAuthorizeResult struct {
 	E
 }
 
-func (s *EntRdsSys) AppAllow(
+func (s *System) AppAllow(
 	ctx context.Context,
 	userId binid.BinId,
 	appUuid string,
@@ -93,7 +93,7 @@ func (s *EntRdsSys) AppAllow(
 	return r
 }
 
-func (s *EntRdsSys) AppAuthorize(
+func (s *System) AppAuthorize(
 	ctx context.Context,
 	p AppAuthorizeParams,
 ) *AppAuthorizeResult {
@@ -169,6 +169,7 @@ func (s *EntRdsSys) AppAuthorize(
 		SetCode(code).
 		SetCodeExpireAt(now.Add(s.ttl.CodeTtl)).
 		SetExpireAt(now.Add(s.ttl.TokenTtl)).
+		SetRefreshExpireAt(now.Add(s.ttl.RefreshTtl)).
 		SetApplicationID(appId).
 		SetUserID(p.UserId).
 		Exec(ctx)

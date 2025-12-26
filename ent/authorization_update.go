@@ -74,6 +74,34 @@ func (_u *AuthorizationUpdate) ClearCodeConsumedAt() *AuthorizationUpdate {
 	return _u
 }
 
+// SetExpireAt sets the "expire_at" field.
+func (_u *AuthorizationUpdate) SetExpireAt(v time.Time) *AuthorizationUpdate {
+	_u.mutation.SetExpireAt(v)
+	return _u
+}
+
+// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
+func (_u *AuthorizationUpdate) SetNillableExpireAt(v *time.Time) *AuthorizationUpdate {
+	if v != nil {
+		_u.SetExpireAt(*v)
+	}
+	return _u
+}
+
+// SetRefreshExpireAt sets the "refresh_expire_at" field.
+func (_u *AuthorizationUpdate) SetRefreshExpireAt(v time.Time) *AuthorizationUpdate {
+	_u.mutation.SetRefreshExpireAt(v)
+	return _u
+}
+
+// SetNillableRefreshExpireAt sets the "refresh_expire_at" field if the given value is not nil.
+func (_u *AuthorizationUpdate) SetNillableRefreshExpireAt(v *time.Time) *AuthorizationUpdate {
+	if v != nil {
+		_u.SetRefreshExpireAt(*v)
+	}
+	return _u
+}
+
 // Mutation returns the AuthorizationMutation object of the builder.
 func (_u *AuthorizationUpdate) Mutation() *AuthorizationMutation {
 	return _u.mutation
@@ -153,6 +181,12 @@ func (_u *AuthorizationUpdate) sqlSave(ctx context.Context) (_node int, err erro
 	if _u.mutation.CodeConsumedAtCleared() {
 		_spec.ClearField(authorization.FieldCodeConsumedAt, field.TypeTime)
 	}
+	if value, ok := _u.mutation.ExpireAt(); ok {
+		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.RefreshExpireAt(); ok {
+		_spec.SetField(authorization.FieldRefreshExpireAt, field.TypeTime, value)
+	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{authorization.Label}
@@ -216,6 +250,34 @@ func (_u *AuthorizationUpdateOne) SetNillableCodeConsumedAt(v *time.Time) *Autho
 // ClearCodeConsumedAt clears the value of the "code_consumed_at" field.
 func (_u *AuthorizationUpdateOne) ClearCodeConsumedAt() *AuthorizationUpdateOne {
 	_u.mutation.ClearCodeConsumedAt()
+	return _u
+}
+
+// SetExpireAt sets the "expire_at" field.
+func (_u *AuthorizationUpdateOne) SetExpireAt(v time.Time) *AuthorizationUpdateOne {
+	_u.mutation.SetExpireAt(v)
+	return _u
+}
+
+// SetNillableExpireAt sets the "expire_at" field if the given value is not nil.
+func (_u *AuthorizationUpdateOne) SetNillableExpireAt(v *time.Time) *AuthorizationUpdateOne {
+	if v != nil {
+		_u.SetExpireAt(*v)
+	}
+	return _u
+}
+
+// SetRefreshExpireAt sets the "refresh_expire_at" field.
+func (_u *AuthorizationUpdateOne) SetRefreshExpireAt(v time.Time) *AuthorizationUpdateOne {
+	_u.mutation.SetRefreshExpireAt(v)
+	return _u
+}
+
+// SetNillableRefreshExpireAt sets the "refresh_expire_at" field if the given value is not nil.
+func (_u *AuthorizationUpdateOne) SetNillableRefreshExpireAt(v *time.Time) *AuthorizationUpdateOne {
+	if v != nil {
+		_u.SetRefreshExpireAt(*v)
+	}
 	return _u
 }
 
@@ -327,6 +389,12 @@ func (_u *AuthorizationUpdateOne) sqlSave(ctx context.Context) (_node *Authoriza
 	}
 	if _u.mutation.CodeConsumedAtCleared() {
 		_spec.ClearField(authorization.FieldCodeConsumedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.ExpireAt(); ok {
+		_spec.SetField(authorization.FieldExpireAt, field.TypeTime, value)
+	}
+	if value, ok := _u.mutation.RefreshExpireAt(); ok {
+		_spec.SetField(authorization.FieldRefreshExpireAt, field.TypeTime, value)
 	}
 	_node = &Authorization{config: _u.config}
 	_spec.Assign = _node.assignValues

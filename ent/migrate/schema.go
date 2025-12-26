@@ -62,6 +62,7 @@ var (
 		{Name: "code_expire_at", Type: field.TypeTime},
 		{Name: "code_consumed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "expire_at", Type: field.TypeTime},
+		{Name: "refresh_expire_at", Type: field.TypeTime},
 		{Name: "application_id", Type: field.TypeUUID, SchemaType: map[string]string{"mysql": "binary(16)"}},
 		{Name: "user_id", Type: field.TypeUUID, SchemaType: map[string]string{"mysql": "binary(16)"}},
 	}
@@ -73,13 +74,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "authorizations_applications_application",
-				Columns:    []*schema.Column{AuthorizationsColumns[10]},
+				Columns:    []*schema.Column{AuthorizationsColumns[11]},
 				RefColumns: []*schema.Column{ApplicationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "authorizations_users_authorizations",
-				Columns:    []*schema.Column{AuthorizationsColumns[11]},
+				Columns:    []*schema.Column{AuthorizationsColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

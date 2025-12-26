@@ -75,8 +75,8 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 	}
 
 	// 2. Execute Test
-	p := AuthTokenCodeParams{
-		AuthTokenParams: AuthTokenParams{
+	p := AuthTokenParams{
+		AuthParams: AuthParams{
 			ApplicationId: appID,
 		},
 		Code:     codeStr,
@@ -84,7 +84,7 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 		Redirect: "https://example.com/cb",
 	}
 
-	res := sys.AuthTokenCode(ctx, p)
+	res := sys.AuthToken(ctx, p)
 
 	if res.ValidationErr != nil {
 		t.Errorf("validation error: %v", res.ValidationErr)
@@ -113,7 +113,7 @@ func TestAuthorization_AuthTokenCode(t *testing.T) {
 	}
 
 	// 3. Verify Code is Consumed (Double use check)
-	res2 := sys.AuthTokenCode(ctx, p)
+	res2 := sys.AuthToken(ctx, p)
 	if res2.ValidationErr == nil {
 		t.Error("expected error for reused code, got nil")
 	}
