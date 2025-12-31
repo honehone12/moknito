@@ -1,6 +1,7 @@
-package moknito
+package main
 
 import (
+	"moknito/moknito"
 	"net/url"
 	"os"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-func Run() {
+func run() {
 	echo := echo4.New()
 	echo.Use(echo4middleware.Logger())
 	echo.Logger.SetLevel(log.INFO)
@@ -21,7 +22,7 @@ func Run() {
 		echo.Logger.Fatal("env for perpper is not set")
 	}
 
-	moknito, err := NewMocknito()
+	moknito, err := moknito.NewMocknito()
 	if err != nil {
 		echo.Logger.Fatal(err)
 	}

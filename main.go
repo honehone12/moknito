@@ -1,8 +1,6 @@
 package main
 
 import (
-	"moknito/moknito"
-
 	"github.com/joho/godotenv"
 )
 
@@ -11,5 +9,5 @@ func main() {
 		panic(err)
 	}
 
-	moknito.Run()
+	run()
 }
