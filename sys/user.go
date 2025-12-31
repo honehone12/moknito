@@ -275,7 +275,12 @@ func (s *System) UserJoin(
 		return r
 	}
 
-	challKey := fmt.Sprintf("%s:%x:%x", __CHALLENGE_REDIS_KEY, userId, authId)
+	challKey := fmt.Sprintf(
+		"%s:%x:%x",
+		__CHALLENGE_REDIS_KEY,
+		userId,
+		p.ApplicationId,
+	)
 	if err := s.redis.SetEx(
 		ctx,
 		challKey,
@@ -376,7 +381,12 @@ func (s *System) UserAuthenticate(
 		return r
 	}
 
-	challKey := fmt.Sprintf("%s:%x:%x", __CHALLENGE_REDIS_KEY, user.ID, authId)
+	challKey := fmt.Sprintf(
+		"%s:%x:%x",
+		__CHALLENGE_REDIS_KEY,
+		user.ID,
+		p.ApplicationId,
+	)
 	if err := s.redis.SetEx(
 		ctx,
 		challKey,

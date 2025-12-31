@@ -2,7 +2,7 @@ package moknito
 
 import (
 	"moknito/binid"
-	"moknito/challenge"
+	"moknito/ent/authorization"
 	"moknito/sys"
 	"net/http"
 
@@ -63,7 +63,7 @@ func (m *Moknito) UserJoin(ctx echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	if form.ChallengeMethod != challenge.CHALLENGE_METHOD_S256 {
+	if form.ChallengeMethod != authorization.ChallengeMethodS256.String() {
 		ctx.Logger().Warn("unsupported challenge method")
 		return echo.ErrBadRequest
 	}
@@ -108,7 +108,7 @@ func (m *Moknito) UserAuthenticate(ctx echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	if form.ChallengeMethod != challenge.CHALLENGE_METHOD_S256 {
+	if form.ChallengeMethod != authorization.ChallengeMethodS256.String() {
 		ctx.Logger().Warn("unsupported challenge method")
 		return echo.ErrBadRequest
 	}

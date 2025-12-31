@@ -126,63 +126,6 @@ func init() {
 	authorization.DefaultUpdatedAt = authorizationDescUpdatedAt.Default.(func() time.Time)
 	// authorization.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	authorization.UpdateDefaultUpdatedAt = authorizationDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// authorizationDescChallenge is the schema descriptor for challenge field.
-	authorizationDescChallenge := authorizationFields[1].Descriptor()
-	// authorization.ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
-	authorization.ChallengeValidator = func() func([]byte) error {
-		validators := authorizationDescChallenge.Validators
-		fns := [...]func([]byte) error{
-			validators[0].(func([]byte) error),
-			validators[1].(func([]byte) error),
-			validators[2].(func([]byte) error),
-		}
-		return func(challenge []byte) error {
-			for _, fn := range fns {
-				if err := fn(challenge); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// authorizationDescChallengeMethod is the schema descriptor for challenge_method field.
-	authorizationDescChallengeMethod := authorizationFields[2].Descriptor()
-	// authorization.ChallengeMethodValidator is a validator for the "challenge_method" field. It is called by the builders before save.
-	authorization.ChallengeMethodValidator = func() func(string) error {
-		validators := authorizationDescChallengeMethod.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-			validators[2].(func(string) error),
-		}
-		return func(challenge_method string) error {
-			for _, fn := range fns {
-				if err := fn(challenge_method); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// authorizationDescCode is the schema descriptor for code field.
-	authorizationDescCode := authorizationFields[3].Descriptor()
-	// authorization.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	authorization.CodeValidator = func() func([]byte) error {
-		validators := authorizationDescCode.Validators
-		fns := [...]func([]byte) error{
-			validators[0].(func([]byte) error),
-			validators[1].(func([]byte) error),
-			validators[2].(func([]byte) error),
-		}
-		return func(code []byte) error {
-			for _, fn := range fns {
-				if err := fn(code); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
 	authorizedappMixin := schema.AuthorizedApp{}.Mixin()
 	authorizedappMixinFields0 := authorizedappMixin[0].Fields()
 	_ = authorizedappMixinFields0

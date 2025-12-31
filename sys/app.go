@@ -6,10 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"moknito/binid"
-	"moknito/challenge"
 	"moknito/code"
 	"moknito/ent"
 	"moknito/ent/application"
+	"moknito/ent/authorization"
 	"moknito/ent/authorizedapp"
 
 	"time"
@@ -109,20 +109,15 @@ func (s *System) AppAuthorize(
 		"%s:%x:%x",
 		__CHALLENGE_REDIS_KEY,
 		p.UserId,
-		p.AuthId,
+		appId,
 	)
-	clg, err := s.redis.Get(ctx, challKey).Result()
-	if errors.Is(err, redis.Nil) {
-		r.ValidationErr = errors.New("could not find challenge")
-		return r
-	} else if err != nil {
+	n, err := s.redis.Exists(ctx, challKey).Result()
+	if err != nil {
 		r.SystemErr = err
 		return r
 	}
-
-	chall, err := base64.RawURLEncoding.DecodeString(clg)
-	if err != nil {
-		r.ValidationErr = err
+	if n == 0 {
+		r.ValidationErr = errors.New("could not find challenge")
 		return r
 	}
 
@@ -160,14 +155,26 @@ func (s *System) AppAuthorize(
 		return r
 	}
 
+	key := fmt.Sprintf("%s:%x", __CODE_REDIS_KEY, code)
+	err = s.redis.SetArgs(
+		ctx,
+		key,
+		id.String(),
+		redis.SetArgs{
+			Mode: "NX",
+			TTL:  s.ttl.CodeTtl,
+		},
+	).Err()
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
 	now := time.Now()
 
 	err = s.ent.Authorization.Create().
 		SetID(id).
-		SetChallengeMethod(challenge.CHALLENGE_METHOD_S256).
-		SetChallenge(chall).
-		SetCode(code).
-		SetCodeExpireAt(now.Add(s.ttl.CodeTtl)).
+		SetChallengeMethod(authorization.ChallengeMethodS256).
 		SetExpireAt(now.Add(s.ttl.TokenTtl)).
 		SetRefreshExpireAt(now.Add(s.ttl.RefreshTtl)).
 		SetApplicationID(appId).

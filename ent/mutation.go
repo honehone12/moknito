@@ -1688,10 +1688,7 @@ type AuthorizationMutation struct {
 	created_at         *time.Time
 	updated_at         *time.Time
 	deleted_at         *time.Time
-	challenge          *[]byte
-	challenge_method   *string
-	code               *[]byte
-	code_expire_at     *time.Time
+	challenge_method   *authorization.ChallengeMethod
 	code_consumed_at   *time.Time
 	expire_at          *time.Time
 	refresh_expire_at  *time.Time
@@ -1930,49 +1927,13 @@ func (m *AuthorizationMutation) ResetDeletedAt() {
 	delete(m.clearedFields, authorization.FieldDeletedAt)
 }
 
-// SetChallenge sets the "challenge" field.
-func (m *AuthorizationMutation) SetChallenge(b []byte) {
-	m.challenge = &b
-}
-
-// Challenge returns the value of the "challenge" field in the mutation.
-func (m *AuthorizationMutation) Challenge() (r []byte, exists bool) {
-	v := m.challenge
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldChallenge returns the old "challenge" field's value of the Authorization entity.
-// If the Authorization object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizationMutation) OldChallenge(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldChallenge is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldChallenge requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldChallenge: %w", err)
-	}
-	return oldValue.Challenge, nil
-}
-
-// ResetChallenge resets all changes to the "challenge" field.
-func (m *AuthorizationMutation) ResetChallenge() {
-	m.challenge = nil
-}
-
 // SetChallengeMethod sets the "challenge_method" field.
-func (m *AuthorizationMutation) SetChallengeMethod(s string) {
-	m.challenge_method = &s
+func (m *AuthorizationMutation) SetChallengeMethod(am authorization.ChallengeMethod) {
+	m.challenge_method = &am
 }
 
 // ChallengeMethod returns the value of the "challenge_method" field in the mutation.
-func (m *AuthorizationMutation) ChallengeMethod() (r string, exists bool) {
+func (m *AuthorizationMutation) ChallengeMethod() (r authorization.ChallengeMethod, exists bool) {
 	v := m.challenge_method
 	if v == nil {
 		return
@@ -1983,7 +1944,7 @@ func (m *AuthorizationMutation) ChallengeMethod() (r string, exists bool) {
 // OldChallengeMethod returns the old "challenge_method" field's value of the Authorization entity.
 // If the Authorization object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizationMutation) OldChallengeMethod(ctx context.Context) (v string, err error) {
+func (m *AuthorizationMutation) OldChallengeMethod(ctx context.Context) (v authorization.ChallengeMethod, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldChallengeMethod is only allowed on UpdateOne operations")
 	}
@@ -2000,78 +1961,6 @@ func (m *AuthorizationMutation) OldChallengeMethod(ctx context.Context) (v strin
 // ResetChallengeMethod resets all changes to the "challenge_method" field.
 func (m *AuthorizationMutation) ResetChallengeMethod() {
 	m.challenge_method = nil
-}
-
-// SetCode sets the "code" field.
-func (m *AuthorizationMutation) SetCode(b []byte) {
-	m.code = &b
-}
-
-// Code returns the value of the "code" field in the mutation.
-func (m *AuthorizationMutation) Code() (r []byte, exists bool) {
-	v := m.code
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCode returns the old "code" field's value of the Authorization entity.
-// If the Authorization object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizationMutation) OldCode(ctx context.Context) (v []byte, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCode is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCode requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCode: %w", err)
-	}
-	return oldValue.Code, nil
-}
-
-// ResetCode resets all changes to the "code" field.
-func (m *AuthorizationMutation) ResetCode() {
-	m.code = nil
-}
-
-// SetCodeExpireAt sets the "code_expire_at" field.
-func (m *AuthorizationMutation) SetCodeExpireAt(t time.Time) {
-	m.code_expire_at = &t
-}
-
-// CodeExpireAt returns the value of the "code_expire_at" field in the mutation.
-func (m *AuthorizationMutation) CodeExpireAt() (r time.Time, exists bool) {
-	v := m.code_expire_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCodeExpireAt returns the old "code_expire_at" field's value of the Authorization entity.
-// If the Authorization object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AuthorizationMutation) OldCodeExpireAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCodeExpireAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCodeExpireAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCodeExpireAt: %w", err)
-	}
-	return oldValue.CodeExpireAt, nil
-}
-
-// ResetCodeExpireAt resets all changes to the "code_expire_at" field.
-func (m *AuthorizationMutation) ResetCodeExpireAt() {
-	m.code_expire_at = nil
 }
 
 // SetCodeConsumedAt sets the "code_consumed_at" field.
@@ -2355,7 +2244,7 @@ func (m *AuthorizationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AuthorizationMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, authorization.FieldCreatedAt)
 	}
@@ -2365,17 +2254,8 @@ func (m *AuthorizationMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, authorization.FieldDeletedAt)
 	}
-	if m.challenge != nil {
-		fields = append(fields, authorization.FieldChallenge)
-	}
 	if m.challenge_method != nil {
 		fields = append(fields, authorization.FieldChallengeMethod)
-	}
-	if m.code != nil {
-		fields = append(fields, authorization.FieldCode)
-	}
-	if m.code_expire_at != nil {
-		fields = append(fields, authorization.FieldCodeExpireAt)
 	}
 	if m.code_consumed_at != nil {
 		fields = append(fields, authorization.FieldCodeConsumedAt)
@@ -2406,14 +2286,8 @@ func (m *AuthorizationMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case authorization.FieldDeletedAt:
 		return m.DeletedAt()
-	case authorization.FieldChallenge:
-		return m.Challenge()
 	case authorization.FieldChallengeMethod:
 		return m.ChallengeMethod()
-	case authorization.FieldCode:
-		return m.Code()
-	case authorization.FieldCodeExpireAt:
-		return m.CodeExpireAt()
 	case authorization.FieldCodeConsumedAt:
 		return m.CodeConsumedAt()
 	case authorization.FieldExpireAt:
@@ -2439,14 +2313,8 @@ func (m *AuthorizationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldUpdatedAt(ctx)
 	case authorization.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
-	case authorization.FieldChallenge:
-		return m.OldChallenge(ctx)
 	case authorization.FieldChallengeMethod:
 		return m.OldChallengeMethod(ctx)
-	case authorization.FieldCode:
-		return m.OldCode(ctx)
-	case authorization.FieldCodeExpireAt:
-		return m.OldCodeExpireAt(ctx)
 	case authorization.FieldCodeConsumedAt:
 		return m.OldCodeConsumedAt(ctx)
 	case authorization.FieldExpireAt:
@@ -2487,33 +2355,12 @@ func (m *AuthorizationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeletedAt(v)
 		return nil
-	case authorization.FieldChallenge:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetChallenge(v)
-		return nil
 	case authorization.FieldChallengeMethod:
-		v, ok := value.(string)
+		v, ok := value.(authorization.ChallengeMethod)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetChallengeMethod(v)
-		return nil
-	case authorization.FieldCode:
-		v, ok := value.([]byte)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCode(v)
-		return nil
-	case authorization.FieldCodeExpireAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCodeExpireAt(v)
 		return nil
 	case authorization.FieldCodeConsumedAt:
 		v, ok := value.(time.Time)
@@ -2623,17 +2470,8 @@ func (m *AuthorizationMutation) ResetField(name string) error {
 	case authorization.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
-	case authorization.FieldChallenge:
-		m.ResetChallenge()
-		return nil
 	case authorization.FieldChallengeMethod:
 		m.ResetChallengeMethod()
-		return nil
-	case authorization.FieldCode:
-		m.ResetCode()
-		return nil
-	case authorization.FieldCodeExpireAt:
-		m.ResetCodeExpireAt()
 		return nil
 	case authorization.FieldCodeConsumedAt:
 		m.ResetCodeConsumedAt()

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"moknito/binid"
 	"moknito/challenge"
 	"moknito/ent"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 type AuthParams struct {
@@ -52,21 +54,34 @@ func (s *System) AuthToken(ctx context.Context, p AuthTokenParams) *AuthResult {
 		return r
 	}
 
+	codeKey := fmt.Sprintf("%s:%x", __CODE_REDIS_KEY, c)
+	uuid, err := s.redis.GetDel(ctx, codeKey).Result()
+	if errors.Is(err, redis.Nil) {
+		r.ValidationErr = errors.New("code not found")
+		return r
+	} else if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
+	id, err := binid.FromUUIDString(uuid)
+	if err != nil {
+		r.SystemErr = err
+	}
+
 	now := time.Now()
 
 	auth, err := s.ent.Authorization.Query().
 		Select(
 			authorization.FieldID,
-			authorization.FieldChallenge,
 			authorization.FieldChallengeMethod,
-			authorization.FieldCode,
 			authorization.FieldUserID,
 			authorization.FieldExpireAt,
 		).
 		Where(
-			authorization.Code(c),
-			authorization.CodeExpireAtGT(now),
+			authorization.ID(id),
 			authorization.CodeConsumedAtIsNil(),
+			authorization.ExpireAtGT(now),
 			authorization.ApplicationID(p.ApplicationId),
 			authorization.DeletedAtIsNil(),
 		).
@@ -76,10 +91,6 @@ func (s *System) AuthToken(ctx context.Context, p AuthTokenParams) *AuthResult {
 				application.FieldDomain,
 			)
 		}).
-		// this should be only, even though
-		// i did't mark "code", "challenge" as unique (including index)
-		// because of application id and expiration span limitations
-		// but this does not mean there are any logic-codes to prevent "not only error"
 		Only(ctx)
 	if ent.IsNotFound(err) {
 		r.ValidationErr = err
@@ -88,7 +99,7 @@ func (s *System) AuthToken(ctx context.Context, p AuthTokenParams) *AuthResult {
 		r.SystemErr = err
 		return r
 	}
-	if auth.ChallengeMethod != challenge.CHALLENGE_METHOD_S256 {
+	if auth.ChallengeMethod != authorization.ChallengeMethodS256 {
 		r.SystemErr = errors.New("unexpected challenge method")
 		return r
 	}
@@ -98,7 +109,29 @@ func (s *System) AuthToken(ctx context.Context, p AuthTokenParams) *AuthResult {
 		return r
 	}
 
-	ok, err := challenge.Verify(p.Verifier, auth.Challenge)
+	chalKey := fmt.Sprintf(
+		"%s:%x:%x",
+		__CHALLENGE_REDIS_KEY,
+		auth.UserID,
+		auth.ApplicationID,
+	)
+	encChal, err := s.redis.GetDel(ctx, chalKey).Result()
+	if errors.Is(err, redis.Nil) {
+		r.ValidationErr = err
+		return r
+	}
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
+	chal, err := base64.RawURLEncoding.DecodeString(encChal)
+	if err != nil {
+		r.SystemErr = err
+		return r
+	}
+
+	ok, err := challenge.Verify(p.Verifier, chal)
 	if err != nil {
 		r.ValidationErr = err
 		return r

@@ -3,6 +3,7 @@
 package authorization
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -20,14 +21,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
-	// FieldChallenge holds the string denoting the challenge field in the database.
-	FieldChallenge = "challenge"
 	// FieldChallengeMethod holds the string denoting the challenge_method field in the database.
 	FieldChallengeMethod = "challenge_method"
-	// FieldCode holds the string denoting the code field in the database.
-	FieldCode = "code"
-	// FieldCodeExpireAt holds the string denoting the code_expire_at field in the database.
-	FieldCodeExpireAt = "code_expire_at"
 	// FieldCodeConsumedAt holds the string denoting the code_consumed_at field in the database.
 	FieldCodeConsumedAt = "code_consumed_at"
 	// FieldExpireAt holds the string denoting the expire_at field in the database.
@@ -66,10 +61,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
-	FieldChallenge,
 	FieldChallengeMethod,
-	FieldCode,
-	FieldCodeExpireAt,
 	FieldCodeConsumedAt,
 	FieldExpireAt,
 	FieldRefreshExpireAt,
@@ -94,13 +86,30 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
-	// ChallengeValidator is a validator for the "challenge" field. It is called by the builders before save.
-	ChallengeValidator func([]byte) error
-	// ChallengeMethodValidator is a validator for the "challenge_method" field. It is called by the builders before save.
-	ChallengeMethodValidator func(string) error
-	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	CodeValidator func([]byte) error
 )
+
+// ChallengeMethod defines the type for the "challenge_method" enum field.
+type ChallengeMethod string
+
+// ChallengeMethod values.
+const (
+	ChallengeMethodS256  ChallengeMethod = "S256"
+	ChallengeMethodPlain ChallengeMethod = "plain"
+)
+
+func (cm ChallengeMethod) String() string {
+	return string(cm)
+}
+
+// ChallengeMethodValidator is a validator for the "challenge_method" field enum values. It is called by the builders before save.
+func ChallengeMethodValidator(cm ChallengeMethod) error {
+	switch cm {
+	case ChallengeMethodS256, ChallengeMethodPlain:
+		return nil
+	default:
+		return fmt.Errorf("authorization: invalid enum value for challenge_method field: %q", cm)
+	}
+}
 
 // OrderOption defines the ordering options for the Authorization queries.
 type OrderOption func(*sql.Selector)
@@ -128,11 +137,6 @@ func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByChallengeMethod orders the results by the challenge_method field.
 func ByChallengeMethod(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldChallengeMethod, opts...).ToFunc()
-}
-
-// ByCodeExpireAt orders the results by the code_expire_at field.
-func ByCodeExpireAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCodeExpireAt, opts...).ToFunc()
 }
 
 // ByCodeConsumedAt orders the results by the code_consumed_at field.
