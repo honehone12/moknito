@@ -6,6 +6,7 @@ import (
 	"moknito/sys"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -121,6 +122,12 @@ func (m *Moknito) Close() error {
 }
 
 func (m *Moknito) bind(ctx echo.Context, target any) error {
+	raw, _, _ := strings.Cut(ctx.Request().Header.Get("Content-Type"), ";")
+	contentType := strings.TrimSpace(raw)
+	if contentType != echo.MIMEApplicationForm {
+		return errors.New("unexpected mime type")
+	}
+
 	if err := ctx.Bind(target); err != nil {
 		return err
 	}
