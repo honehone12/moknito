@@ -122,7 +122,7 @@ func (m *Moknito) Close() error {
 }
 
 func (m *Moknito) bind(ctx echo.Context, target any) error {
-	raw, _, _ := strings.Cut(ctx.Request().Header.Get("Content-Type"), ";")
+	raw, _, _ := strings.Cut(ctx.Request().Header.Get(echo.HeaderContentType), ";")
 	contentType := strings.TrimSpace(raw)
 	if contentType != echo.MIMEApplicationForm {
 		return errors.New("unexpected mime type")
